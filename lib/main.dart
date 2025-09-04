@@ -7,7 +7,21 @@ import 'core/services/supabase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SupabaseService.init();
+
+  try {
+    await SupabaseService.init();
+    print('✅ Supabase initialized successfully');
+
+    // Test the connection
+    final isConnected = await SupabaseService.testConnection();
+    if (isConnected) {
+      print('✅ Supabase connection test passed');
+    } else {
+      print('⚠️ Supabase connection test failed');
+    }
+  } catch (e) {
+    print('❌ Supabase initialization failed: $e');
+  }
 
   runApp(
     const ProviderScope(

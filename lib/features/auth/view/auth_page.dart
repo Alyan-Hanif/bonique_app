@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/auth_viewmodel.dart';
-import 'login_page.dart';
+import 'account_page.dart';
+import 'signin_page.dart';
 import 'signup_page.dart';
+
+enum AuthScreen { account, signIn, signUp }
 
 class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({super.key});
@@ -14,7 +17,7 @@ class AuthPage extends ConsumerStatefulWidget {
 }
 
 class _AuthPageState extends ConsumerState<AuthPage> {
-  bool _isLogin = true;
+  AuthScreen _currentScreen = AuthScreen.account;
 
   @override
   void initState() {
@@ -32,6 +35,24 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     }
   }
 
+  void _navigateToSignIn() {
+    setState(() {
+      _currentScreen = AuthScreen.signIn;
+    });
+  }
+
+  void _navigateToSignUp() {
+    setState(() {
+      _currentScreen = AuthScreen.signUp;
+    });
+  }
+
+  void _navigateBack() {
+    setState(() {
+      _currentScreen = AuthScreen.account;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Listen for auth state changes
@@ -41,10 +62,20 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       }
     });
 
-    return Scaffold(
-      body: _isLogin
-          ? LoginPage(onSwitchToSignup: () => setState(() => _isLogin = false))
-          : SignupPage(onSwitchToLogin: () => setState(() => _isLogin = true)),
-    );
+    return Scaffold(body: _buildCurrentScreen());
+  }
+
+  Widget _buildCurrentScreen() {
+    switch (_currentScreen) {
+      case AuthScreen.account:
+        return AccountPage(
+          onSignIn: _navigateToSignIn,
+          onCreateAccount: _navigateToSignUp,
+        );
+      case AuthScreen.signIn:
+        return SignInPage(onBack: _navigateBack, onSignUp: _navigateToSignUp);
+      case AuthScreen.signUp:
+        return SignUpPage(onBack: _navigateBack, onSignIn: _navigateToSignIn);
+    }
   }
 }

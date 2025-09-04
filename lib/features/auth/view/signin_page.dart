@@ -3,47 +3,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/auth_viewmodel.dart';
 import '../widgets/auth_widgets.dart';
 
-class SignUpPage extends ConsumerStatefulWidget {
+class SignInPage extends ConsumerStatefulWidget {
   final VoidCallback onBack;
-  final VoidCallback onSignIn;
+  final VoidCallback onSignUp;
 
-  const SignUpPage({super.key, required this.onBack, required this.onSignIn});
+  const SignInPage({super.key, required this.onBack, required this.onSignUp});
 
   @override
-  ConsumerState<SignUpPage> createState() => _SignUpPageState();
+  ConsumerState<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignUpPageState extends ConsumerState<SignUpPage> {
-  final _nameController = TextEditingController();
+class _SignInPageState extends ConsumerState<SignInPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _handleSignUp() async {
+  void _handleSignIn() async {
     if (_formKey.currentState!.validate()) {
       final authViewModel = ref.read(authViewModelProvider.notifier);
-      await authViewModel.signUp(
+      await authViewModel.signIn(
         _emailController.text,
         _passwordController.text,
-        _nameController.text,
-        _confirmPasswordController.text,
       );
     }
-  }
-
-  void _onNameChanged(String value) {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    authViewModel.validateName(value);
   }
 
   void _onEmailChanged(String value) {
@@ -54,11 +43,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   void _onPasswordChanged(String value) {
     final authViewModel = ref.read(authViewModelProvider.notifier);
     authViewModel.validatePassword(value);
-  }
-
-  void _onConfirmPasswordChanged(String value) {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    authViewModel.validateConfirmPassword(_passwordController.text, value);
   }
 
   @override
@@ -102,28 +86,16 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 const SizedBox(height: 32),
 
                 // Title
-                Text('Create a new account!', style: AuthTextStyles.h3),
+                Text('Sign-In to your account!', style: AuthTextStyles.h3),
 
                 const SizedBox(height: 8),
 
                 Text(
-                  'Enter information to create a new account.',
+                  'Enter information to Sign In to your account.',
                   style: AuthTextStyles.stat1,
                 ),
 
                 const SizedBox(height: 32),
-
-                // Name field
-                AuthInputField(
-                  controller: _nameController,
-                  label: 'Enter your full name',
-                  placeholder: 'Raheema Ali',
-                  prefixIcon: Icons.person_outline,
-                  errorText: authState.nameError,
-                  onChanged: _onNameChanged,
-                ),
-
-                const SizedBox(height: 24),
 
                 // Email field
                 AuthInputField(
@@ -158,38 +130,23 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   onChanged: _onPasswordChanged,
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
-                // Confirm Password field
-                AuthInputField(
-                  controller: _confirmPasswordController,
-                  label: 'Confirm your password',
-                  placeholder: '*****',
-                  prefixIcon: Icons.lock_outline,
-                  suffixIcon: authState.isConfirmPasswordVisible
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  isPassword: true,
-                  isPasswordVisible: authState.isConfirmPasswordVisible,
-                  onSuffixIconPressed: () {
-                    ref
-                        .read(authViewModelProvider.notifier)
-                        .toggleConfirmPasswordVisibility();
-                  },
-                  errorText: authState.confirmPasswordError,
-                  onChanged: _onConfirmPasswordChanged,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Terms checkbox
-                TermsCheckbox(
-                  value: authState.agreeToTerms,
-                  onChanged: (value) {
-                    ref
-                        .read(authViewModelProvider.notifier)
-                        .toggleTermsAgreement();
-                  },
+                // Forgot password link
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      // TODO: Implement forgot password
+                    },
+                    child: Text(
+                      'Forgot Password?',
+                      style: AuthTextStyles.stat2.copyWith(
+                        color: kPrimaryColor,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 32),
@@ -200,41 +157,27 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
                 if (authState.error != null) const SizedBox(height: 16),
 
-                // Sign Up button
+                // Sign In button
                 AuthPrimaryButton(
-                  text: 'Sign Up',
-                  onPressed: _handleSignUp,
+                  text: 'Sign In',
+                  onPressed: _handleSignIn,
                   isLoading: authState.isLoading,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Divider
-                const AuthDivider(),
-
-                const SizedBox(height: 24),
-
-                // Google Sign In button
-                GoogleSignInButton(
-                  onPressed: () {
-                    // TODO: Implement Google sign in
-                  },
                 ),
 
                 const Spacer(),
 
-                // Sign In link
+                // Sign Up link
                 Center(
                   child: RichText(
                     text: TextSpan(
                       style: AuthTextStyles.stat2,
                       children: [
-                        const TextSpan(text: 'Already have an account? '),
+                        const TextSpan(text: "Don't have an account? "),
                         WidgetSpan(
                           child: GestureDetector(
-                            onTap: widget.onSignIn,
+                            onTap: widget.onSignUp,
                             child: Text(
-                              'Sign In',
+                              'Sign Up',
                               style: AuthTextStyles.stat2.copyWith(
                                 color: kPrimaryColor,
                                 fontWeight: FontWeight.w600,

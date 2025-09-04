@@ -1,20 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repository/auth_repository.dart';
 
+// Provider for AuthRepository
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
 });
 
+// Auth State class
 class AuthState {
   final bool isLoading;
   final String? error;
   final bool isLoggedIn;
   final bool isEmailValid;
   final bool isPasswordValid;
+  final bool isNameValid;
   final bool isConfirmPasswordValid;
   final String? emailError;
   final String? passwordError;
+  final String? nameError;
   final String? confirmPasswordError;
+  final bool isPasswordVisible;
+  final bool isConfirmPasswordVisible;
+  final bool agreeToTerms;
 
   AuthState({
     this.isLoading = false,
@@ -22,10 +29,15 @@ class AuthState {
     this.isLoggedIn = false,
     this.isEmailValid = true,
     this.isPasswordValid = true,
+    this.isNameValid = true,
     this.isConfirmPasswordValid = true,
     this.emailError,
     this.passwordError,
+    this.nameError,
     this.confirmPasswordError,
+    this.isPasswordVisible = false,
+    this.isConfirmPasswordVisible = false,
+    this.agreeToTerms = false,
   });
 
   AuthState copyWith({
@@ -34,10 +46,15 @@ class AuthState {
     bool? isLoggedIn,
     bool? isEmailValid,
     bool? isPasswordValid,
+    bool? isNameValid,
     bool? isConfirmPasswordValid,
     String? emailError,
     String? passwordError,
+    String? nameError,
     String? confirmPasswordError,
+    bool? isPasswordVisible,
+    bool? isConfirmPasswordVisible,
+    bool? agreeToTerms,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -45,15 +62,22 @@ class AuthState {
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
       isEmailValid: isEmailValid ?? this.isEmailValid,
       isPasswordValid: isPasswordValid ?? this.isPasswordValid,
+      isNameValid: isNameValid ?? this.isNameValid,
       isConfirmPasswordValid:
           isConfirmPasswordValid ?? this.isConfirmPasswordValid,
       emailError: emailError,
       passwordError: passwordError,
+      nameError: nameError,
       confirmPasswordError: confirmPasswordError,
+      isPasswordVisible: isPasswordVisible ?? this.isPasswordVisible,
+      isConfirmPasswordVisible:
+          isConfirmPasswordVisible ?? this.isConfirmPasswordVisible,
+      agreeToTerms: agreeToTerms ?? this.agreeToTerms,
     );
   }
 }
 
+// Auth ViewModel
 class AuthViewModel extends StateNotifier<AuthState> {
   final AuthRepository _repository;
 
@@ -102,6 +126,27 @@ class AuthViewModel extends StateNotifier<AuthState> {
     return true;
   }
 
+  bool validateName(String name) {
+    if (name.isEmpty) {
+      state = state.copyWith(
+        isNameValid: false,
+        nameError: 'Full name is required',
+      );
+      return false;
+    }
+
+    if (name.length < 2) {
+      state = state.copyWith(
+        isNameValid: false,
+        nameError: 'Name must be at least 2 characters',
+      );
+      return false;
+    }
+
+    state = state.copyWith(isNameValid: true, nameError: null);
+    return true;
+  }
+
   bool validateConfirmPassword(String password, String confirmPassword) {
     if (confirmPassword.isEmpty) {
       state = state.copyWith(
@@ -126,12 +171,29 @@ class AuthViewModel extends StateNotifier<AuthState> {
     return true;
   }
 
+  // Toggle password visibility
+  void togglePasswordVisibility() {
+    state = state.copyWith(isPasswordVisible: !state.isPasswordVisible);
+  }
+
+  void toggleConfirmPasswordVisibility() {
+    state = state.copyWith(
+      isConfirmPasswordVisible: !state.isConfirmPasswordVisible,
+    );
+  }
+
+  // Toggle terms agreement
+  void toggleTermsAgreement() {
+    state = state.copyWith(agreeToTerms: !state.agreeToTerms);
+  }
+
   // Clear validation errors
   void clearValidationErrors() {
     state = state.copyWith(
       error: null,
       emailError: null,
       passwordError: null,
+      nameError: null,
       confirmPasswordError: null,
     );
   }
@@ -161,25 +223,86 @@ class AuthViewModel extends StateNotifier<AuthState> {
   Future<bool> signUp(
     String email,
     String password,
+    String fullName,
     String confirmPassword,
   ) async {
     // Validate inputs
     final isEmailValid = validateEmail(email);
     final isPasswordValid = validatePassword(password);
+    final isNameValid = validateName(fullName);
     final isConfirmPasswordValid = validateConfirmPassword(
       password,
       confirmPassword,
     );
 
-    if (!isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+    if (!isEmailValid ||
+        !isPasswordValid ||
+        !isNameValid ||
+        !isConfirmPasswordValid) {
+      return false;
+    }
+
+    if (!state.agreeToTerms) {
+      state = state.copyWith(
+        error: 'Please agree to the Terms of Service and Privacy Policy',
+      );
       return false;
     }
 
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      await _repository.signUp(email, password);
-      state = state.copyWith(isLoading: false, isLoggedIn: true);
+      final response = await _repository.signUp(
+        email,
+        password,
+        fullName: fullName,
+      );
+
+      // Check if signup was successful
+      if (response.user != null) {
+        state = state.copyWith(isLoading: false, isLoggedIn: true);
+        return true;
+      } else {
+        // Handle case where user needs email confirmation
+        state = state.copyWith(
+          isLoading: false,
+          error:
+              'Please check your email to confirm your account before signing in.',
+        );
+        return false;
+      }
+    } catch (e) {
+      // Provide more user-friendly error messages
+      String errorMessage = 'Signup failed. Please try again.';
+
+      if (e.toString().contains('User already registered')) {
+        errorMessage =
+            'An account with this email already exists. Please sign in instead.';
+      } else if (e.toString().contains('Invalid email')) {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (e.toString().contains('Password should be at least')) {
+        errorMessage = 'Password must be at least 6 characters long.';
+      } else if (e.toString().contains('AuthSessionMissingException')) {
+        errorMessage =
+            'Connection error. Please check your internet connection and try again.';
+      }
+
+      state = state.copyWith(isLoading: false, error: errorMessage);
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword(String email) async {
+    final isEmailValid = validateEmail(email);
+    if (!isEmailValid) {
+      return false;
+    }
+
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await _repository.resetPassword(email);
+      state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -193,9 +316,10 @@ class AuthViewModel extends StateNotifier<AuthState> {
   }
 
   // Check if user is already logged in
-  bool get isUserLoggedIn => _repository.currentUser != null;
+  bool get isUserLoggedIn => _repository.isLoggedIn;
 }
 
+// Provider for AuthViewModel
 final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthState>((
   ref,
 ) {

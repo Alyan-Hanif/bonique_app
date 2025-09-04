@@ -1,343 +1,395 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../viewmodel/auth_viewmodel.dart';
-import '../widgets/auth_widgets.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
-  final VoidCallback onSwitchToSignup;
+// Colors from Figma design
+const Color kPrimaryColor = Color(0xFF2C2C2C);
+const Color kSecondaryColor = Color(0xFFF5F5F5);
+const Color kAccentColor = Color(0xFFFF6B2C);
+const Color kTextPrimary = Color(0xFF2C2C2C);
+const Color kTextSecondary = Color(0xFF666666);
+const Color kBorderColor = Color(0xFFE0E0E0);
 
-  const LoginPage({super.key, required this.onSwitchToSignup});
+// Text styles from Figma
+class AuthTextStyles {
+  static const TextStyle mainHeading = TextStyle(
+    fontSize: 60,
+    height: 60 / 60,
+    fontWeight: FontWeight.bold,
+    color: kTextPrimary,
+  );
 
-  @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
+  static const TextStyle h1 = TextStyle(
+    fontSize: 48,
+    height: 48 / 48,
+    fontWeight: FontWeight.bold,
+    color: kTextPrimary,
+  );
+
+  static const TextStyle h2 = TextStyle(
+    fontSize: 20,
+    height: 28 / 20,
+    fontWeight: FontWeight.w600,
+    color: kTextPrimary,
+  );
+
+  static const TextStyle h3 = TextStyle(
+    fontSize: 30,
+    height: 36 / 30,
+    fontWeight: FontWeight.bold,
+    color: kTextPrimary,
+  );
+
+  static const TextStyle stat1 = TextStyle(
+    fontSize: 20,
+    height: 28 / 20,
+    fontWeight: FontWeight.normal,
+    color: kTextSecondary,
+  );
+
+  static const TextStyle stat2 = TextStyle(
+    fontSize: 16,
+    height: 24 / 16,
+    fontWeight: FontWeight.normal,
+    color: kTextSecondary,
+  );
+
+  static const TextStyle stat3 = TextStyle(
+    fontSize: 18,
+    height: 22.5 / 18,
+    fontWeight: FontWeight.normal,
+    color: kTextSecondary,
+  );
+
+  static const TextStyle button = TextStyle(
+    fontSize: 16,
+    height: 24 / 16,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+// Custom input field widget
+class AuthInputField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String placeholder;
+  final IconData? prefixIcon;
+  final IconData? suffixIcon;
+  final bool isPassword;
+  final bool isPasswordVisible;
+  final VoidCallback? onSuffixIconPressed;
+  final String? errorText;
+  final TextInputType? keyboardType;
+  final ValueChanged<String>? onChanged;
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  void _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      final authViewModel = ref.read(authViewModelProvider.notifier);
-      final success = await authViewModel.signIn(
-        _emailController.text,
-        _passwordController.text,
-      );
-
-      // Note: Navigation will be handled by the listener in AuthPage
-      // No need to call widget.onSwitchToSignup() here
-    }
-  }
-
-  void _onEmailChanged(String value) {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    authViewModel.validateEmail(value);
-  }
-
-  void _onPasswordChanged(String value) {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    authViewModel.validatePassword(value);
-  }
+  const AuthInputField({
+    super.key,
+    required this.controller,
+    required this.label,
+    required this.placeholder,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.isPassword = false,
+    this.isPasswordVisible = false,
+    this.onSuffixIconPressed,
+    this.errorText,
+    this.keyboardType,
+    this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authViewModelProvider);
-
-    return Scaffold(
-      body: AuthGradientBackground(
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: AuthCard(
-                title: 'Welcome Back',
-                children: [
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        // Email field
-                        AuthFormField(
-                          controller: _emailController,
-                          hint: 'Email',
-                          keyboardType: TextInputType.emailAddress,
-                          errorText: authState.emailError,
-                          onChanged: _onEmailChanged,
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Password field
-                        AuthFormField(
-                          controller: _passwordController,
-                          hint: 'Password',
-                          obscure: true,
-                          errorText: authState.passwordError,
-                          onChanged: _onPasswordChanged,
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Error message
-                        if (authState.error != null)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(12),
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.red.shade200),
-                            ),
-                            child: Text(
-                              authState.error!,
-                              style: TextStyle(color: Colors.red.shade700),
-                            ),
-                          ),
-
-                        // Login button
-                        AuthCTAButton(
-                          label: authState.isLoading
-                              ? 'Signing In...'
-                              : 'Sign In',
-                          onPressed: authState.isLoading ? null : _handleLogin,
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Switch to signup
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text("Don't have an account? "),
-                            TextButton(
-                              onPressed: widget.onSwitchToSignup,
-                              child: const Text(
-                                'Sign Up',
-                                style: TextStyle(
-                                  color: kAuthAccent,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AuthTextStyles.h2),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          obscureText: isPassword && !isPasswordVisible,
+          keyboardType: keyboardType,
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            hintText: placeholder,
+            hintStyle: AuthTextStyles.stat2.copyWith(
+              color: kTextSecondary.withValues(alpha: 0.6),
             ),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            prefixIcon: prefixIcon != null
+                ? Icon(prefixIcon, color: kTextSecondary, size: 20)
+                : null,
+            suffixIcon: suffixIcon != null
+                ? IconButton(
+                    icon: Icon(suffixIcon, color: kTextSecondary, size: 20),
+                    onPressed: onSuffixIconPressed,
+                  )
+                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: kBorderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: kBorderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: kPrimaryColor, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.red.shade300),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.red.shade400, width: 2),
+            ),
+            errorText: errorText,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+// Primary button widget
+class AuthPrimaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  const AuthPrimaryButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: kPrimaryColor,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        onPressed: isLoading ? null : onPressed,
+        child: isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : Text(text, style: AuthTextStyles.button),
+      ),
+    );
+  }
+}
+
+// Secondary button widget
+class AuthSecondaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  const AuthSecondaryButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: kPrimaryColor,
+          side: const BorderSide(color: kPrimaryColor, width: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: isLoading ? null : onPressed,
+        child: isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: kPrimaryColor,
+                  strokeWidth: 2,
+                ),
+              )
+            : Text(
+                text,
+                style: AuthTextStyles.button.copyWith(color: kPrimaryColor),
+              ),
+      ),
+    );
+  }
+}
+
+// Google sign-in button
+class GoogleSignInButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+
+  const GoogleSignInButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: kTextPrimary,
+          side: const BorderSide(color: kBorderColor),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/google_logo.png',
+              height: 24,
+              width: 24,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.g_mobiledata, size: 24);
+              },
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Continue with Google',
+              style: AuthTextStyles.button.copyWith(color: kTextPrimary),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class SignupPage extends ConsumerStatefulWidget {
-  final VoidCallback onSwitchToLogin;
-
-  const SignupPage({super.key, required this.onSwitchToLogin});
-
-  @override
-  ConsumerState<SignupPage> createState() => _SignupPageState();
-}
-
-class _SignupPageState extends ConsumerState<SignupPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  void _handleSignup() async {
-    if (_formKey.currentState!.validate()) {
-      final authViewModel = ref.read(authViewModelProvider.notifier);
-      final success = await authViewModel.signUp(
-        _emailController.text,
-        _passwordController.text,
-        _confirmPasswordController.text,
-      );
-
-      // Note: Navigation will be handled by the listener in AuthPage
-      // No need to call widget.onSwitchToLogin() here
-    }
-  }
-
-  void _onEmailChanged(String value) {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    authViewModel.validateEmail(value);
-  }
-
-  void _onPasswordChanged(String value) {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    authViewModel.validatePassword(value);
-  }
-
-  void _onConfirmPasswordChanged(String value) {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    authViewModel.validateConfirmPassword(_passwordController.text, value);
-  }
+// Divider with "or" text
+class AuthDivider extends StatelessWidget {
+  const AuthDivider({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authViewModelProvider);
-
-    return Scaffold(
-      body: AuthGradientBackground(
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: AuthCard(
-                title: 'Create Account',
-                children: [
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        // Email field
-                        AuthFormField(
-                          controller: _emailController,
-                          hint: 'Email',
-                          keyboardType: TextInputType.emailAddress,
-                          errorText: authState.emailError,
-                          onChanged: _onEmailChanged,
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Password field
-                        AuthFormField(
-                          controller: _passwordController,
-                          hint: 'Password',
-                          obscure: true,
-                          errorText: authState.passwordError,
-                          onChanged: _onPasswordChanged,
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Confirm Password field
-                        AuthFormField(
-                          controller: _confirmPasswordController,
-                          hint: 'Confirm Password',
-                          obscure: true,
-                          errorText: authState.confirmPasswordError,
-                          onChanged: _onConfirmPasswordChanged,
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Error message
-                        if (authState.error != null)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(12),
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.red.shade200),
-                            ),
-                            child: Text(
-                              authState.error!,
-                              style: TextStyle(color: Colors.red.shade700),
-                            ),
-                          ),
-
-                        // Signup button
-                        AuthCTAButton(
-                          label: authState.isLoading
-                              ? 'Creating Account...'
-                              : 'Sign Up',
-                          onPressed: authState.isLoading ? null : _handleSignup,
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Switch to login
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text("Already have an account? "),
-                            TextButton(
-                              onPressed: widget.onSwitchToLogin,
-                              child: const Text(
-                                'Sign In',
-                                style: TextStyle(
-                                  color: kAuthAccent,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    return Row(
+      children: [
+        Expanded(child: Container(height: 1, color: kBorderColor)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'or',
+            style: AuthTextStyles.stat2.copyWith(color: kTextSecondary),
           ),
         ),
-      ),
+        Expanded(child: Container(height: 1, color: kBorderColor)),
+      ],
     );
   }
 }
 
-class AuthPage extends ConsumerStatefulWidget {
-  const AuthPage({super.key});
+// Checkbox with terms text
+class TermsCheckbox extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool?> onChanged;
 
-  static const String route = '/auth';
-
-  @override
-  ConsumerState<AuthPage> createState() => _AuthPageState();
-}
-
-class _AuthPageState extends ConsumerState<AuthPage> {
-  bool _isLogin = true;
-
-  @override
-  void initState() {
-    super.initState();
-    // Check if user is already logged in
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuthStatus();
-    });
-  }
-
-  void _checkAuthStatus() {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    if (authViewModel.isUserLoggedIn) {
-      Navigator.pushReplacementNamed(context, '/home');
-    }
-  }
+  const TermsCheckbox({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Listen for auth state changes
-    ref.listen<AuthState>(authViewModelProvider, (previous, next) {
-      if (next.isLoggedIn) {
-        Navigator.pushReplacementNamed(context, '/home');
-      }
-    });
+    return Row(
+      children: [
+        Checkbox(
+          value: value,
+          onChanged: onChanged,
+          activeColor: kPrimaryColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        ),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: AuthTextStyles.stat2,
+              children: [
+                const TextSpan(text: 'I agree to the '),
+                TextSpan(
+                  text: 'Terms of Services',
+                  style: AuthTextStyles.stat2.copyWith(
+                    color: kPrimaryColor,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+                const TextSpan(text: ' & '),
+                TextSpan(
+                  text: 'Privacy Policy',
+                  style: AuthTextStyles.stat2.copyWith(
+                    color: kPrimaryColor,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-    return Scaffold(
-      body: _isLogin
-          ? LoginPage(onSwitchToSignup: () => setState(() => _isLogin = false))
-          : SignupPage(onSwitchToLogin: () => setState(() => _isLogin = true)),
+// Error message widget
+class AuthErrorMessage extends StatelessWidget {
+  final String message;
+
+  const AuthErrorMessage({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: AuthTextStyles.stat2.copyWith(color: Colors.red.shade700),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
