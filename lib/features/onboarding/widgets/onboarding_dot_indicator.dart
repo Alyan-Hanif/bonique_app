@@ -16,8 +16,9 @@ class OnboardingDots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color active = activeColor ?? Theme.of(context).colorScheme.primary;
-    final Color inactive = inactiveColor ?? Colors.black12;
+    final Color active = activeColor ?? const Color(0xFF2C2C2C);
+    final Color inactive =
+        inactiveColor ?? const Color(0xFF2C2C2C).withOpacity(0.3);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -25,15 +26,15 @@ class OnboardingDots extends StatelessWidget {
         final bool isActive = index == activeIndex;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 250),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          height: 6,
-          width: isActive ? 16 : 6,
+          margin: const EdgeInsets.symmetric(horizontal: 6),
+          height: 8,
+          width: 8, // Fixed width for all dots
           decoration: BoxDecoration(
             color: isActive ? active : inactive,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(4),
           ),
         );
       }),
     );
   }
-} 
+}

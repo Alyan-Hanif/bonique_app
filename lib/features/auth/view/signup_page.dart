@@ -17,7 +17,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  // final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -25,7 +25,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
+    // _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -36,7 +36,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         _emailController.text,
         _passwordController.text,
         _nameController.text,
-        _confirmPasswordController.text,
+        // _confirmPasswordController.text,
       );
     }
   }
@@ -56,10 +56,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     authViewModel.validatePassword(value);
   }
 
-  void _onConfirmPasswordChanged(String value) {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    authViewModel.validateConfirmPassword(_passwordController.text, value);
-  }
+  // void _onConfirmPasswordChanged(String value) {
+  //   final authViewModel = ref.read(authViewModelProvider.notifier);
+  //   authViewModel.validateConfirmPassword(_passwordController.text, value);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -77,15 +77,16 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
               children: [
                 // Back button and app logo
                 Row(
+                  mainAxisAlignment:MainAxisAlignment.center,
                   children: [
-                    IconButton(
-                      onPressed: widget.onBack,
-                      icon: const Icon(Icons.arrow_back, color: kTextPrimary),
-                    ),
-                    const Spacer(),
+                    // IconButton(
+                    //   onPressed: widget.onBack,
+                    //   icon: const Icon(Icons.arrow_back, color: kTextPrimary),
+                    // ),
+                    // const Spacer(),
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 58,
+                      height: 58,
                       decoration: BoxDecoration(
                         color: kPrimaryColor,
                         borderRadius: BorderRadius.circular(10),
@@ -93,7 +94,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       child: const Icon(
                         Icons.shopping_bag_outlined,
                         color: Colors.white,
-                        size: 20,
+                        size: 39,
                       ),
                     ),
                   ],
@@ -102,13 +103,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 const SizedBox(height: 32),
 
                 // Title
-                Text('Create a new account!', style: AuthTextStyles.h3),
+                Center(child: Text('Create a new account!', style: AuthTextStyles.h1)),
 
                 const SizedBox(height: 8),
 
-                Text(
-                  'Enter information to create a new account.',
-                  style: AuthTextStyles.stat1,
+                Center(
+                  child: Text(
+                    'Enter information to create a new account.',
+                    style: AuthTextStyles.stat1,
+                  ),
                 ),
 
                 const SizedBox(height: 32),
@@ -158,29 +161,29 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   onChanged: _onPasswordChanged,
                 ),
 
-                const SizedBox(height: 24),
+                // const SizedBox(height: 24),
+                //
+                // // Confirm Password field
+                // AuthInputField(
+                //   controller: _confirmPasswordController,
+                //   label: 'Confirm your password',
+                //   placeholder: '*****',
+                //   prefixIcon: Icons.lock_outline,
+                //   suffixIcon: authState.isConfirmPasswordVisible
+                //       ? Icons.visibility_off
+                //       : Icons.visibility,
+                //   isPassword: true,
+                //   isPasswordVisible: authState.isConfirmPasswordVisible,
+                //   onSuffixIconPressed: () {
+                //     ref
+                //         .read(authViewModelProvider.notifier)
+                //         .toggleConfirmPasswordVisibility();
+                //   },
+                //   errorText: authState.confirmPasswordError,
+                //   onChanged: _onConfirmPasswordChanged,
+                // ),
 
-                // Confirm Password field
-                AuthInputField(
-                  controller: _confirmPasswordController,
-                  label: 'Confirm your password',
-                  placeholder: '*****',
-                  prefixIcon: Icons.lock_outline,
-                  suffixIcon: authState.isConfirmPasswordVisible
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  isPassword: true,
-                  isPasswordVisible: authState.isConfirmPasswordVisible,
-                  onSuffixIconPressed: () {
-                    ref
-                        .read(authViewModelProvider.notifier)
-                        .toggleConfirmPasswordVisibility();
-                  },
-                  errorText: authState.confirmPasswordError,
-                  onChanged: _onConfirmPasswordChanged,
-                ),
-
-                const SizedBox(height: 24),
+                // const SizedBox(height: 24),
 
                 // Terms checkbox
                 TermsCheckbox(
@@ -207,12 +210,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   isLoading: authState.isLoading,
                 ),
 
-                const SizedBox(height: 24),
-
-                // Divider
-                const AuthDivider(),
-
-                const SizedBox(height: 24),
+                // const SizedBox(height: 24),
+                //
+                // // Divider
+                // const AuthDivider(),
+                //
+                // const SizedBox(height: 24),
 
                 // Google Sign In button
                 GoogleSignInButton(

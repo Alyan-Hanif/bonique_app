@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final onboardingControllerProvider =
     StateNotifierProvider<OnboardingController, int>((ref) {
-  return OnboardingController();
-});
+      return OnboardingController();
+    });
 
 class OnboardingController extends StateNotifier<int> {
   OnboardingController() : super(0);

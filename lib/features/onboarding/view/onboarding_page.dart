@@ -17,39 +17,46 @@ class OnboardingPage extends ConsumerWidget {
 
     final pagesData = [
       (
-        image: const Icon(Icons.auto_awesome, size: 140, color: Color(0xFF2C2C2C)),
+        image: 'assets/images/onboarding_1.png',
         title: 'Meet Bonique',
-        subtitle: 'Your AI stylist that keeps outfits easy and fun.'
+        subtitle:
+            'Bonique is your personal AI-powered stylist - helping you explore your wardrobe, discover new outfit ideas, and try on looks virtually, so you can step out with confidence every day.',
       ),
       (
-        image: const Icon(Icons.color_lens, size: 140, color: Color(0xFF2C2C2C)),
-        title: 'Set Your Vibe',
-        subtitle: 'Pick colors and moods. We tailor looks to you.'
+        image: 'assets/images/onboarding_2.png',
+        title: 'Fashion, Made Effortless',
+        subtitle:
+            'Say goodbye to decision fatigue and hello to confidence. Bonique blends your wardrobe with endless AI-curated possibilities, so you always step out feeling polished, stylish, and authentically you.',
       ),
       (
-        image: const Icon(Icons.tune, size: 140, color: Color(0xFF2C2C2C)),
-        title: 'Instant Picks',
-        subtitle: 'Get quick suggestions for work, weekends, and more.'
-      ),
-      (
-        image: const Icon(Icons.check_circle, size: 140, color: Color(0xFF2C2C2C)),
-        title: 'Ready To Go',
-        subtitle: 'Save favorites and shop the look when you’re set.'
+        image: 'assets/images/onboarding_3.png',
+        title: 'Discover Looks',
+        subtitle:
+            'Turn dressing into a seamless experience with intelligent, tailored outfit suggestions that adapt to your mood, align with your events, and evolve with the seasons - ensuring you always feel confident and effortlessly stylish.',
       ),
     ];
 
-    final Color bgPeach = const Color(0xFFFFE7D7);
-    final Color accent = const Color(0xFFFF6B2C);
+    final Color darkGray = const Color(0xFF2C2C2C);
 
     void goToAuth(BuildContext context) {
       Navigator.of(context).pushReplacementNamed(AuthPage.route);
     }
 
-    return Scaffold(
-      backgroundColor: bgPeach,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+    return WillPopScope(
+      onWillPop: () async {
+        // Handle back button - go to previous page or exit onboarding
+        if (index > 0) {
+          controller.previousPage();
+          return false; // Don't pop the route
+        } else {
+          // If on first page, go to auth page
+          goToAuth(context);
+          return false; // Don't pop the route
+        }
+      },
+      child: Scaffold(
+        backgroundColor: darkGray,
+        body: SafeArea(
           child: Column(
             children: [
               Expanded(
@@ -59,32 +66,28 @@ class OnboardingPage extends ConsumerWidget {
                   onPageChanged: (i) => controller.goToPage(i),
                   itemBuilder: (context, i) {
                     final data = pagesData[i];
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-                        child: OnboardingPageContent(
-                          image: data.image,
-                          title: data.title,
-                          subtitle: data.subtitle,
-                          ctaText: i < pagesData.length - 1 ? 'Next' : 'Get Started',
-                          onCtaPressed: () {
-                            if (index < pagesData.length - 1) {
-                              controller.nextPage();
-                            } else {
-                              goToAuth(context);
-                            }
-                          },
-                          onSkip: () => goToAuth(context),
-                          dots: Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: OnboardingDots(
-                              count: pagesData.length,
-                              activeIndex: index,
-                              activeColor: accent,
-                              inactiveColor: Colors.black12,
-                            ),
-                          ),
-                        ),
+                    return OnboardingPageContent(
+                      image: data.image,
+                      title: data.title,
+                      subtitle: data.subtitle,
+                      ctaText: i < pagesData.length - 1
+                          ? 'Next'
+                          : 'Get Started',
+                      showBackButton: i > 0,
+                      onCtaPressed: () {
+                        if (index < pagesData.length - 1) {
+                          controller.nextPage();
+                        } else {
+                          goToAuth(context);
+                        }
+                      },
+                      onBack: i > 0 ? () => controller.previousPage() : null,
+                      onSkip: () => goToAuth(context),
+                      dots: OnboardingDots(
+                        count: pagesData.length,
+                        activeIndex: index,
+                        activeColor: darkGray,
+                        inactiveColor: darkGray.withOpacity(0.3),
                       ),
                     );
                   },
@@ -96,4 +99,4 @@ class OnboardingPage extends ConsumerWidget {
       ),
     );
   }
-} 
+}

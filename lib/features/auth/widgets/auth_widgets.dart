@@ -18,16 +18,16 @@ class AuthTextStyles {
   );
 
   static const TextStyle h1 = TextStyle(
-    fontSize: 48,
+    fontSize:26,
     height: 48 / 48,
     fontWeight: FontWeight.bold,
     color: kTextPrimary,
   );
 
   static const TextStyle h2 = TextStyle(
-    fontSize: 20,
+    fontSize: 14,
     height: 28 / 20,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.normal,
     color: kTextPrimary,
   );
 
@@ -39,21 +39,21 @@ class AuthTextStyles {
   );
 
   static const TextStyle stat1 = TextStyle(
-    fontSize: 20,
+    fontSize: 16,
     height: 28 / 20,
     fontWeight: FontWeight.normal,
     color: kTextSecondary,
   );
 
   static const TextStyle stat2 = TextStyle(
-    fontSize: 16,
+    fontSize: 14,
     height: 24 / 16,
     fontWeight: FontWeight.normal,
     color: kTextSecondary,
   );
 
   static const TextStyle stat3 = TextStyle(
-    fontSize: 18,
+    fontSize: 12 ,
     height: 22.5 / 18,
     fontWeight: FontWeight.normal,
     color: kTextSecondary,
@@ -173,13 +173,13 @@ class AuthPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 48,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: kPrimaryColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(48),
           ),
           elevation: 0,
         ),
@@ -335,12 +335,12 @@ class TermsCheckbox extends StatelessWidget {
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: AuthTextStyles.stat2,
+              style: AuthTextStyles.stat3,
               children: [
                 const TextSpan(text: 'I agree to the '),
                 TextSpan(
                   text: 'Terms of Services',
-                  style: AuthTextStyles.stat2.copyWith(
+                  style: AuthTextStyles.stat3.copyWith(
                     color: kPrimaryColor,
                     decoration: TextDecoration.underline,
                   ),
@@ -348,7 +348,7 @@ class TermsCheckbox extends StatelessWidget {
                 const TextSpan(text: ' & '),
                 TextSpan(
                   text: 'Privacy Policy',
-                  style: AuthTextStyles.stat2.copyWith(
+                  style: AuthTextStyles.stat3.copyWith(
                     color: kPrimaryColor,
                     decoration: TextDecoration.underline,
                   ),

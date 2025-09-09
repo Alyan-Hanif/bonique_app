@@ -14,13 +14,13 @@ class AuthState {
   final bool isEmailValid;
   final bool isPasswordValid;
   final bool isNameValid;
-  final bool isConfirmPasswordValid;
+  // final bool isConfirmPasswordValid;
   final String? emailError;
   final String? passwordError;
   final String? nameError;
-  final String? confirmPasswordError;
+  // final String? confirmPasswordError;
   final bool isPasswordVisible;
-  final bool isConfirmPasswordVisible;
+  // final bool isConfirmPasswordVisible;
   final bool agreeToTerms;
 
   AuthState({
@@ -30,13 +30,13 @@ class AuthState {
     this.isEmailValid = true,
     this.isPasswordValid = true,
     this.isNameValid = true,
-    this.isConfirmPasswordValid = true,
+    // this.isConfirmPasswordValid = true,
     this.emailError,
     this.passwordError,
     this.nameError,
-    this.confirmPasswordError,
+    // this.confirmPasswordError,
     this.isPasswordVisible = false,
-    this.isConfirmPasswordVisible = false,
+    // this.isConfirmPasswordVisible = false,
     this.agreeToTerms = false,
   });
 
@@ -46,14 +46,15 @@ class AuthState {
     bool? isLoggedIn,
     bool? isEmailValid,
     bool? isPasswordValid,
+        // isConfirmPasswordValid: false,
     bool? isNameValid,
-    bool? isConfirmPasswordValid,
+    // bool? isConfirmPasswordValid,
     String? emailError,
     String? passwordError,
     String? nameError,
-    String? confirmPasswordError,
+    // String? confirmPasswordError,
     bool? isPasswordVisible,
-    bool? isConfirmPasswordVisible,
+    // bool? isConfirmPasswordVisible,
     bool? agreeToTerms,
   }) {
     return AuthState(
@@ -63,15 +64,15 @@ class AuthState {
       isEmailValid: isEmailValid ?? this.isEmailValid,
       isPasswordValid: isPasswordValid ?? this.isPasswordValid,
       isNameValid: isNameValid ?? this.isNameValid,
-      isConfirmPasswordValid:
-          isConfirmPasswordValid ?? this.isConfirmPasswordValid,
+      // isConfirmPasswordValid:
+      //     isConfirmPasswordValid ?? this.isConfirmPasswordValid,
       emailError: emailError,
       passwordError: passwordError,
       nameError: nameError,
-      confirmPasswordError: confirmPasswordError,
+      // confirmPasswordError: confirmPasswordError,
       isPasswordVisible: isPasswordVisible ?? this.isPasswordVisible,
-      isConfirmPasswordVisible:
-          isConfirmPasswordVisible ?? this.isConfirmPasswordVisible,
+      // isConfirmPasswordVisible:
+          // isConfirmPasswordVisible ?? this.isConfirmPasswordVisible,
       agreeToTerms: agreeToTerms ?? this.agreeToTerms,
     );
   }
@@ -147,40 +148,40 @@ class AuthViewModel extends StateNotifier<AuthState> {
     return true;
   }
 
-  bool validateConfirmPassword(String password, String confirmPassword) {
-    if (confirmPassword.isEmpty) {
-      state = state.copyWith(
-        isConfirmPasswordValid: false,
-        confirmPasswordError: 'Please confirm your password',
-      );
-      return false;
-    }
-
-    if (confirmPassword != password) {
-      state = state.copyWith(
-        isConfirmPasswordValid: false,
-        confirmPasswordError: 'Passwords do not match',
-      );
-      return false;
-    }
-
-    state = state.copyWith(
-      isConfirmPasswordValid: true,
-      confirmPasswordError: null,
-    );
-    return true;
-  }
+  // bool validateConfirmPassword(String password, String confirmPassword) {
+  //    if (confirmPassword.isEmpty) {
+  //     state = state.copyWith(
+  //       isConfirmPasswordValid: false,
+  //       confirmPasswordError: 'Please confirm your password',
+  //     );
+  //     return false;
+  //   }
+  //
+  //   if (confirmPassword != password) {
+  //     state = state.copyWith(
+  //       isConfirmPasswordValid: false,
+  //       confirmPasswordError: 'Passwords do not match',
+  //     );
+  //     return false;
+  //   }
+  //
+  //   state = state.copyWith(
+  //     isConfirmPasswordValid: true,
+  //     confirmPasswordError: null,
+  //   );
+  //   return true;
+  // }
 
   // Toggle password visibility
   void togglePasswordVisibility() {
     state = state.copyWith(isPasswordVisible: !state.isPasswordVisible);
   }
 
-  void toggleConfirmPasswordVisibility() {
-    state = state.copyWith(
-      isConfirmPasswordVisible: !state.isConfirmPasswordVisible,
-    );
-  }
+  // void toggleConfirmPasswordVisibility() {
+  //   state = state.copyWith(
+  //     isConfirmPasswordVisible: !state.isConfirmPasswordVisible,
+  //   );
+  // }
 
   // Toggle terms agreement
   void toggleTermsAgreement() {
@@ -188,15 +189,15 @@ class AuthViewModel extends StateNotifier<AuthState> {
   }
 
   // Clear validation errors
-  void clearValidationErrors() {
-    state = state.copyWith(
-      error: null,
-      emailError: null,
-      passwordError: null,
-      nameError: null,
-      confirmPasswordError: null,
-    );
-  }
+  // void clearValidationErrors() {
+  //   state = state.copyWith(
+  //     error: null,
+  //     emailError: null,
+  //     passwordError: null,
+  //     nameError: null,
+  //     confirmPasswordError: null,
+  //   );
+  // }
 
   // Authentication methods
   Future<bool> signIn(String email, String password) async {
@@ -224,21 +225,23 @@ class AuthViewModel extends StateNotifier<AuthState> {
     String email,
     String password,
     String fullName,
-    String confirmPassword,
+    // String confirmPassword,
   ) async {
     // Validate inputs
     final isEmailValid = validateEmail(email);
     final isPasswordValid = validatePassword(password);
     final isNameValid = validateName(fullName);
-    final isConfirmPasswordValid = validateConfirmPassword(
-      password,
-      confirmPassword,
-    );
+    // final isConfirmPasswordValid = validateConfirmPassword(
+    //   password
+    //   confirmPassword,
+    // );
 
     if (!isEmailValid ||
         !isPasswordValid ||
-        !isNameValid ||
-        !isConfirmPasswordValid) {
+        !isNameValid
+        // ||
+        // !isConfirmPasswordValid
+    ) {
       return false;
     }
 
