@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'features/splash/view/splash_page.dart';
 import 'features/onboarding/view/onboarding_page.dart';
 import 'features/auth/view/auth_page.dart';
 import 'features/home/view/home_page.dart';
@@ -46,11 +47,12 @@ class MyApp extends StatelessWidget {
         ).copyWith(primary: const Color(0xFFFF6B2C)),
         useMaterial3: false,
       ),
-      home: const OnboardingPage(),
+      home: const SplashPage(),
       routes: {
-        OnboardingPage.route: (_) => const OnboardingPage(),
-        AuthPage.route: (_) => const AuthPage(),
-        HomePage.route: (_) => const HomePage(),
+        SplashPage.route: (context) => const SplashPage(),
+        OnboardingPage.route: (context) => const OnboardingPage(),
+        AuthPage.route: (context) => const AuthPage(),
+        HomePage.route: (context) => const HomePage(),
       },
     );
   }
