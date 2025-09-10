@@ -25,13 +25,17 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
     // Initialize smoke animation controller
     _smokeController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(
+        milliseconds: 2500,
+      ), // Increased for smoother smoke
       vsync: this,
     );
 
     // Initialize logo animation controller
     _logoController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(
+        milliseconds: 1500,
+      ), // Increased for smoother logo
       vsync: this,
     );
 
@@ -51,15 +55,23 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 
   void _startAnimations() async {
-    // First: Complete smoke animation
+    // Phase 1: Smoke animation (2.5 seconds)
     _smokeController.forward();
 
-    // Wait for smoke to complete, then show logo
-    await Future.delayed(const Duration(milliseconds: 2000));
+    // Phase 2: Wait for smoke to complete + pause (1 second pause)
+    await Future.delayed(
+      const Duration(milliseconds: 3500),
+    ); // 2500ms smoke + 1000ms pause
+
+    // Phase 3: Logo animation (1.5 seconds)
     _logoController.forward();
 
-    // Wait for logo animation to complete, then navigate
-    await Future.delayed(const Duration(milliseconds: 1500));
+    // Phase 4: Wait for logo animation + pause (2 seconds pause)
+    await Future.delayed(
+      const Duration(milliseconds: 2000),
+    ); // 1500ms logo + 500ms pause
+
+    // Phase 5: Navigate to onboarding
     _navigateToOnboarding();
   }
 

@@ -33,14 +33,14 @@ class OnboardingPageContent extends StatelessWidget {
       color: Colors.white,
       child: Column(
         children: [
-          // Upper portion - 60% with white background and dark grey circle
+          // Upper portion - 60% with dark gray wave
           Expanded(
             flex: 60,
             child: Container(
               width: double.infinity,
               color: Colors.white,
               child: ClipPath(
-                clipper: CircleClipper(),
+                clipper: TopWaveClipper(),
                 child: Container(
                   width: double.infinity,
                   height: double.infinity,
@@ -51,12 +51,14 @@ class OnboardingPageContent extends StatelessWidget {
                       width: 300,
                       height: 300,
                       fit: BoxFit.contain,
+                      semanticLabel: title,
                     ),
                   ),
                 ),
               ),
             ),
           ),
+
           // Lower portion - 40% with white background
           Expanded(
             flex: 40,
@@ -88,26 +90,39 @@ class OnboardingPageContent extends StatelessWidget {
                         Text(
                           subtitle,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
+                          style: textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w400,
                             fontSize: 15,
-                            height: 1.0, // line-height: 100%
-                            letterSpacing: 0.0, // letter-spacing: 0%
+                            height: 1.2,
                             color: Colors.black87,
                           ),
                         ),
                       ],
                     ),
-                    // Navigation elements at bottom
+
+                    // Navigation row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Skip button (left side)
-                        SizedBox(
-                          height: 32,
-                          width: 100,
-                          child: TextButton(
+                        if (showBackButton)
+                          TextButton(
+                            onPressed: onBack,
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(83, 32),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: const Text(
+                              'Back',
+                              style: TextStyle(
+                                color: Color(0xFF2C2C2C),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          )
+                        else
+                          TextButton(
                             onPressed: onSkip,
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
@@ -123,37 +138,27 @@ class OnboardingPageContent extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ),
 
-                        // Dot indicator
-                        if (dots != null) ...[
-                          dots!,
-                          const SizedBox(height: 24),
-                        ],
+                        if (dots != null) dots!,
 
-                        // Next button (right side)
-                        SizedBox(
-                          height: 32,
-                          width: 100,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: darkGray,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(48),
-                              ),
-                              elevation: 0,
-                              padding: EdgeInsets.zero,
-                              minimumSize: const Size(83, 32),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: darkGray,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(48),
                             ),
-                            onPressed: onCtaPressed,
-                            child: Text(
-                              ctaText ?? 'Next',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            elevation: 0,
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(83, 32),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: onCtaPressed,
+                          child: Text(
+                            ctaText ?? 'Next',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -170,21 +175,27 @@ class OnboardingPageContent extends StatelessWidget {
   }
 }
 
-class CircleClipper extends CustomClipper<Path> {
+/// Custom clipper for the shaded "wave/curve" at the top
+class TopWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
 
-    // Create a circle that starts from above and extends down
-    final centerX = size.width / 2;
-    final centerY = size.height * 0.4; // Position circle higher up
-    final radius =
-        size.width * 0.7; // Make circle large enough to extend beyond bounds
+    // Start at top-left
+    path.lineTo(0, 0);
 
-    path.addOval(
-      Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
+    // Top-right corner
+    path.lineTo(size.width, 0);
+
+    // Curve down towards left side
+    path.quadraticBezierTo(
+      size.width * 0.6, // control point (x)
+      size.height * 0.2, // control point (y)
+      0,
+      size.height * 0.4, // end point
     );
 
+    path.close();
     return path;
   }
 

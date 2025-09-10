@@ -65,30 +65,66 @@ class OnboardingPage extends ConsumerWidget {
                   width: double.infinity,
                   color: Colors.white,
                   child: ClipPath(
-                    clipper: CircleClipper(),
+                    clipper: TopWaveClipper(),
                     child: Container(
                       width: double.infinity,
                       height: double.infinity,
-                      color: darkGray,
-                      child: Center(
-                        child: PageView.builder(
-                          controller: controller.pageController,
-                          itemCount: pagesData.length,
-                          onPageChanged: (i) => controller.goToPage(i),
-                          itemBuilder: (context, i) {
-                            final data = pagesData[i];
-                            return Image.asset(
-                              data.image,
-                              width: 300,
-                              height: 300,
-                              fit: BoxFit.contain,
-                            );
-                          },
+                      color: Color(0xFF1B1A18),
+                      child: Stack(
+                        children:[
+                          //left circle
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              width: 75,  // adjust size
+                              height: 150, // adjust size
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF424041),
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(100),
+                                  bottomRight: Radius.circular(100),
+                                ),
+                                // shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+
+                          //right circle
+                          Align(
+                            alignment: const Alignment(1, -0.7), // 1 = right, -1 = top, 0 = center, 1 = bottom
+                            child: Container(
+                              width: 80,
+                              height: 180,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF424041),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(100),
+                                  bottomLeft: Radius.circular(100),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Center(
+                          child: PageView.builder(
+                            controller: controller.pageController,
+                            itemCount: pagesData.length,
+                            onPageChanged: (i) => controller.goToPage(i),
+                            itemBuilder: (context, i) {
+                              final data = pagesData[i];
+                              return Image.asset(
+                                data.image,
+                                width: 300,
+                                height: 300,
+                                fit: BoxFit.contain,
+                              );
+                            },
+                          ),
                         ),
+                        ],
                       ),
                     ),
                   ),
-                ),
+                )
               ),
               // Fixed content area with text and navigation
               Expanded(
@@ -231,20 +267,29 @@ class OnboardingPage extends ConsumerWidget {
 }
 
 // CircleClipper class moved here since we're no longer using OnboardingPageContent
-class CircleClipper extends CustomClipper<Path> {
+class TopWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
 
-    // Create a circle that starts from above and extends down
-    final centerX = size.width / 2;
-    final centerY = size.height * 0.4; // Position circle higher up
-    final radius =
-        size.width * 0.7; // Make circle large enough to extend beyond bounds
+    // Start at left, 60% height
+    path.moveTo(0, size.height * 0.8);
 
-    path.addOval(
-      Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
+    // Circular arc OUTWARD (convex), ending at 80%
+    path.arcToPoint(
+      Offset(size.width, size.height * 0.99), // end point
+      radius: Radius.circular(size.width*1.5),   // big enough radius for circular feel
+      clockwise: false, // flip to make arc outside
     );
+
+    // Go up to top-right
+    path.lineTo(size.width, 0);
+
+    // Back to top-left
+    path.lineTo(0, 0);
+
+    // Close the path
+    path.close();
 
     return path;
   }
