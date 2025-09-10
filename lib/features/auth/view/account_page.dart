@@ -30,24 +30,26 @@ class AccountPage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+                  crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
                   children: [
                     const SizedBox(height: 80), // Increased top spacing
                     // App Logo
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: 58,
+                      height: 58,
                       decoration: BoxDecoration(
-                        color: kPrimaryColor,
-                        borderRadius: BorderRadius.circular(20),
+                        color: Color(0xFFEFF1F1),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
                         Icons.shopping_bag_outlined,
-                        color: Colors.white,
+                        color: Colors.black,
                         size: 40,
                       ),
                     ),
 
-                    const SizedBox(height: 60), // Increased spacing after logo
+                    const SizedBox(height: 40), // Increased spacing after logo
                     // Welcome Text
                     Text(
                       'Welcome to Bonique',
@@ -76,7 +78,7 @@ class AccountPage extends StatelessWidget {
                     ),
 
                     const SizedBox(
-                      height: 60,
+                      height: 30,
                     ), // Increased spacing before buttons
                     // Buttons Container
                     Column(
@@ -105,7 +107,8 @@ class AccountPage extends StatelessWidget {
                       ],
                     ),
 
-                    // const Spacer(), // Push footer to bottom
+                    const SizedBox(height: 16),
+
                     // Terms Text
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -113,8 +116,8 @@ class AccountPage extends StatelessWidget {
                         'By Continuing, you agree to our terms of service and privacy policy',
                         style: AuthTextStyles.stat2.copyWith(
                           color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 12,
-                          height: 1.3,
+                          fontSize: 16,
+                          height: 1.0,
                         ),
                         textAlign: TextAlign.center,
                       ),

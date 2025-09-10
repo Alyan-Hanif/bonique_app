@@ -57,33 +57,27 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Back button and app logo
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: widget.onBack,
-                      icon: const Icon(Icons.arrow_back, color: kTextPrimary),
+                // app logo
+                Center(
+                  child: Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: kPrimaryColor,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const Spacer(),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: kPrimaryColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.shopping_bag_outlined,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                    child: const Icon(
+                      Icons.shopping_bag_outlined,
+                      color: Colors.white,
+                      size: 39,
                     ),
-                  ],
+                  ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 30),
 
                 // Title
                 Text('Sign-In to your account!', style: AuthTextStyles.h3),
@@ -95,7 +89,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   style: AuthTextStyles.stat1,
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
 
                 // Email field
                 AuthInputField(
@@ -108,7 +102,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   onChanged: _onEmailChanged,
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 15),
 
                 // Password field
                 AuthInputField(
@@ -130,7 +124,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   onChanged: _onPasswordChanged,
                 ),
 
-                const SizedBox(height: 16),
+                // const SizedBox(height: 10),
 
                 // Forgot password link
                 Align(
@@ -149,7 +143,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 40),
 
                 // Error message
                 if (authState.error != null)
@@ -164,7 +158,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   isLoading: authState.isLoading,
                 ),
 
-                const Spacer(),
+                // const Spacer(),
+                const SizedBox(height: 20),
 
                 // Sign Up link
                 Center(

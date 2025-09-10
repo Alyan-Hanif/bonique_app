@@ -73,7 +73,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Back button and app logo
                 Row(
@@ -210,12 +210,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   isLoading: authState.isLoading,
                 ),
 
-                // const SizedBox(height: 24),
-                //
-                // // Divider
-                // const AuthDivider(),
-                //
-                // const SizedBox(height: 24),
+                const SizedBox(height: 14),
+
+                // Divider
+                const AuthDivider(),
+
+                const SizedBox(height: 14),
 
                 // Google Sign In button
                 GoogleSignInButton(
@@ -224,7 +224,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   },
                 ),
 
-                const Spacer(),
+                // const Spacer(),
 
                 // Sign In link
                 Center(

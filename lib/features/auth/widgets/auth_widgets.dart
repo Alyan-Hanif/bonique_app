@@ -172,27 +172,31 @@ class AuthPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
-      height: 48,
+      width: 327, // fixed width
+      height: 48, // fixed height
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: const Color(0xFF1B1A18),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(48),
+            side: const BorderSide(
+              color: Colors.white,
+              width: 1,
+            ),
           ),
           elevation: 0,
         ),
         onPressed: isLoading ? null : onPressed,
         child: isLoading
             ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            color: Colors.white,
+            strokeWidth: 2,
+          ),
+        )
             : Text(text, style: AuthTextStyles.button),
       ),
     );
@@ -223,7 +227,7 @@ class AuthSecondaryButton extends StatelessWidget {
           foregroundColor: kPrimaryColor,
           side: const BorderSide(color: kPrimaryColor, width: 2),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(48),
           ),
         ),
         onPressed: isLoading ? null : onPressed,
@@ -254,15 +258,15 @@ class GoogleSignInButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
-      height: 56,
+      width: 327,
+      height: 48,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: kTextPrimary,
-          side: const BorderSide(color: kBorderColor),
+          side: const BorderSide(color: Colors.black),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(48),
           ),
         ),
         onPressed: onPressed,
