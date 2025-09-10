@@ -77,7 +77,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
               children: [
                 // Back button and app logo
                 Row(
-                  mainAxisAlignment:MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // IconButton(
                     //   onPressed: widget.onBack,
@@ -103,7 +103,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 const SizedBox(height: 32),
 
                 // Title
-                Center(child: Text('Create a new account!', style: AuthTextStyles.h1)),
+                Center(
+                  child: Text(
+                    'Create a new account!',
+                    style: AuthTextStyles.h1,
+                  ),
+                ),
 
                 const SizedBox(height: 8),
 
