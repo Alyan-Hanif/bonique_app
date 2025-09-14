@@ -22,18 +22,19 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   @override
   void initState() {
     super.initState();
-    // Check if user is already logged in
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuthStatus();
-    });
+    // Remove automatic auth check - let users manually sign in
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _checkAuthStatus();
+    // });
   }
 
-  void _checkAuthStatus() {
-    final authViewModel = ref.read(authViewModelProvider.notifier);
-    if (authViewModel.isUserLoggedIn) {
-      Navigator.pushReplacementNamed(context, '/home');
-    }
-  }
+  // Remove or comment out the _checkAuthStatus method
+  // void _checkAuthStatus() {
+  //   final authViewModel = ref.read(authViewModelProvider.notifier);
+  //   if (authViewModel.isUserLoggedIn) {
+  //     Navigator.pushReplacementNamed(context, '/home');
+  //   }
+  // }
 
   void _navigateToSignIn() {
     setState(() {

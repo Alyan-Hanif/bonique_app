@@ -56,138 +56,146 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // app logo
-                Center(
-                  child: Container(
-                    width: 58,
-                    height: 58,
-                    decoration: BoxDecoration(
-                      color: kPrimaryColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.shopping_bag_outlined,
-                      color: Colors.white,
-                      size: 39,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Back button and app logo
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 58,
+                        height: 58,
+                        decoration: BoxDecoration(
+                          color: kPrimaryColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.shopping_bag_outlined,
+                          color: Colors.white,
+                          size: 39,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Title
+                  Center(
+                    child: Text(
+                      'Sign-In to your account!',
+                      style: AuthTextStyles.h1,
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 30),
+                  const SizedBox(height: 8),
 
-                // Title
-                Text('Sign-In to your account!', style: AuthTextStyles.h3),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  'Enter information to Sign In to your account.',
-                  style: AuthTextStyles.stat1,
-                ),
-
-                const SizedBox(height: 20),
-
-                // Email field
-                AuthInputField(
-                  controller: _emailController,
-                  label: 'Enter your email address',
-                  placeholder: 'raheema@gmail.com',
-                  prefixIcon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                  errorText: authState.emailError,
-                  onChanged: _onEmailChanged,
-                ),
-
-                const SizedBox(height: 15),
-
-                // Password field
-                AuthInputField(
-                  controller: _passwordController,
-                  label: 'Enter your password',
-                  placeholder: '*****',
-                  prefixIcon: Icons.lock_outline,
-                  suffixIcon: authState.isPasswordVisible
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  isPassword: true,
-                  isPasswordVisible: authState.isPasswordVisible,
-                  onSuffixIconPressed: () {
-                    ref
-                        .read(authViewModelProvider.notifier)
-                        .togglePasswordVisibility();
-                  },
-                  errorText: authState.passwordError,
-                  onChanged: _onPasswordChanged,
-                ),
-
-                // const SizedBox(height: 10),
-
-                // Forgot password link
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // TODO: Implement forgot password
-                    },
+                  Center(
                     child: Text(
-                      'Forgot Password?',
-                      style: AuthTextStyles.stat2.copyWith(
-                        color: kPrimaryColor,
-                        decoration: TextDecoration.underline,
+                      'Enter information to Sign In to your account.',
+                      style: AuthTextStyles.stat1,
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Email field
+                  AuthInputField(
+                    controller: _emailController,
+                    label: 'Enter your email address',
+                    placeholder: 'raheema@gmail.com',
+                    prefixIcon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                    errorText: authState.emailError,
+                    onChanged: _onEmailChanged,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Password field
+                  AuthInputField(
+                    controller: _passwordController,
+                    label: 'Enter your password',
+                    placeholder: '*****',
+                    prefixIcon: Icons.lock_outline,
+                    suffixIcon: authState.isPasswordVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    isPassword: true,
+                    isPasswordVisible: authState.isPasswordVisible,
+                    onSuffixIconPressed: () {
+                      ref
+                          .read(authViewModelProvider.notifier)
+                          .togglePasswordVisibility();
+                    },
+                    errorText: authState.passwordError,
+                    onChanged: _onPasswordChanged,
+                  ),
+
+                  // Forgot password link
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        // TODO: Implement forgot password
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: AuthTextStyles.stat2.copyWith(
+                          color: kPrimaryColor,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 40),
+                  const SizedBox(height: 32),
 
-                // Error message
-                if (authState.error != null)
-                  AuthErrorMessage(message: authState.error!),
+                  // Error message
+                  if (authState.error != null)
+                    AuthErrorMessage(message: authState.error!),
 
-                if (authState.error != null) const SizedBox(height: 16),
+                  if (authState.error != null) const SizedBox(height: 16),
 
-                // Sign In button
-                AuthPrimaryButton(
-                  text: 'Sign In',
-                  onPressed: _handleSignIn,
-                  isLoading: authState.isLoading,
-                ),
+                  // Sign In button
+                  AuthPrimaryButton(
+                    text: 'Sign In',
+                    onPressed: _handleSignIn,
+                    isLoading: authState.isLoading,
+                  ),
 
-                // const Spacer(),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // Sign Up link
-                Center(
-                  child: RichText(
-                    text: TextSpan(
-                      style: AuthTextStyles.stat2,
-                      children: [
-                        const TextSpan(text: "Don't have an account? "),
-                        WidgetSpan(
-                          child: GestureDetector(
-                            onTap: widget.onSignUp,
-                            child: Text(
-                              'Sign Up',
-                              style: AuthTextStyles.stat2.copyWith(
-                                color: kPrimaryColor,
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.underline,
+                  // Sign Up link
+                  Center(
+                    child: RichText(
+                      text: TextSpan(
+                        style: AuthTextStyles.stat2,
+                        children: [
+                          const TextSpan(text: "Don't have an account? "),
+                          WidgetSpan(
+                            child: GestureDetector(
+                              onTap: widget.onSignUp,
+                              child: Text(
+                                'Sign Up',
+                                style: AuthTextStyles.stat2.copyWith(
+                                  color: kPrimaryColor,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 24),
-              ],
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),

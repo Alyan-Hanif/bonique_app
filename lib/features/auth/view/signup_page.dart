@@ -41,6 +41,16 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     }
   }
 
+  void _handleGoogleSignIn() async {
+    final authViewModel = ref.read(authViewModelProvider.notifier);
+    final success = await authViewModel.signInWithGoogle();
+
+    if (success) {
+      // Navigation will be handled by the auth state listener in auth_page.dart
+      print('Google sign-in successful!');
+    }
+  }
+
   void _onNameChanged(String value) {
     final authViewModel = ref.read(authViewModelProvider.notifier);
     authViewModel.validateName(value);
@@ -72,192 +82,190 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Back button and app logo
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // IconButton(
-                    //   onPressed: widget.onBack,
-                    //   icon: const Icon(Icons.arrow_back, color: kTextPrimary),
-                    // ),
-                    // const Spacer(),
-                    Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        color: kPrimaryColor,
-                        borderRadius: BorderRadius.circular(10),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Back button and app logo
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // IconButton(
+                      //   onPressed: widget.onBack,
+                      //   icon: const Icon(Icons.arrow_back, color: kTextPrimary),
+                      // ),
+                      // const Spacer(),
+                      Container(
+                        width: 58,
+                        height: 58,
+                        decoration: BoxDecoration(
+                          color: kPrimaryColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.shopping_bag_outlined,
+                          color: Colors.white,
+                          size: 39,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.shopping_bag_outlined,
-                        color: Colors.white,
-                        size: 39,
-                      ),
+                    ],
+                  ),
+              
+                  const SizedBox(height: 32),
+              
+                  // Title
+                  Center(
+                    child: Text(
+                      'Create a new account!',
+                      style: AuthTextStyles.h1,
                     ),
-                  ],
-                ),
-
-                const SizedBox(height: 32),
-
-                // Title
-                Center(
-                  child: Text(
-                    'Create a new account!',
-                    style: AuthTextStyles.h1,
                   ),
-                ),
-
-                const SizedBox(height: 8),
-
-                Center(
-                  child: Text(
-                    'Enter information to create a new account.',
-                    style: AuthTextStyles.stat1,
+              
+                  const SizedBox(height: 8),
+              
+                  Center(
+                    child: Text(
+                      'Enter information to create a new account.',
+                      style: AuthTextStyles.stat1,
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Name field
-                AuthInputField(
-                  controller: _nameController,
-                  label: 'Enter your full name',
-                  placeholder: 'Raheema Ali',
-                  prefixIcon: Icons.person_outline,
-                  errorText: authState.nameError,
-                  onChanged: _onNameChanged,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Email field
-                AuthInputField(
-                  controller: _emailController,
-                  label: 'Enter your email address',
-                  placeholder: 'raheema@gmail.com',
-                  prefixIcon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                  errorText: authState.emailError,
-                  onChanged: _onEmailChanged,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Password field
-                AuthInputField(
-                  controller: _passwordController,
-                  label: 'Enter your password',
-                  placeholder: '*****',
-                  prefixIcon: Icons.lock_outline,
-                  suffixIcon: authState.isPasswordVisible
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  isPassword: true,
-                  isPasswordVisible: authState.isPasswordVisible,
-                  onSuffixIconPressed: () {
-                    ref
-                        .read(authViewModelProvider.notifier)
-                        .togglePasswordVisibility();
-                  },
-                  errorText: authState.passwordError,
-                  onChanged: _onPasswordChanged,
-                ),
-
-                // const SizedBox(height: 24),
-                //
-                // // Confirm Password field
-                // AuthInputField(
-                //   controller: _confirmPasswordController,
-                //   label: 'Confirm your password',
-                //   placeholder: '*****',
-                //   prefixIcon: Icons.lock_outline,
-                //   suffixIcon: authState.isConfirmPasswordVisible
-                //       ? Icons.visibility_off
-                //       : Icons.visibility,
-                //   isPassword: true,
-                //   isPasswordVisible: authState.isConfirmPasswordVisible,
-                //   onSuffixIconPressed: () {
-                //     ref
-                //         .read(authViewModelProvider.notifier)
-                //         .toggleConfirmPasswordVisibility();
-                //   },
-                //   errorText: authState.confirmPasswordError,
-                //   onChanged: _onConfirmPasswordChanged,
-                // ),
-
-                // const SizedBox(height: 24),
-
-                // Terms checkbox
-                TermsCheckbox(
-                  value: authState.agreeToTerms,
-                  onChanged: (value) {
-                    ref
-                        .read(authViewModelProvider.notifier)
-                        .toggleTermsAgreement();
-                  },
-                ),
-
-                const SizedBox(height: 32),
-
-                // Error message
-                if (authState.error != null)
-                  AuthErrorMessage(message: authState.error!),
-
-                if (authState.error != null) const SizedBox(height: 16),
-
-                // Sign Up button
-                AuthPrimaryButton(
-                  text: 'Sign Up',
-                  onPressed: _handleSignUp,
-                  isLoading: authState.isLoading,
-                ),
-
-                const SizedBox(height: 14),
-
-                // Divider
-                const AuthDivider(),
-
-                const SizedBox(height: 14),
-
-                // Google Sign In button
-                GoogleSignInButton(
-                  onPressed: () {
-                    // TODO: Implement Google sign in
-                  },
-                ),
-
-                // const Spacer(),
-
-                // Sign In link
-                Center(
-                  child: RichText(
-                    text: TextSpan(
-                      style: AuthTextStyles.stat2,
-                      children: [
-                        const TextSpan(text: 'Already have an account? '),
-                        WidgetSpan(
-                          child: GestureDetector(
-                            onTap: widget.onSignIn,
-                            child: Text(
-                              'Sign In',
-                              style: AuthTextStyles.stat2.copyWith(
-                                color: kPrimaryColor,
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.underline,
+              
+                  const SizedBox(height: 32),
+              
+                  // Name field
+                  AuthInputField(
+                    controller: _nameController,
+                    label: 'Enter your full name',
+                    placeholder: 'Raheema Ali',
+                    prefixIcon: Icons.person_outline,
+                    errorText: authState.nameError,
+                    onChanged: _onNameChanged,
+                  ),
+              
+                  const SizedBox(height: 24),
+              
+                  // Email field
+                  AuthInputField(
+                    controller: _emailController,
+                    label: 'Enter your email address',
+                    placeholder: 'raheema@gmail.com',
+                    prefixIcon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                    errorText: authState.emailError,
+                    onChanged: _onEmailChanged,
+                  ),
+              
+                  const SizedBox(height: 24),
+              
+                  // Password field
+                  AuthInputField(
+                    controller: _passwordController,
+                    label: 'Enter your password',
+                    placeholder: '*****',
+                    prefixIcon: Icons.lock_outline,
+                    suffixIcon: authState.isPasswordVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    isPassword: true,
+                    isPasswordVisible: authState.isPasswordVisible,
+                    onSuffixIconPressed: () {
+                      ref
+                          .read(authViewModelProvider.notifier)
+                          .togglePasswordVisibility();
+                    },
+                    errorText: authState.passwordError,
+                    onChanged: _onPasswordChanged,
+                  ),
+              
+                  // const SizedBox(height: 24),
+                  //
+                  // // Confirm Password field
+                  // AuthInputField(
+                  //   controller: _confirmPasswordController,
+                  //   label: 'Confirm your password',
+                  //   placeholder: '*****',
+                  //   prefixIcon: Icons.lock_outline,
+                  //   suffixIcon: authState.isConfirmPasswordVisible
+                  //       ? Icons.visibility_off
+                  //       : Icons.visibility,
+                  //   isPassword: true,
+                  //   isPasswordVisible: authState.isConfirmPasswordVisible,
+                  //   onSuffixIconPressed: () {
+                  //     ref
+                  //         .read(authViewModelProvider.notifier)
+                  //         .toggleConfirmPasswordVisibility();
+                  //   },
+                  //   errorText: authState.confirmPasswordError,
+                  //   onChanged: _onConfirmPasswordChanged,
+                  // ),
+              
+                  // const SizedBox(height: 24),
+              
+                  // Terms checkbox
+                  TermsCheckbox(
+                    value: authState.agreeToTerms,
+                    onChanged: (value) {
+                      ref
+                          .read(authViewModelProvider.notifier)
+                          .toggleTermsAgreement();
+                    },
+                  ),
+              
+                  const SizedBox(height: 32),
+              
+                  // Error message
+                  if (authState.error != null)
+                    AuthErrorMessage(message: authState.error!),
+              
+                  if (authState.error != null) const SizedBox(height: 16),
+              
+                  // Sign Up button
+                  AuthPrimaryButton(
+                    text: 'Sign Up',
+                    onPressed: _handleSignUp,
+                    isLoading: authState.isLoading,
+                  ),
+              
+                  const SizedBox(height: 14),
+              
+                  // Divider
+                  const AuthDivider(),
+              
+                  const SizedBox(height: 14),
+              
+                  // Google Sign In button
+                  GoogleSignInButton(onPressed: _handleGoogleSignIn),
+              
+                  // const Spacer(),
+              
+                  // Sign In link
+                  Center(
+                    child: RichText(
+                      text: TextSpan(
+                        style: AuthTextStyles.stat2,
+                        children: [
+                          const TextSpan(text: 'Already have an account? '),
+                          WidgetSpan(
+                            child: GestureDetector(
+                              onTap: widget.onSignIn,
+                              child: Text(
+                                'Sign In',
+                                style: AuthTextStyles.stat2.copyWith(
+                                  color: kPrimaryColor,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 24),
-              ],
+              
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),
