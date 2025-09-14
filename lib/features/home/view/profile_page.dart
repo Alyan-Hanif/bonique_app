@@ -1,6 +1,8 @@
+import 'package:bonique/features/auth/view/account_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/home_viewmodel.dart';
+import '../../auth/viewmodel/auth_viewmodel.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -9,9 +11,23 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(homeControllerProvider);
     final controller = ref.read(homeControllerProvider.notifier);
+    final authState = ref.watch(authViewModelProvider);
 
-    final displayName = state.username ?? 'John Ahem';
-    const email = 'john432@bonique.ai';
+    // Get user info from Supabase auth state
+    final user = authState.isLoggedIn
+        ? ref.read(authViewModelProvider.notifier).currentUser
+        : null;
+    final displayName =
+        user?.userMetadata?['full_name'] ?? state.username ?? 'John Ahem';
+    final email = user?.email ?? 'john432@bonique.ai';
+
+    // Listen for auth state changes to handle logout
+    ref.listen<AuthState>(authViewModelProvider, (previous, next) {
+      if (!next.isLoggedIn && previous?.isLoggedIn == true) {
+        // User has been logged out, navigate to auth page
+        Navigator.pushNamedAndRemoveUntil(context, '/auth', (route) => false);
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -40,12 +56,17 @@ class ProfilePage extends ConsumerWidget {
                       CircleAvatar(
                         radius: 38,
                         backgroundColor: Colors.grey.shade300,
-                        backgroundImage: null,
-                        child: const Icon(
-                          Icons.person,
-                          color: Colors.white,
-                          size: 36,
-                        ),
+                        backgroundImage:
+                            user?.userMetadata?['avatar_url'] != null
+                            ? NetworkImage(user!.userMetadata!['avatar_url'])
+                            : null,
+                        child: user?.userMetadata?['avatar_url'] == null
+                            ? const Icon(
+                                Icons.person,
+                                color: Colors.white,
+                                size: 36,
+                              )
+                            : null,
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -100,7 +121,7 @@ class ProfilePage extends ConsumerWidget {
                   child: SizedBox(
                     height: 56,
                     child: ElevatedButton.icon(
-                      onPressed: controller.signOut,
+                      onPressed: () => _handleLogout(context, controller),
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         backgroundColor: const Color(0xFFF0F0F0),
@@ -122,6 +143,42 @@ class ProfilePage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _handleLogout(
+    BuildContext context,
+    HomeController controller,
+  ) async {
+    // Show confirmation dialog
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Log Out'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      AccountPage(onSignIn: () {}, onCreateAccount: () {}),
+                ),
+              ),
+            },
+            child: const Text('Log Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true) {
+      await controller.signOut();
+    }
   }
 }
 

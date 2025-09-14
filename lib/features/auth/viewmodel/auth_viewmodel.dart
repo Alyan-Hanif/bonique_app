@@ -215,9 +215,19 @@ class AuthViewModel extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      await _repository.signIn(email, password);
-      state = state.copyWith(isLoading: false, isLoggedIn: true);
-      return true;
+      final response = await _repository.signIn(email, password);
+
+      // Check if sign-in was successful by verifying the user exists
+      if (response.user != null) {
+        state = state.copyWith(isLoading: false, isLoggedIn: true);
+        return true;
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Sign-in failed. Please check your credentials.',
+        );
+        return false;
+      }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
       return false;
