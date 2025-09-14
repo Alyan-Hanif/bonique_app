@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../repository/auth_repository.dart';
 
 // Provider for AuthRepository
@@ -46,7 +47,7 @@ class AuthState {
     bool? isLoggedIn,
     bool? isEmailValid,
     bool? isPasswordValid,
-        // isConfirmPasswordValid: false,
+    // isConfirmPasswordValid: false,
     bool? isNameValid,
     // bool? isConfirmPasswordValid,
     String? emailError,
@@ -72,7 +73,7 @@ class AuthState {
       // confirmPasswordError: confirmPasswordError,
       isPasswordVisible: isPasswordVisible ?? this.isPasswordVisible,
       // isConfirmPasswordVisible:
-          // isConfirmPasswordVisible ?? this.isConfirmPasswordVisible,
+      // isConfirmPasswordVisible ?? this.isConfirmPasswordVisible,
       agreeToTerms: agreeToTerms ?? this.agreeToTerms,
     );
   }
@@ -199,6 +200,8 @@ class AuthViewModel extends StateNotifier<AuthState> {
   //   );
   // }
 
+  //Authentication with Google
+
   // Authentication methods
   Future<bool> signIn(String email, String password) async {
     // Validate inputs
@@ -236,11 +239,9 @@ class AuthViewModel extends StateNotifier<AuthState> {
     //   confirmPassword,
     // );
 
-    if (!isEmailValid ||
-        !isPasswordValid ||
-        !isNameValid
-        // ||
-        // !isConfirmPasswordValid
+    if (!isEmailValid || !isPasswordValid || !isNameValid
+    // ||
+    // !isConfirmPasswordValid
     ) {
       return false;
     }
@@ -313,6 +314,27 @@ class AuthViewModel extends StateNotifier<AuthState> {
     }
   }
 
+  Future<bool> signInWithGoogle() async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await _repository.signInWithGoogle();
+      state = state.copyWith(isLoading: false, isLoggedIn: true);
+      return true;
+    } catch (e) {
+      String errorMessage = 'Google sign-in failed. Please try again.';
+
+      if (e.toString().contains('sign-in was cancelled')) {
+        errorMessage = 'Sign-in was cancelled';
+      } else if (e.toString().contains('network')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      }
+
+      state = state.copyWith(isLoading: false, error: errorMessage);
+      return false;
+    }
+  }
+
   void signOut() async {
     await _repository.signOut();
     state = AuthState();
@@ -320,6 +342,8 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
   // Check if user is already logged in
   bool get isUserLoggedIn => _repository.isLoggedIn;
+
+  User? get currentUser => _repository.currentUser;
 }
 
 // Provider for AuthViewModel

@@ -1,0 +1,32 @@
+{
+  "project_info": {
+    "project_number": "1051919162406",
+    "project_id": "cloud-storage-alyan",
+    "storage_bucket": "cloud-storage-alyan.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1051919162406:android:6kmsaekalhpja17c7k6ihpvtnn6t3lap",
+        "android_client_info": {
+          "package_name": "com.example.bonique"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1051919162406-6kmsaekalhpja17c7k6ihpvtnn6t3lap.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bonique",
+            "certificate_hash": "dafb88bfb54890a7bbfa04d78374f8e5e0d1d1c1"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDummyKeyForTesting"
+        }
+      ]
+    }
+  ]
+}
