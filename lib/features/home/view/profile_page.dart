@@ -161,15 +161,7 @@ class ProfilePage extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      AccountPage(onSignIn: () {}, onCreateAccount: () {}),
-                ),
-              ),
-            },
+            onPressed: () => Navigator.of(context).pop(true),
             child: const Text('Log Out'),
           ),
         ],

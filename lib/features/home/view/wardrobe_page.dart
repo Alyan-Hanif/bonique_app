@@ -7,50 +7,74 @@ class WardrobePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Wardrobe'),
-        backgroundColor: const Color(0xFFFF6B2C),
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                _WardrobeFilter(label: 'All', selected: true),
-                _WardrobeFilter(label: 'Dresses'),
-                _WardrobeFilter(label: 'Jeans'),
-                _WardrobeFilter(label: 'Shirts'),
-                _WardrobeFilter(label: 'Skirts'),
-                _WardrobeFilter(label: 'Hoodies'),
-              ],
-            ),
-          ),
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.85,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Custom title bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: const Center(
+                child: Text(
+                  'My Wardrobe',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1B1A18),
+                  ),
+                ),
               ),
-              itemCount: 12,
-              itemBuilder: (context, index) {
-                return _WardrobeTile(index: index);
-              },
             ),
-          ),
-        ],
+            // Filter bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: const [
+                    _WardrobeFilter(label: 'All', selected: true),
+                    SizedBox(width: 16),
+                    _WardrobeFilter(label: 'Dresses'),
+                    SizedBox(width: 16),
+                    _WardrobeFilter(label: 'Jeans'),
+                    SizedBox(width: 16),
+                    _WardrobeFilter(label: 'Shirts'),
+                    SizedBox(width: 16),
+                    _WardrobeFilter(label: 'Skirts'),
+                    SizedBox(width: 16),
+                    _WardrobeFilter(label: 'Hoodies'),
+                  ],
+                ),
+              ),
+            ),
+            // Wardrobe grid
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.85,
+                ),
+                itemCount: 12,
+                itemBuilder: (context, index) {
+                  return _WardrobeTile(index: index);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFFF6B2C),
-        onPressed: () {},
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton: FloatingActionButton(
+      //   backgroundColor: const Color(0xFF1B1A18),
+      //   onPressed: () {},
+      //   child: const Icon(Icons.add, color: Colors.white),
+      // ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: const SizedBox(height: 0),
     );
   }
@@ -66,15 +90,17 @@ class _WardrobeFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CircleAvatar(
-          radius: 18,
-          backgroundColor: selected
-              ? const Color(0xFFFFE3D6)
-              : Colors.grey.shade200,
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFF1B1A18) : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(18),
+          ),
           child: Icon(
-            Icons.checkroom,
+            _getIconForLabel(label),
             size: 18,
-            color: selected ? const Color(0xFFFF6B2C) : Colors.grey.shade700,
+            color: selected ? Colors.white : Colors.grey.shade700,
           ),
         ),
         const SizedBox(height: 6),
@@ -82,12 +108,31 @@ class _WardrobeFilter extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: selected ? const Color(0xFFFF6B2C) : Colors.grey.shade700,
+            color: selected ? const Color(0xFF1B1A18) : Colors.grey.shade700,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
       ],
     );
+  }
+
+  IconData _getIconForLabel(String label) {
+    switch (label.toLowerCase()) {
+      case 'all':
+        return Icons.checkroom;
+      case 'dresses':
+        return Icons.checkroom;
+      case 'jeans':
+        return Icons.checkroom;
+      case 'shirts':
+        return Icons.checkroom;
+      case 'skirts':
+        return Icons.checkroom;
+      case 'hoodies':
+        return Icons.checkroom;
+      default:
+        return Icons.checkroom;
+    }
   }
 }
 
@@ -101,8 +146,15 @@ class _WardrobeTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,9 +162,9 @@ class _WardrobeTile extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Colors.grey.shade50,
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
+                  top: Radius.circular(12),
                 ),
               ),
               child: const Center(
@@ -129,16 +181,16 @@ class _WardrobeTile extends StatelessWidget {
                   'Item ${index + 1}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1B1A18),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Last worn: 2d ago',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),

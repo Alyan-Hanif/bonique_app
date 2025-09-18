@@ -83,7 +83,16 @@ class AuthState {
 class AuthViewModel extends StateNotifier<AuthState> {
   final AuthRepository _repository;
 
-  AuthViewModel(this._repository) : super(AuthState());
+  AuthViewModel(this._repository) : super(AuthState()) {
+    // Check initial authentication status
+    _checkInitialAuthStatus();
+  }
+
+  // Check initial authentication status
+  void _checkInitialAuthStatus() {
+    final isLoggedIn = _repository.isLoggedIn;
+    state = state.copyWith(isLoggedIn: isLoggedIn);
+  }
 
   // Form validation methods
   bool validateEmail(String email) {

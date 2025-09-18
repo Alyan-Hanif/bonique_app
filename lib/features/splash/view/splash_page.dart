@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/splash_viewmodel.dart';
 import '../../onboarding/view/onboarding_page.dart';
+import '../../auth/viewmodel/auth_viewmodel.dart';
+import '../../home/view/home_page.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -71,13 +73,22 @@ class _SplashPageState extends ConsumerState<SplashPage>
       const Duration(milliseconds: 2000),
     ); // 1500ms logo + 500ms pause
 
-    // Phase 5: Navigate to onboarding
-    _navigateToOnboarding();
+    // Phase 5: Check authentication and navigate accordingly
+    _checkAuthAndNavigate();
   }
 
-  void _navigateToOnboarding() {
+  void _checkAuthAndNavigate() {
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed(OnboardingPage.route);
+      final authViewModel = ref.read(authViewModelProvider.notifier);
+
+      // Check if user is logged in
+      if (authViewModel.isUserLoggedIn) {
+        // User is logged in, navigate to home
+        Navigator.of(context).pushReplacementNamed(HomePage.route);
+      } else {
+        // User is not logged in, navigate to onboarding
+        Navigator.of(context).pushReplacementNamed(OnboardingPage.route);
+      }
     }
   }
 

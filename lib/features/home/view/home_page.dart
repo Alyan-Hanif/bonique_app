@@ -1,83 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'wardrobe_page.dart';
 import 'discovery_page.dart';
 import 'try_on_page.dart';
 import 'profile_page.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   static const route = '/home';
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return PersistentTabView(
-      context,
-      controller: PersistentTabController(initialIndex: 0),
-      screens: const [
-        WardrobePage(),
-        DiscoveryPage(),
-        TryOnPage(),
-        ProfilePage(),
-      ],
-      items: [
-        PersistentBottomNavBarItem(
-          icon: const Icon(Icons.inventory_2_outlined),
-          title: "Wardrobe",
-          activeColorPrimary: const Color(0xFFFF6B2C),
-          inactiveColorPrimary: Colors.grey,
-        ),
-        PersistentBottomNavBarItem(
-          icon: const Icon(Icons.explore),
-          title: "Discovery",
-          activeColorPrimary: const Color(0xFFFF6B2C),
-          inactiveColorPrimary: Colors.grey,
-        ),
-        PersistentBottomNavBarItem(
-          icon: const Icon(Icons.camera_alt),
-          title: "Try On",
-          activeColorPrimary: const Color(0xFFFF6B2C),
-          inactiveColorPrimary: Colors.grey,
-        ),
-        PersistentBottomNavBarItem(
-          icon: const Icon(Icons.person),
-          title: "Profile",
-          activeColorPrimary: const Color(0xFFFF6B2C),
-          inactiveColorPrimary: Colors.grey,
-        ),
-      ],
-      // confineInSafeArea: true,
-      backgroundColor: Colors.white,
-      handleAndroidBackButtonPress: true,
-      resizeToAvoidBottomInset: true,
-      stateManagement: true,
-      // hideNavigationBarWhenKeyboardShows: true,
-      decoration: NavBarDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        colorBehindNavBar: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  int _currentIndex = 1; // Start with Discover tab
+
+  final List<Widget> _screens = const [
+    WardrobePage(),
+    DiscoveryPage(),
+    TryOnPage(),
+    ProfilePage(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(index: _currentIndex, children: _screens),
+
+      // Floating Add Button (center docked)
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Add item functionality")),
+          );
+        },
+        backgroundColor: const Color(0xFF1B1A18),
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),
-      // popAllScreensOnTapOfSelectedTab: true,
-      // popActionScreens: PopActionScreensType.all,
-      // itemAnimationProperties: const ItemAnimationProperties(
-      //   duration: Duration(milliseconds: 200),
-      //   curve: Curves.ease,
-      // ),
-      // screenTransitionAnimation: const ScreenTransitionAnimation(
-      //   animateTabTransition: true,
-      //   curve: Curves.ease,
-      //   duration: Duration(milliseconds: 200),
-      // ),
-      navBarStyle: NavBarStyle.style6,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      // Custom Bottom Navigation
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(), // notch for FAB
+        notchMargin: 8,
+        child: SizedBox(
+          height: 70,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(Icons.checkroom, 'Wardrobe', 0),
+              _buildNavItem(Icons.search, 'Discover', 1),
+              const SizedBox(width: 40), // gap for FAB
+              _buildNavItem(Icons.checkroom, 'Try-On', 2),
+              _buildNavItem(Icons.person, 'Profile', 3),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isSelected = _currentIndex == index;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() => _currentIndex = index);
+      },
+      child: SizedBox(
+        width: 70,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon,
+                color: isSelected ? const Color(0xFF1B1A18) : Colors.grey),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected ? const Color(0xFF1B1A18) : Colors.grey,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

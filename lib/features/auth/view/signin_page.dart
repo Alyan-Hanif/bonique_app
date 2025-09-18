@@ -168,6 +168,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
                   const SizedBox(height: 20),
 
+
                   // Sign Up link
                   Center(
                     child: RichText(
