@@ -245,24 +245,24 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 16),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF1B1A18) : Colors.white,
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
                 ? const Color(0xFF1B1A18)
                 : Colors.black.withOpacity(0.27),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              offset: const Offset(0, -4),
-              blurRadius: 8.4,
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.21),
-              offset: const Offset(0, 4),
-              blurRadius: 8.4,
-            ),
-          ],
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.black.withOpacity(0.25),
+          //     offset: const Offset(0, -4),
+          //     blurRadius: 8.4,
+          //   ),
+          //   BoxShadow(
+          //     color: Colors.black.withOpacity(0.21),
+          //     offset: const Offset(0, 4),
+          //     blurRadius: 8.4,
+          //   ),
+          // ],
         ),
         child: Row(
           children: [

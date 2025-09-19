@@ -27,17 +27,15 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
     // Initialize smoke animation controller
     _smokeController = AnimationController(
-      duration: const Duration(
-        milliseconds: 2500,
-      ), // Increased for smoother smoke
+      duration: const Duration(milliseconds: 0), // Instant transition
       vsync: this,
     );
 
     // Initialize logo animation controller
     _logoController = AnimationController(
       duration: const Duration(
-        milliseconds: 1500,
-      ), // Increased for smoother logo
+        milliseconds: 800,
+      ), // 800ms duration as per Figma
       vsync: this,
     );
 
@@ -46,34 +44,36 @@ class _SplashPageState extends ConsumerState<SplashPage>
       CurvedAnimation(parent: _smokeController, curve: Curves.easeInOut),
     );
 
-    // Create logo scale and fade animation
-    _logoAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _logoController, curve: Curves.easeOut));
+    // Create logo animation with spring curve (cubic-bezier equivalent)
+    _logoAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _logoController,
+        curve: const Cubic(
+          0.7,
+          -0.4,
+          0.4,
+          1.4,
+        ), // cubic-bezier(0.7, -0.4, 0.4, 1.4)
+      ),
+    );
 
     // Start animations in sequence
     _startAnimations();
   }
 
   void _startAnimations() async {
-    // Phase 1: Smoke animation (2.5 seconds)
+    // Phase 1: Empty background for 1000ms delay
+    await Future.delayed(const Duration(milliseconds: 1000));
+
+    // Phase 2: Show smoke instantly (0ms duration)
     _smokeController.forward();
 
-    // Phase 2: Wait for smoke to complete + pause (1 second pause)
-    await Future.delayed(
-      const Duration(milliseconds: 3500),
-    ); // 2500ms smoke + 1000ms pause
-
-    // Phase 3: Logo animation (1.5 seconds)
+    // Phase 3: Wait 1000ms delay, then start logo animation
+    await Future.delayed(const Duration(milliseconds: 1000));
     _logoController.forward();
 
-    // Phase 4: Wait for logo animation + pause (2 seconds pause)
-    await Future.delayed(
-      const Duration(milliseconds: 2000),
-    ); // 1500ms logo + 500ms pause
-
-    // Phase 5: Check authentication and navigate accordingly
+    // Phase 4: Wait 800ms delay, then navigate
+    await Future.delayed(const Duration(milliseconds: 800));
     _checkAuthAndNavigate();
   }
 
@@ -142,13 +142,11 @@ class _SplashPageState extends ConsumerState<SplashPage>
                         height: 80,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(
-                            16,
-                          ), // Rounded corners like in image
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Icon(
                           Icons.shopping_bag_outlined,
-                          color: Colors.black, // Black icon as shown in image
+                          color: Colors.black,
                           size: 40,
                         ),
                       ),

@@ -1,3 +1,4 @@
+import 'package:bonique/features/home/widgets/home_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,47 +8,45 @@ class TryOnPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Try On'),
-        backgroundColor: const Color(0xFFFF6B2C),
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      // appBar: AppBar(
+      //   title: const Text('Try On'),
+      //   backgroundColor: const Color(0xFFFF6B2C),
+      //   foregroundColor: Colors.white,
+      // ),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              'Virtual Try-On',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: const Center(
+                child: Text(
+                  'Try-On',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1B1A18),
                   ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Try clothes virtually before you buy',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 20),
-            const Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.camera_alt,
-                      size: 64,
-                      color: Color(0xFFFF6B2C),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Try-on feature will appear here',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ],
                 ),
               ),
             ),
+
+            Expanded(child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Container(
+
+                color: Colors.black12,
+              ),
+            )),
+
+            TryOnBtn(text: "Try Another ", onPressed: (){}, isLoading: false),
+
+            SizedBox(height: 10,),
+
+            TryOnBtn(text: "Save Outfit ", onPressed: (){}, isLoading: false),
+
+            SizedBox(height: 20,),
+
           ],
         ),
       ),
