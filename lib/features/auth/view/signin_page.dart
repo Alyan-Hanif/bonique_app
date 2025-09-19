@@ -35,6 +35,16 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     }
   }
 
+  void _handleGoogleSignIn() async {
+    final authViewModel = ref.read(authViewModelProvider.notifier);
+    final success = await authViewModel.signInWithGoogle();
+
+    if (success) {
+      // Navigation will be handled by the auth state listener in auth_page.dart
+      print('Google sign-in successful!');
+    }
+  }
+
   void _onEmailChanged(String value) {
     final authViewModel = ref.read(authViewModelProvider.notifier);
     authViewModel.validateEmail(value);
@@ -166,8 +176,17 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     isLoading: authState.isLoading,
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 14),
 
+                  // Divider
+                  const AuthDivider(),
+
+                  const SizedBox(height: 14),
+
+                  // Google Sign In button
+                  GoogleSignInButton(onPressed: _handleGoogleSignIn),
+
+                  const SizedBox(height: 20),
 
                   // Sign Up link
                   Center(
