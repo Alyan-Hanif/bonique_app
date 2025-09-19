@@ -9,32 +9,36 @@ final onboardingControllerProvider =
 class OnboardingController extends StateNotifier<int> {
   OnboardingController() : super(0);
 
-  final PageController pageController = PageController();
-
   void goToPage(int index) {
-    state = index;
-    pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    if (index >= 0 && index < 3) {
+      // Assuming 3 pages
+      state = index;
+    }
   }
 
   void nextPage() {
     final next = state + 1;
-    goToPage(next);
+    if (next < 3) {
+      // Assuming 3 pages
+      state = next;
+    }
   }
 
   void previousPage() {
     final prev = state - 1;
     if (prev >= 0) {
-      goToPage(prev);
+      state = prev;
     }
   }
 
-  @override
-  void dispose() {
-    pageController.dispose();
-    super.dispose();
+  void handleScroll(DragUpdateDetails details) {
+    // Detect horizontal scroll direction
+    if (details.delta.dx > 10) {
+      // Swipe right - go to previous page
+      previousPage();
+    } else if (details.delta.dx < -10) {
+      // Swipe left - go to next page
+      nextPage();
+    }
   }
 }
