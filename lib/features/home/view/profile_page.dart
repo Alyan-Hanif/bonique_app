@@ -243,7 +243,6 @@ class _SettingsTile extends StatelessWidget {
           context,
         ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
       ),
-      trailing: const Icon(Icons.chevron_right),
       onTap: () {},
     );
   }

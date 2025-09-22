@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'wardrobe_page.dart';
 import 'discovery_page.dart';
 import 'try_on_page.dart';
@@ -15,19 +16,19 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  int _currentIndex = 1; // Start with Discover tab
-
   final List<Widget> _screens = const [
     WardrobePage(),
-    DiscoveryPage(),
+    DiscoveryPage(), // Changed from ResultsPage() back to DiscoveryPage()
     TryOnPage(),
     ProfilePage(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final currentIndex = ref.watch(bottomNavigationIndexProvider);
+
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      body: IndexedStack(index: currentIndex, children: _screens),
 
       // Floating Add Button (center docked)
       floatingActionButton: FloatingActionButton(
@@ -63,19 +64,22 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildNavItem(IconData icon, String label, int index) {
-    final isSelected = _currentIndex == index;
+    final currentIndex = ref.watch(bottomNavigationIndexProvider);
+    final isSelected = currentIndex == index;
 
     return GestureDetector(
       onTap: () {
-        setState(() => _currentIndex = index);
+        ref.read(bottomNavigationIndexProvider.notifier).state = index;
       },
       child: SizedBox(
         width: 70,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon,
-                color: isSelected ? const Color(0xFF1B1A18) : Colors.grey),
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFF1B1A18) : Colors.grey,
+            ),
             const SizedBox(height: 4),
             Text(
               label,

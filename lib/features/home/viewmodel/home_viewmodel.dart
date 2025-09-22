@@ -38,3 +38,6 @@ class HomeController extends StateNotifier<HomeState> {
     }
   }
 }
+
+// Bottom navigation index provider
+final bottomNavigationIndexProvider = StateProvider<int>((ref) => 0);

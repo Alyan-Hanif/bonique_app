@@ -238,7 +238,28 @@ class AuthViewModel extends StateNotifier<AuthState> {
         return false;
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      // Provide more user-friendly error messages
+      String errorMessage = 'Sign-in failed. Please try again.';
+
+      if (e.toString().contains('Invalid login credentials') ||
+          e.toString().contains('invalid_credentials')) {
+        errorMessage =
+            'Invalid email or password. Please check your credentials.';
+      } else if (e.toString().contains('User not found')) {
+        errorMessage =
+            'No account found with this email. Please sign up first.';
+      } else if (e.toString().contains('Email not confirmed')) {
+        errorMessage =
+            'Please check your email and confirm your account before signing in.';
+      } else if (e.toString().contains('Too many requests')) {
+        errorMessage =
+            'Too many sign-in attempts. Please wait a moment and try again.';
+      } else if (e.toString().contains('AuthSessionMissingException')) {
+        errorMessage =
+            'Connection error. Please check your internet connection and try again.';
+      }
+
+      state = state.copyWith(isLoading: false, error: errorMessage);
       return false;
     }
   }

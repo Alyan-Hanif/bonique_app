@@ -20,6 +20,10 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
     super.dispose();
   }
 
+  // Check if any option is selected
+  bool get hasSelection =>
+      selectedEvent != null || selectedType != null || selectedColor != null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,9 +31,16 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Custom title bar
+            // Custom title bar with updated styling
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              width: 414,
+              height: 42,
+              padding: const EdgeInsets.only(
+                top: 5,
+                right: 16,
+                bottom: 8,
+                left: 16,
+              ),
               child: const Center(
                 child: Text(
                   'Discover',
@@ -59,7 +70,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                         });
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 15),
 
                     // Type Section
                     _buildSection(
@@ -72,7 +83,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                         });
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 15),
 
                     // Color Section
                     _buildSection(
@@ -85,33 +96,23 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                         });
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 15),
 
                     // Conditional input field for Event "Other"
                     if (selectedEvent == 'Other') ...[
                       Container(
+                        width: 382,
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 13,
+                          horizontal: 8,
                           vertical: 16,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.black.withOpacity(0.27),
+                            color: const Color(0x6D797F99),
+                            width: 1,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.25),
-                              offset: const Offset(0, -4),
-                              blurRadius: 8.4,
-                            ),
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.21),
-                              offset: const Offset(0, 4),
-                              blurRadius: 8.4,
-                            ),
-                          ],
                         ),
                         child: TextField(
                           controller: _otherController,
@@ -122,34 +123,24 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 15),
                     ],
 
                     // Conditional input field for Type "Other"
                     if (selectedType == 'Other') ...[
                       Container(
+                        width: 382,
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 13,
+                          horizontal: 8,
                           vertical: 16,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.black.withOpacity(0.27),
+                            color: const Color(0x6D797F99),
+                            width: 1,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.25),
-                              offset: const Offset(0, -4),
-                              blurRadius: 8.4,
-                            ),
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.21),
-                              offset: const Offset(0, 4),
-                              blurRadius: 8.4,
-                            ),
-                          ],
                         ),
                         child: TextField(
                           decoration: const InputDecoration(
@@ -159,7 +150,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 15),
                     ],
                   ],
                 ),
@@ -168,38 +159,39 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor: const Color(0xFF1B1A18),
-      //   onPressed: () {},
-      //   child: const Icon(Icons.add, color: Colors.white),
-      // ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // bottomNavigationBar: Container(
-      //   height: 80,
-      //   decoration: const BoxDecoration(
-      //     color: Color(0xFF1B1A18),
-      //     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      //   ),
-      //   child: Row(
-      //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      //     children: [
-      //       _buildNavItem(Icons.checkroom, 'Wardrobe', false),
-      //       _buildNavItem(Icons.search, 'Discover', true),
-      //       Container(
-      //         width: 60,
-      //         height: 60,
-      //         decoration: const BoxDecoration(
-      //           color: Color(0xFF1B1A18),
-      //           shape: BoxShape.circle,
-      //         ),
-      //         child: const Icon(Icons.add, color: Colors.white, size: 30),
-      //       ),
-      //       _buildNavItem(Icons.checkroom, 'Try-On', false),
-      //       _buildNavItem(Icons.person, 'Profile', false),
-      //     ],
-      //   ),
-      // ),
+      // Floating Discover Button (similar to wardrobe page)
+      floatingActionButton: hasSelection
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                // Navigate to results or perform discovery action
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Discovering items for: ${_getSelectedOptionsText()}',
+                    ),
+                  ),
+                );
+                // You can add navigation to results page here
+                // Navigator.pushNamed(context, '/results');
+              },
+              backgroundColor: const Color(0xFF1B1A18),
+              label: const Text(
+                'Discover',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          : null,
+      bottomNavigationBar: const SizedBox(height: 0),
     );
+  }
+
+  // Helper method to get selected options text
+  String _getSelectedOptionsText() {
+    List<String> selections = [];
+    if (selectedEvent != null) selections.add('Event: $selectedEvent');
+    if (selectedType != null) selections.add('Type: $selectedType');
+    if (selectedColor != null) selections.add('Color: $selectedColor');
+    return selections.join(', ');
   }
 
   Widget _buildSection({
@@ -214,8 +206,11 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
         Text(
           title,
           style: const TextStyle(
+            fontFamily: 'Inter',
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
+            height: 1.5, // line-height: 24px / font-size: 16px = 1.5
+            letterSpacing: 0,
             color: Color(0xFF1B1A18),
           ),
         ),
@@ -242,27 +237,18 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 16),
+        width: 382,
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1B1A18) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? const Color(0x1B1A1842) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
                 ? const Color(0xFF1B1A18)
-                : Colors.black.withOpacity(0.27),
+                : const Color(0x6D797F99),
+            width: 1,
           ),
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: Colors.black.withOpacity(0.25),
-          //     offset: const Offset(0, -4),
-          //     blurRadius: 8.4,
-          //   ),
-          //   BoxShadow(
-          //     color: Colors.black.withOpacity(0.21),
-          //     offset: const Offset(0, 4),
-          //     blurRadius: 8.4,
-          //   ),
-          // ],
         ),
         child: Row(
           children: [
@@ -272,13 +258,15 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? Colors.white : Colors.grey,
+                  color: isSelected ? const Color(0xFF1B1A18) : Colors.grey,
                   width: 2,
                 ),
-                color: isSelected ? Colors.white : Colors.transparent,
+                color: isSelected
+                    ? const Color(0xFF1B1A18)
+                    : Colors.transparent,
               ),
               child: isSelected
-                  ? const Icon(Icons.circle, size: 12, color: Color(0xFF1B1A18))
+                  ? const Icon(Icons.circle, size: 12, color: Colors.white)
                   : null,
             ),
             const SizedBox(width: 10),
@@ -287,7 +275,9 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : const Color(0xFF1B1A18),
+                color: isSelected
+                    ? const Color(0xFF1B1A18)
+                    : const Color(0xFF1B1A18),
               ),
             ),
           ],

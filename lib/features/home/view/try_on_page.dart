@@ -31,25 +31,23 @@ class TryOnPage extends ConsumerWidget {
               ),
             ),
 
-            Expanded(child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Container(
-
-                color: Colors.black12,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(color: Colors.black12),
               ),
-            )),
+            ),
 
-            TryOnBtn(text: "Try Another ", onPressed: (){}, isLoading: false),
+            TryOnBtn(text: "Try Another ", onPressed: () {}, isLoading: false),
 
-            SizedBox(height: 10,),
+            SizedBox(height: 10),
 
-            TryOnBtn(text: "Save Outfit ", onPressed: (){}, isLoading: false),
+            TryOnBtn(text: "Save Outfit ", onPressed: () {}, isLoading: false),
 
-            SizedBox(height: 20,),
-
+            SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
-} 
+}
