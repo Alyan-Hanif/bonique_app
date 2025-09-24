@@ -1,13 +1,12 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/env_config.dart';
 
 class SupabaseService {
   static Future<void> init() async {
     try {
       await Supabase.initialize(
-        url:
-            "https://yrrdneithyzxwzrzphbf.supabase.co", // from Supabase dashboard
-        anonKey:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlycmRuZWl0aHl6eHd6cnpwaGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjA2MTcsImV4cCI6MjA3MDAzNjYxN30.MvDf-WpE-qOusYNV8opEFb__76GvuNydw7xpXxc9StI", // from Supabase dashboard
+        url: EnvConfig.supabaseUrl,
+        anonKey: EnvConfig.supabaseAnonKey,
       );
       print('Supabase initialized successfully');
     } catch (e) {
@@ -21,7 +20,7 @@ class SupabaseService {
   // Test method to verify connection
   static Future<bool> testConnection() async {
     try {
-      final response = await client
+      await client
           .from('_test_connection')
           .select('*')
           .limit(1);

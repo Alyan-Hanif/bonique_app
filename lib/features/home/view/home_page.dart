@@ -5,6 +5,7 @@ import 'wardrobe_page.dart';
 import 'discovery_page.dart';
 import 'try_on_page.dart';
 import 'profile_page.dart';
+import 'results_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -18,9 +19,10 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   final List<Widget> _screens = const [
     WardrobePage(),
-    DiscoveryPage(), // Changed from ResultsPage() back to DiscoveryPage()
+    DiscoveryPage(),
     TryOnPage(),
     ProfilePage(),
+    ResultsPage(), // Add ResultsPage at index 4
   ];
 
   @override

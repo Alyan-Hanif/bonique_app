@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../viewmodel/home_viewmodel.dart'; // Add this import
 
 class DiscoveryPage extends ConsumerStatefulWidget {
   const DiscoveryPage({super.key});
@@ -163,16 +164,8 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
       floatingActionButton: hasSelection
           ? FloatingActionButton.extended(
               onPressed: () {
-                // Navigate to results or perform discovery action
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Discovering items for: ${_getSelectedOptionsText()}',
-                    ),
-                  ),
-                );
-                // You can add navigation to results page here
-                // Navigator.pushNamed(context, '/results');
+                // Navigate to results page
+                ref.read(bottomNavigationIndexProvider.notifier).state = 4;
               },
               backgroundColor: const Color(0xFF1B1A18),
               label: const Text(

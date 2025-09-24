@@ -5,11 +5,23 @@ import 'features/onboarding/view/onboarding_page.dart';
 import 'features/auth/view/auth_page.dart';
 import 'features/home/view/home_page.dart';
 import 'core/services/supabase_service.dart';
+import 'core/config/env_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    // Initialize environment configuration first
+    await EnvConfig.init();
+    print('✅ Environment configuration loaded');
+
+    // Validate environment variables
+    if (!EnvConfig.validateConfig()) {
+      throw Exception('Missing required environment variables');
+    }
+    print('✅ Environment variables validated');
+
+    // Initialize Supabase with environment variables
     await SupabaseService.init();
     print('✅ Supabase initialized successfully');
 
@@ -21,7 +33,8 @@ void main() async {
       print('⚠️ Supabase connection test failed');
     }
   } catch (e) {
-    print('❌ Supabase initialization failed: $e');
+    print('❌ Initialization failed: $e');
+    // You might want to show an error screen or handle this gracefully
   }
 
   runApp(
@@ -38,7 +51,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AI Stylist App',
+      title: EnvConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.orange,
