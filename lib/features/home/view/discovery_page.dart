@@ -21,9 +21,9 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
     super.dispose();
   }
 
-  // Check if any option is selected
+  // Check if all options are selected
   bool get hasSelection =>
-      selectedEvent != null || selectedType != null || selectedColor != null;
+      selectedEvent != null && selectedType != null && selectedColor != null;
 
   @override
   Widget build(BuildContext context) {

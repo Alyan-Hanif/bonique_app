@@ -1,4 +1,8 @@
 import 'package:bonique/features/auth/view/account_page.dart';
+import 'package:bonique/features/home/view/edit_profile_page.dart';
+// import 'package:bonique/features/home/view/account_security_page.dart';
+// import 'package:bonique/features/home/view/outfit_history_page.dart';
+import 'package:bonique/features/home/view/help_support_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/home_viewmodel.dart';
@@ -87,31 +91,35 @@ class ProfilePage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 _SettingsList(
-                  items: const [
+                  items: [
                     _SettingsItem(
                       icon: Icons.edit_outlined,
                       title: 'Edit Profile',
                       subtitle: 'Name, Photo, Personal Info',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EditProfilePage(),
+                        ),
+                      ),
                     ),
                     _SettingsItem(
                       icon: Icons.lock_outline,
                       title: 'Account & Security',
                       subtitle: 'Change Password, Manage Login Methods',
-                    ),
-                    _SettingsItem(
-                      icon: Icons.notifications_none,
-                      title: 'Notifications',
-                      subtitle: 'Outfit Suggestions, Style Tips, Reminders',
+                      onTap: () => {},
                     ),
                     _SettingsItem(
                       icon: Icons.history,
                       title: 'Outfit History',
                       subtitle: 'Saved Outfits',
+                      onTap: () => {},
                     ),
                     _SettingsItem(
                       icon: Icons.help_outline,
                       title: 'Help & Support',
                       subtitle: 'FAQ, Contact Support',
+                      onTap: () => {},
                     ),
                   ],
                 ),
@@ -209,11 +217,13 @@ class _SettingsItem {
   final IconData icon;
   final String title;
   final String subtitle;
+  final VoidCallback? onTap;
 
   const _SettingsItem({
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.onTap,
   });
 }
 
@@ -243,7 +253,7 @@ class _SettingsTile extends StatelessWidget {
           context,
         ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
       ),
-      onTap: () {},
+      onTap: item.onTap,
     );
   }
 }
