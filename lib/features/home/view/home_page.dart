@@ -24,14 +24,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     TryOnPage(),
     ProfilePage(),
     ResultsPage(), // Add ResultsPage at index 4
+    AddItemPage(), // Add AddItemPage at index 5
   ];
 
   void _navigateToAddItem() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AddItemPage(),
-      ),
-    );
+    // Navigate to AddItemPage using bottom navigation index
+    ref.read(bottomNavigationIndexProvider.notifier).state = 5;
   }
 
   @override
