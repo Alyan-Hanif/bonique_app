@@ -6,6 +6,7 @@ import 'discovery_page.dart';
 import 'try_on_page.dart';
 import 'profile_page.dart';
 import 'results_page.dart';
+import 'add_item_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -25,6 +26,14 @@ class _HomePageState extends ConsumerState<HomePage> {
     ResultsPage(), // Add ResultsPage at index 4
   ];
 
+  void _navigateToAddItem() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AddItemPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(bottomNavigationIndexProvider);
@@ -34,11 +43,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
       // Floating Add Button (center docked)
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Add item functionality")),
-          );
-        },
+        onPressed: _navigateToAddItem,
         backgroundColor: const Color(0xFF1B1A18),
         child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),

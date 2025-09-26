@@ -58,7 +58,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   Widget build(BuildContext context) {
     // Listen for auth state changes
     ref.listen<AuthState>(authViewModelProvider, (previous, next) {
-      if (next.isLoggedIn) {
+      // ENFORCE: Only navigate to home if user is logged in AND exists in database
+      if (next.isLoggedIn && next.currentUserModel != null) {
         Navigator.pushReplacementNamed(context, '/home');
       }
     });

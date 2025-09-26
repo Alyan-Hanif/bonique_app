@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../repository/auth_repository.dart';
+import '../../../data/models/user_model.dart';
 
 // Provider for AuthRepository
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -23,6 +24,7 @@ class AuthState {
   final bool isPasswordVisible;
   // final bool isConfirmPasswordVisible;
   final bool agreeToTerms;
+  final UserModel? currentUserModel;
 
   AuthState({
     this.isLoading = false,
@@ -39,6 +41,7 @@ class AuthState {
     this.isPasswordVisible = false,
     // this.isConfirmPasswordVisible = false,
     this.agreeToTerms = false,
+    this.currentUserModel,
   });
 
   AuthState copyWith({
@@ -57,6 +60,7 @@ class AuthState {
     bool? isPasswordVisible,
     // bool? isConfirmPasswordVisible,
     bool? agreeToTerms,
+    UserModel? currentUserModel,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -75,6 +79,7 @@ class AuthState {
       // isConfirmPasswordVisible:
       // isConfirmPasswordVisible ?? this.isConfirmPasswordVisible,
       agreeToTerms: agreeToTerms ?? this.agreeToTerms,
+      currentUserModel: currentUserModel ?? this.currentUserModel,
     );
   }
 }
@@ -89,9 +94,36 @@ class AuthViewModel extends StateNotifier<AuthState> {
   }
 
   // Check initial authentication status
-  void _checkInitialAuthStatus() {
+  void _checkInitialAuthStatus() async {
     final isLoggedIn = _repository.isLoggedIn;
-    state = state.copyWith(isLoggedIn: isLoggedIn);
+    UserModel? userModel;
+
+    if (isLoggedIn) {
+      try {
+        userModel = await _repository.getCurrentUserModel();
+
+        // ENFORCE: If user is authenticated but not in database, sign them out
+        if (userModel == null) {
+          print('User authenticated but not found in database. Signing out...');
+          await _repository.signOut();
+          state = AuthState();
+          return;
+        }
+      } catch (e) {
+        print('Error getting current user model: $e');
+        // Sign out on error to ensure clean state
+        await _repository.signOut();
+        state = AuthState();
+        return;
+      }
+    }
+
+    state = state.copyWith(
+      isLoggedIn:
+          isLoggedIn &&
+          userModel != null, // Only logged in if user exists in DB
+      currentUserModel: userModel,
+    );
   }
 
   // Form validation methods
@@ -158,56 +190,15 @@ class AuthViewModel extends StateNotifier<AuthState> {
     return true;
   }
 
-  // bool validateConfirmPassword(String password, String confirmPassword) {
-  //    if (confirmPassword.isEmpty) {
-  //     state = state.copyWith(
-  //       isConfirmPasswordValid: false,
-  //       confirmPasswordError: 'Please confirm your password',
-  //     );
-  //     return false;
-  //   }
-  //
-  //   if (confirmPassword != password) {
-  //     state = state.copyWith(
-  //       isConfirmPasswordValid: false,
-  //       confirmPasswordError: 'Passwords do not match',
-  //     );
-  //     return false;
-  //   }
-  //
-  //   state = state.copyWith(
-  //     isConfirmPasswordValid: true,
-  //     confirmPasswordError: null,
-  //   );
-  //   return true;
-  // }
-
   // Toggle password visibility
   void togglePasswordVisibility() {
     state = state.copyWith(isPasswordVisible: !state.isPasswordVisible);
   }
 
-  // void toggleConfirmPasswordVisibility() {
-  //   state = state.copyWith(
-  //     isConfirmPasswordVisible: !state.isConfirmPasswordVisible,
-  //   );
-  // }
-
   // Toggle terms agreement
   void toggleTermsAgreement() {
     state = state.copyWith(agreeToTerms: !state.agreeToTerms);
   }
-
-  // Clear validation errors
-  // void clearValidationErrors() {
-  //   state = state.copyWith(
-  //     error: null,
-  //     emailError: null,
-  //     passwordError: null,
-  //     nameError: null,
-  //     confirmPasswordError: null,
-  //   );
-  // }
 
   //Authentication with Google
 
@@ -228,7 +219,23 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
       // Check if sign-in was successful by verifying the user exists
       if (response.user != null) {
-        state = state.copyWith(isLoading: false, isLoggedIn: true);
+        // Get user model from our users table
+        final userModel = await _repository.getCurrentUserModel();
+
+        // ENFORCE: User must exist in database to proceed
+        if (userModel == null) {
+          state = state.copyWith(
+            isLoading: false,
+            error: 'User account not found. Please contact support.',
+          );
+          return false;
+        }
+
+        state = state.copyWith(
+          isLoading: false,
+          isLoggedIn: true,
+          currentUserModel: userModel,
+        );
         return true;
       } else {
         state = state.copyWith(
@@ -304,7 +311,24 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
       // Check if signup was successful
       if (response.user != null) {
-        state = state.copyWith(isLoading: false, isLoggedIn: true);
+        // Get user model from our users table
+        final userModel = await _repository.getCurrentUserModel();
+
+        // ENFORCE: User must exist in database to proceed
+        if (userModel == null) {
+          state = state.copyWith(
+            isLoading: false,
+            error:
+                'Account created but profile setup failed. Please try signing in.',
+          );
+          return false;
+        }
+
+        state = state.copyWith(
+          isLoading: false,
+          isLoggedIn: true,
+          currentUserModel: userModel,
+        );
         return true;
       } else {
         // Handle case where user needs email confirmation
@@ -359,7 +383,25 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
     try {
       await _repository.signInWithGoogle();
-      state = state.copyWith(isLoading: false, isLoggedIn: true);
+
+      // Get user model from our users table
+      final userModel = await _repository.getCurrentUserModel();
+
+      // ENFORCE: User must exist in database to proceed
+      if (userModel == null) {
+        state = state.copyWith(
+          isLoading: false,
+          error:
+              'Google sign-in successful but profile setup failed. Please try again.',
+        );
+        return false;
+      }
+
+      state = state.copyWith(
+        isLoading: false,
+        isLoggedIn: true,
+        currentUserModel: userModel,
+      );
       return true;
     } catch (e) {
       String errorMessage = 'Google sign-in failed. Please try again.';
@@ -378,6 +420,18 @@ class AuthViewModel extends StateNotifier<AuthState> {
   void signOut() async {
     await _repository.signOut();
     state = AuthState();
+  }
+
+  // Refresh current user model
+  Future<void> refreshUserModel() async {
+    if (state.isLoggedIn) {
+      try {
+        final userModel = await _repository.getCurrentUserModel();
+        state = state.copyWith(currentUserModel: userModel);
+      } catch (e) {
+        print('Error refreshing user model: $e');
+      }
+    }
   }
 
   // Check if user is already logged in
