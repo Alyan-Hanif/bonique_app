@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
+import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
 import 'wardrobe_page.dart';
 import 'discovery_page.dart';
 import 'try_on_page.dart';
@@ -30,6 +31,34 @@ class _HomePageState extends ConsumerState<HomePage> {
   void _navigateToAddItem() {
     // Navigate to AddItemPage using bottom navigation index
     ref.read(bottomNavigationIndexProvider.notifier).state = 5;
+  }
+
+  void _onTabTapped(int index) {
+    // Update the current index
+    ref.read(bottomNavigationIndexProvider.notifier).state = index;
+
+    // Refetch data based on the selected tab
+    switch (index) {
+      case 0: // Wardrobe
+        ref.refresh(wardrobeDataProvider);
+        break;
+      case 1: // Discover
+        // Add discovery data provider refresh if needed
+        break;
+      case 2: // Try-On
+        // Add try-on data provider refresh if needed
+        break;
+      case 3: // Profile
+        // Refresh auth state to get latest user data
+        ref.refresh(authViewModelProvider);
+        break;
+      case 4: // Results
+        ref.refresh(resultsDataProvider);
+        break;
+      case 5: // Add Item
+        // Add item data provider refresh if needed
+        break;
+    }
   }
 
   @override
@@ -73,9 +102,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final isSelected = currentIndex == index;
 
     return GestureDetector(
-      onTap: () {
-        ref.read(bottomNavigationIndexProvider.notifier).state = index;
-      },
+      onTap: () => _onTabTapped(index),
       child: SizedBox(
         width: 70,
         child: Column(
