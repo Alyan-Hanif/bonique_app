@@ -1,6 +1,6 @@
 import 'package:bonique/features/auth/view/account_page.dart';
 import 'package:bonique/features/home/view/edit_profile_page.dart';
-// import 'package:bonique/features/home/view/account_security_page.dart';
+import 'package:bonique/features/home/view/account_security_page.dart';
 // import 'package:bonique/features/home/view/outfit_history_page.dart';
 import 'package:bonique/features/home/view/help_support_page.dart';
 import 'package:flutter/material.dart';
@@ -61,10 +61,12 @@ class ProfilePage extends ConsumerWidget {
                         radius: 38,
                         backgroundColor: Colors.grey.shade300,
                         backgroundImage:
-                            user?.userMetadata?['avatar_url'] != null
-                            ? NetworkImage(user!.userMetadata!['avatar_url'])
+                            authState.currentUserModel?.avatarUrl != null
+                            ? NetworkImage(
+                                authState.currentUserModel!.avatarUrl!,
+                              )
                             : null,
-                        child: user?.userMetadata?['avatar_url'] == null
+                        child: authState.currentUserModel?.avatarUrl == null
                             ? const Icon(
                                 Icons.person,
                                 color: Colors.white,
@@ -107,7 +109,12 @@ class ProfilePage extends ConsumerWidget {
                       icon: Icons.lock_outline,
                       title: 'Account & Security',
                       subtitle: 'Change Password, Manage Login Methods',
-                      onTap: () => {},
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AccountSecurityPage(),
+                        ),
+                      ),
                     ),
                     _SettingsItem(
                       icon: Icons.history,
@@ -119,7 +126,12 @@ class ProfilePage extends ConsumerWidget {
                       icon: Icons.help_outline,
                       title: 'Help & Support',
                       subtitle: 'FAQ, Contact Support',
-                      onTap: () => {},
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HelpSupportPage(),
+                        ),
+                      ),
                     ),
                   ],
                 ),

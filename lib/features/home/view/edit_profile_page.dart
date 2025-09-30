@@ -167,6 +167,11 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         throw Exception('Failed to update users table: $dbError');
       }
 
+      // Refresh the user model in Riverpod state
+      print('🔄 Refreshing user model in Riverpod...');
+      await ref.read(authViewModelProvider.notifier).refreshUserModel();
+      print('✅ Riverpod state refreshed');
+
       if (mounted) {
         print('✅ Profile update completed successfully');
         ScaffoldMessenger.of(context).showSnackBar(

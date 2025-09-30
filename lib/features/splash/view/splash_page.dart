@@ -118,6 +118,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                     image: DecorationImage(
                       image: AssetImage('assets/images/smoke_bg.png'),
                       fit: BoxFit.cover,
+                      opacity: 0.1,
                     ),
                   ),
                 ),
@@ -137,43 +138,48 @@ class _SplashPageState extends ConsumerState<SplashPage>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Logo container - white rounded square with black shopping bag icon
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          Icons.shopping_bag_outlined,
-                          color: Colors.black,
-                          size: 40,
-                        ),
+                      // Container(
+                      //   width: 80,
+                      //   height: 80,
+                      //   decoration: BoxDecoration(
+                      //     color: Colors.white,
+                      //     borderRadius: BorderRadius.circular(16),
+                      //   ),
+                      //   child: Image.asset(
+                      //     'assets/images/bonique/bonique - Copy-05.png',
+                      //     width: 80,
+                      //     height: 80,
+                      //   ),
+                      // ),
+                      Image.asset(
+                        'assets/images/bonique/bonique - Copy-05.png',
+                        width: 200,
+                        height: 200,
                       ),
                       const SizedBox(height: 24),
 
-                      // Primary text
-                      const Text(
-                        'Your AI Stylist',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                      // // Primary text
+                      // const Text(
+                      //   'Your AI Stylist',
+                      //   style: TextStyle(
+                      //     color: Colors.white,
+                      //     fontSize: 28,
+                      //     fontWeight: FontWeight.bold,
+                      //     letterSpacing: 0.5,
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 8),
 
-                      // Secondary text
-                      const Text(
-                        'Powered by Bonique',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
+                      // // Secondary text
+                      // const Text(
+                      //   'Powered by Bonique',
+                      //   style: TextStyle(
+                      //     color: Colors.white70,
+                      //     fontSize: 16,
+                      //     fontWeight: FontWeight.w400,
+                      //     letterSpacing: 0.3,
+                      //   ),
+                      // ),
                     ],
                   ),
                 );

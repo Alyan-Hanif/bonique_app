@@ -49,8 +49,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         // Add try-on data provider refresh if needed
         break;
       case 3: // Profile
-        // Refresh auth state to get latest user data
-        ref.refresh(authViewModelProvider);
+        // Don't refresh auth state - it can cause navigation issues
+        // The profile page will get the current auth state automatically
         break;
       case 4: // Results
         ref.refresh(resultsDataProvider);

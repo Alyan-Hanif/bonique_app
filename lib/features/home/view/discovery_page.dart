@@ -31,6 +31,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Custom title bar with updated styling
             Container(

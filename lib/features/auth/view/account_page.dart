@@ -38,20 +38,13 @@ class AccountPage extends StatelessWidget {
                     const SizedBox(height: 80), // Increased top spacing
                     // App Logo
                     Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        color: Color(0xFFEFF1F1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.shopping_bag_outlined,
-                        color: Colors.black,
-                        size: 40,
-                      ),
+                      width: 250,
+                      height: 250,
+
+                      child: Image.asset('assets/images/bonique/bonique - Copy-08.png')
                     ),
 
-                    const SizedBox(height: 40), // Increased spacing after logo
+                    // const SizedBox(height: 40), // Increased spacing after logo
                     // Welcome Text
                     Text(
                       'Welcome to Bonique',

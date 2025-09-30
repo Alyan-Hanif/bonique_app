@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../core/config/env_config.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../data/models/user_model.dart';
 
@@ -9,9 +10,7 @@ class AuthRepository {
   final UserRepository _userRepository = UserRepository();
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
-    serverClientId:
-        "1051919162406-aubf0h6e99e6dpe9g2or9qh5jqjsvpel.apps.googleusercontent.com",
-    // Remove serverClientId to avoid configuration conflicts
+    serverClientId: EnvConfig.googleOAuthClientId,
   );
 
   // Sign in with email and password

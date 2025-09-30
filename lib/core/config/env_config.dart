@@ -11,8 +11,11 @@ class EnvConfig {
 
   // Google Services Configuration
   static String get googleProjectId => dotenv.env['GOOGLE_PROJECT_ID'] ?? '';
-  static String get googleProjectNumber => dotenv.env['GOOGLE_PROJECT_NUMBER'] ?? '';
+  static String get googleProjectNumber =>
+      dotenv.env['GOOGLE_PROJECT_NUMBER'] ?? '';
   static String get googleApiKey => dotenv.env['GOOGLE_API_KEY'] ?? '';
+  static String get googleOAuthClientId =>
+      dotenv.env['GOOGLE_OAUTH_CLIENT_ID'] ?? '';
 
   // App Configuration
   static String get appPackageName => dotenv.env['APP_PACKAGE_NAME'] ?? '';
@@ -26,6 +29,7 @@ class EnvConfig {
       googleProjectId,
       googleProjectNumber,
       googleApiKey,
+      googleOAuthClientId,
       appPackageName,
       appName,
     ];
