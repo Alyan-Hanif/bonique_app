@@ -234,7 +234,12 @@ class AuthRepository {
 
   // Reset password
   Future<void> resetPassword(String email) async {
-    await _client.auth.resetPasswordForEmail(email);
+    // For mobile app, we can use a custom scheme or universal link
+    // For now, we'll use the Supabase hosted URL which allows password reset
+    await _client.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'io.supabase.bonique://reset-password', // Custom deep link
+    );
   }
 
   // Ensure user exists in our users table (helper method)

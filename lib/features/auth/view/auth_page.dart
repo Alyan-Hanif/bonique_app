@@ -4,8 +4,9 @@ import '../viewmodel/auth_viewmodel.dart';
 import 'account_page.dart';
 import 'signin_page.dart';
 import 'signup_page.dart';
+import 'reset_password_page.dart';
 
-enum AuthScreen { account, signIn, signUp }
+enum AuthScreen { account, signIn, signUp, resetPassword }
 
 class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({super.key});
@@ -54,6 +55,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     });
   }
 
+  void _navigateToResetPassword() {
+    setState(() {
+      _currentScreen = AuthScreen.resetPassword;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Listen for auth state changes
@@ -75,9 +82,15 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           onCreateAccount: _navigateToSignUp,
         );
       case AuthScreen.signIn:
-        return SignInPage(onBack: _navigateBack, onSignUp: _navigateToSignUp);
+        return SignInPage(
+          onBack: _navigateBack,
+          onSignUp: _navigateToSignUp,
+          onForgotPassword: _navigateToResetPassword,
+        );
       case AuthScreen.signUp:
         return SignUpPage(onBack: _navigateBack, onSignIn: _navigateToSignIn);
+      case AuthScreen.resetPassword:
+        return ResetPasswordPage(onBack: _navigateBack);
     }
   }
 }

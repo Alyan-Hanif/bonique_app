@@ -6,8 +6,14 @@ import '../widgets/auth_widgets.dart';
 class SignInPage extends ConsumerStatefulWidget {
   final VoidCallback onBack;
   final VoidCallback onSignUp;
+  final VoidCallback onForgotPassword;
 
-  const SignInPage({super.key, required this.onBack, required this.onSignUp});
+  const SignInPage({
+    super.key,
+    required this.onBack,
+    required this.onSignUp,
+    required this.onForgotPassword,
+  });
 
   @override
   ConsumerState<SignInPage> createState() => _SignInPageState();
@@ -150,9 +156,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-                          // TODO: Implement forgot password
-                        },
+                        onPressed: widget.onForgotPassword,
                         child: Text(
                           'Forgot Password?',
                           style: AuthTextStyles.stat2.copyWith(

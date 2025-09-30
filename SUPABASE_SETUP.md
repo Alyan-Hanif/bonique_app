@@ -64,7 +64,7 @@ if (userModel != null) {
 // Update user profile
 final userRepository = UserRepository();
 await userRepository.updateUser(
-  userId, 
+  userId,
   {'full_name': 'New Name', 'avatar_url': 'new_url'}
 );
 ```
@@ -101,3 +101,137 @@ SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 The implementation automatically handles user data storage for both email/password and Google sign-in methods.
+
+## Password Reset Configuration
+
+### Configure Supabase Redirect URLs
+
+1. Go to your Supabase Dashboard
+2. Navigate to **Authentication** → **URL Configuration**
+3. Add the following to **Redirect URLs**:
+   - `io.supabase.bonique://reset-password` (for mobile deep linking)
+   - `https://yourdomain.com/reset-password` (if you have a web version)
+
+### For Testing Password Reset:
+
+**Option 1: Use Supabase Email Templates (Simplest for Mobile)**
+
+1. Go to **Authentication** → **Email Templates** in Supabase Dashboard
+2. Edit the "Reset Password" template
+3. Change the redirect URL to use the Supabase hosted page:
+   - Replace `{{ .SiteURL }}/auth/reset-password?token={{ .Token }}`
+   - With `{{ .ConfirmationURL }}`
+
+This will use Supabase's built-in password reset page where users can:
+
+- Click the link in their email
+- Get redirected to a Supabase-hosted page
+- Enter their new password
+- Get automatically redirected back to your app
+
+**Option 2: Implement Deep Linking (For Production)**
+
+If you want users to reset password directly in your app:
+
+1. Add deep linking packages to `pubspec.yaml`:
+
+```yaml
+dependencies:
+  uni_links: ^0.5.1
+  app_links: ^3.4.5
+```
+
+2. Configure Android deep linking in `android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="io.supabase.bonique" />
+</intent-filter>
+```
+
+3. Configure iOS deep linking in `ios/Runner/Info.plist`:
+
+```xml
+<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>io.supabase.bonique</string>
+        </array>
+    </dict>
+</array>
+```
+
+**Option 3: Quick Fix for Development (Desktop/Web Testing)**
+
+For testing on desktop or web during development:
+
+1. In Supabase Dashboard → **Authentication** → **URL Configuration**
+2. Set **Site URL** to: `http://localhost:3000`
+3. Add redirect URL: `http://localhost:3000/reset-password`
+4. Create a simple HTML page to handle the reset (see below)
+
+### Simple Local Reset Password Page
+
+Create a file `reset-password.html` for local testing:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reset Password</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body>
+    <h1>Reset Your Password</h1>
+    <form id="resetForm">
+      <input
+        type="password"
+        id="newPassword"
+        placeholder="New Password"
+        required
+      />
+      <button type="submit">Reset Password</button>
+    </form>
+    <div id="message"></div>
+
+    <script>
+      const { createClient } = supabase;
+      const supabaseUrl = "YOUR_SUPABASE_URL";
+      const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+      const client = createClient(supabaseUrl, supabaseKey);
+
+      document
+        .getElementById("resetForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const newPassword = document.getElementById("newPassword").value;
+
+          const { error } = await client.auth.updateUser({
+            password: newPassword,
+          });
+
+          if (error) {
+            document.getElementById("message").innerText =
+              "Error: " + error.message;
+          } else {
+            document.getElementById("message").innerText =
+              "Password updated successfully!";
+          }
+        });
+    </script>
+  </body>
+</html>
+```
+
+### Recommended Approach
+
+For mobile apps, **Option 1** (Supabase Email Templates) is the easiest:
+
+- No deep linking configuration needed
+- Users click email link → go to Supabase page → reset password → done
+- Works immediately without any additional setup

@@ -27,22 +27,17 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final maxContentWidth = 600.0; // Max width for content on larger screens
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Custom title bar with updated styling
             Container(
-              width: 414,
-              height: 42,
-              padding: const EdgeInsets.only(
-                top: 5,
-                right: 16,
-                bottom: 8,
-                left: 16,
-              ),
+              height: 56,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: const Center(
                 child: Text(
                   'Discover',
@@ -56,105 +51,110 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
             ),
             // Content
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Event Section
-                    _buildSection(
-                      title: 'Event',
-                      options: ['Work', 'Casual', 'Party', 'Other'],
-                      selectedValue: selectedEvent,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedEvent = value;
-                        });
-                      },
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxContentWidth),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 16),
+                        // Event Section
+                        _buildSection(
+                          title: 'Event',
+                          options: ['Work', 'Casual', 'Party', 'Other'],
+                          selectedValue: selectedEvent,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedEvent = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 15),
+
+                        // Type Section
+                        _buildSection(
+                          title: 'Type',
+                          options: ['Formal', 'Elegant', 'Fancy', 'Other'],
+                          selectedValue: selectedType,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedType = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 15),
+
+                        // Color Section
+                        _buildSection(
+                          title: 'Color',
+                          options: ['Black', 'White'],
+                          selectedValue: selectedColor,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedColor = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 15),
+
+                        // Conditional input field for Event "Other"
+                        if (selectedEvent == 'Other') ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0x6D797F99),
+                                width: 1,
+                              ),
+                            ),
+                            child: TextField(
+                              controller: _otherController,
+                              decoration: const InputDecoration(
+                                hintText: 'Type your preference',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                        ],
+
+                        // Conditional input field for Type "Other"
+                        if (selectedType == 'Other') ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0x6D797F99),
+                                width: 1,
+                              ),
+                            ),
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                hintText: 'Type your preference',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                        ],
+                        const SizedBox(height: 80), // Space for floating button
+                      ],
                     ),
-                    const SizedBox(height: 15),
-
-                    // Type Section
-                    _buildSection(
-                      title: 'Type',
-                      options: ['Formal', 'Elegant', 'Fancy', 'Other'],
-                      selectedValue: selectedType,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedType = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 15),
-
-                    // Color Section
-                    _buildSection(
-                      title: 'Color',
-                      options: ['Black', 'White'],
-                      selectedValue: selectedColor,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedColor = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 15),
-
-                    // Conditional input field for Event "Other"
-                    if (selectedEvent == 'Other') ...[
-                      Container(
-                        width: 382,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0x6D797F99),
-                            width: 1,
-                          ),
-                        ),
-                        child: TextField(
-                          controller: _otherController,
-                          decoration: const InputDecoration(
-                            hintText: 'Type your preference',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                    ],
-
-                    // Conditional input field for Type "Other"
-                    if (selectedType == 'Other') ...[
-                      Container(
-                        width: 382,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0x6D797F99),
-                            width: 1,
-                          ),
-                        ),
-                        child: TextField(
-                          decoration: const InputDecoration(
-                            hintText: 'Type your preference',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                    ],
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -231,9 +231,8 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 382,
         height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0x1B1A1842) : Colors.white,
           borderRadius: BorderRadius.circular(8),
