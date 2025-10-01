@@ -46,17 +46,17 @@ class AccountPage extends StatelessWidget {
 
                     // const SizedBox(height: 40), // Increased spacing after logo
                     // Welcome Text
-                    Text(
-                      'Welcome to Bonique',
-                      style: AuthTextStyles.h1.copyWith(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    // Text(
+                    //   'Welcome to Bonique',
+                    //   style: AuthTextStyles.h1.copyWith(
+                    //     color: Colors.white,
+                    //     fontSize: 32,
+                    //     fontWeight: FontWeight.w700,
+                    //   ),
+                    //   textAlign: TextAlign.center,
+                    // ),
 
-                    const SizedBox(height: 16),
+                    // const SizedBox(height: 16),
 
                     // Description Text
                     Padding(

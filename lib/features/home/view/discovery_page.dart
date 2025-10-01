@@ -179,15 +179,6 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
     );
   }
 
-  // Helper method to get selected options text
-  String _getSelectedOptionsText() {
-    List<String> selections = [];
-    if (selectedEvent != null) selections.add('Event: $selectedEvent');
-    if (selectedType != null) selections.add('Type: $selectedType');
-    if (selectedColor != null) selections.add('Color: $selectedColor');
-    return selections.join(', ');
-  }
-
   Widget _buildSection({
     required String title,
     required List<String> options,
@@ -276,24 +267,6 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: isActive ? Colors.white : Colors.grey, size: 24),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isActive ? Colors.white : Colors.grey,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 }

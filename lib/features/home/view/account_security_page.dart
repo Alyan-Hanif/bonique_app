@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../../auth/view/reset_password_page.dart';
+import 'change_password_page.dart';
 
 class AccountSecurityPage extends ConsumerStatefulWidget {
   const AccountSecurityPage({super.key});
@@ -170,8 +171,22 @@ class _AccountSecurityPageState extends ConsumerState<AccountSecurityPage> {
               children: [
                 _buildSecurityCard(
                   icon: Icons.lock_outline,
+                  title: 'Change Password',
+                  subtitle: 'Update your current password',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChangePasswordPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildSecurityCard(
+                  icon: Icons.lock_reset,
                   title: 'Reset Password',
-                  subtitle: 'Reset your password via email',
+                  subtitle: 'Reset password via email (if forgotten)',
                   onTap: () {
                     Navigator.push(
                       context,

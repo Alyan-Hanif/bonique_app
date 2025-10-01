@@ -22,7 +22,7 @@ class ProfilePage extends ConsumerWidget {
         ? ref.read(authViewModelProvider.notifier).currentUser
         : null;
     final displayName =
-        user?.userMetadata?['full_name'] ?? state.username ?? 'John Ahem';
+        state.username ?? authState.currentUserModel?.fullName ?? 'John Ahemn';
     final email = user?.email ?? 'john432@bonique.ai';
 
     // Listen for auth state changes to handle logout
