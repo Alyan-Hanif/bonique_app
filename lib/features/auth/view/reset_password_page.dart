@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/auth_viewmodel.dart';
 import '../widgets/auth_widgets.dart';
+import '../../../core/utils/snackbar_utils.dart';
 
 class ResetPasswordPage extends ConsumerStatefulWidget {
   final VoidCallback onBack;
@@ -19,6 +20,29 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _emailSent = false;
+  String? _deepLinkError;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Check if there's an error from deep link
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map<String, dynamic> && args['error'] != null) {
+      _deepLinkError = args['error'] as String;
+
+      // Show error in awesome SnackBar once
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _deepLinkError != null) {
+          SnackbarUtils.showError(
+            context,
+            title: 'Link Expired!',
+            message: _deepLinkError!,
+          );
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -50,11 +74,10 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to send reset email. Please try again.'),
-            backgroundColor: Colors.red,
-          ),
+        SnackbarUtils.showError(
+          context,
+          title: 'Failed!',
+          message: 'Failed to send reset email. Please try again.',
         );
       }
     } catch (e) {
@@ -62,11 +85,10 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+        SnackbarUtils.showError(
+          context,
+          title: 'Error!',
+          message: e.toString(),
         );
       }
     }
@@ -177,7 +199,36 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
 
           const SizedBox(height: 32),
 
-          // Error message
+          // Deep link error message (e.g., expired link)
+          if (_deepLinkError != null)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _deepLinkError!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          if (_deepLinkError != null) const SizedBox(height: 16),
+
+          // Auth error message
           if (authState.error != null)
             AuthErrorMessage(message: authState.error!),
 

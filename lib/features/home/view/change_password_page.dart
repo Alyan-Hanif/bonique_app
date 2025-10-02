@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../core/utils/snackbar_utils.dart';
 
 class ChangePasswordPage extends ConsumerStatefulWidget {
   const ChangePasswordPage({super.key});
@@ -39,13 +40,21 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
 
     // Check if new passwords match
     if (_newPasswordController.text != _confirmPasswordController.text) {
-      _showErrorDialog('New passwords do not match');
+      SnackbarUtils.showError(
+        context,
+        title: 'Password Mismatch',
+        message: 'New passwords do not match',
+      );
       return;
     }
 
     // Check password length
     if (_newPasswordController.text.length < 6) {
-      _showErrorDialog('Password must be at least 6 characters long');
+      SnackbarUtils.showError(
+        context,
+        title: 'Invalid Password',
+        message: 'Password must be at least 6 characters long',
+      );
       return;
     }
 
@@ -73,7 +82,11 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
           setState(() {
             _isLoading = false;
           });
-          _showErrorDialog('Current password is incorrect');
+          SnackbarUtils.showError(
+            context,
+            title: 'Verification Failed',
+            message: 'Current password is incorrect',
+          );
           return;
         }
       }
@@ -90,33 +103,19 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
           _isLoading = false;
         });
 
-        // Show success dialog
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.green),
-                SizedBox(width: 8),
-                Text('Success'),
-              ],
-            ),
-            content: const Text(
-              'Your password has been changed successfully!',
-              style: TextStyle(fontSize: 14),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.of(context).pop(); // Go back to previous page
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          ),
+        // Show success snackbar
+        SnackbarUtils.showSuccess(
+          context,
+          title: 'Success!',
+          message: 'Your password has been changed successfully!',
         );
+
+        // Navigate back after a short delay
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        });
       }
     } catch (e) {
       print('❌ Password change error: $e');
@@ -124,25 +123,13 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
         setState(() {
           _isLoading = false;
         });
-        _showErrorDialog('Failed to change password: ${e.toString()}');
+        SnackbarUtils.showError(
+          context,
+          title: 'Failed',
+          message: 'Failed to change password: ${e.toString()}',
+        );
       }
     }
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override

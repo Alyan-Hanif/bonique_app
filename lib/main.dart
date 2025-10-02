@@ -5,6 +5,7 @@ import 'features/onboarding/view/onboarding_page.dart';
 import 'features/auth/view/auth_page.dart';
 import 'features/home/view/home_page.dart';
 import 'core/services/supabase_service.dart';
+import 'core/services/deep_link_service.dart';
 import 'core/config/env_config.dart';
 
 void main() async {
@@ -45,13 +46,35 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final DeepLinkService _deepLinkService = DeepLinkService();
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize deep link service with navigator key
+    _deepLinkService.initialize(navigatorKey);
+  }
+
+  @override
+  void dispose() {
+    _deepLinkService.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: EnvConfig.appName,
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.orange,
@@ -66,6 +89,7 @@ class MyApp extends StatelessWidget {
         OnboardingPage.route: (context) => const OnboardingPage(),
         AuthPage.route: (context) => const AuthPage(),
         HomePage.route: (context) => const HomePage(),
+        // Add more routes as needed
       },
     );
   }

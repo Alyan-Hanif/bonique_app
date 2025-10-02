@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -164,6 +165,19 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
         ).showSnackBar(SnackBar(content: Text('Error taking photo: $e')));
       }
     }
+  }
+
+  Future<File> _compressImage(File file) async {
+    final targetPath =
+        "${file.parent.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+    final result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 70, // lower = smaller size, but less quality
+    );
+
+    return result as File ?? file; // fallback to original if compression fails
   }
 
   void _removeImage(int index) {

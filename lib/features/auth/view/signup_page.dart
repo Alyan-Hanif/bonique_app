@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/auth_viewmodel.dart';
 import '../widgets/auth_widgets.dart';
+import '../../../core/utils/snackbar_utils.dart';
 
 class SignUpPage extends ConsumerStatefulWidget {
   final VoidCallback onBack;
@@ -32,12 +33,32 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   void _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
       final authViewModel = ref.read(authViewModelProvider.notifier);
-      await authViewModel.signUp(
+      final success = await authViewModel.signUp(
         _emailController.text,
         _passwordController.text,
         _nameController.text,
         // _confirmPasswordController.text,
       );
+
+      if (mounted) {
+        if (success) {
+          SnackbarUtils.showSuccess(
+            context,
+            title: 'Account Created!',
+            message: 'Please check your email to verify your account.',
+          );
+        } else {
+          // Get the error from state
+          final error = ref.read(authViewModelProvider).error;
+          if (error != null) {
+            SnackbarUtils.showError(
+              context,
+              title: 'Sign Up Failed',
+              message: error,
+            );
+          }
+        }
+      }
     }
   }
 
@@ -45,9 +66,24 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final authViewModel = ref.read(authViewModelProvider.notifier);
     final success = await authViewModel.signInWithGoogle();
 
-    if (success) {
-      // Navigation will be handled by the auth state listener in auth_page.dart
-      print('Google sign-in successful!');
+    if (mounted) {
+      if (success) {
+        SnackbarUtils.showSuccess(
+          context,
+          title: 'Welcome!',
+          message: 'Google sign-in successful!',
+        );
+      } else {
+        // Get the error from state
+        final error = ref.read(authViewModelProvider).error;
+        if (error != null) {
+          SnackbarUtils.showError(
+            context,
+            title: 'Google Sign In Failed',
+            message: error,
+          );
+        }
+      }
     }
   }
 
@@ -96,23 +132,19 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       // ),
                       // const Spacer(),
                       Container(
-                        width: 58,
-                        height: 58,
-                        decoration: BoxDecoration(
-                          color: kPrimaryColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.shopping_bag_outlined,
-                          color: Colors.white,
-                          size: 39,
+                        width: 150,
+                        height: 150,
+                        child: Image.asset(
+                          'assets/images/bonique/bonique - Copy-06.png',
+                          width: 150,
+                          height: 150,
                         ),
                       ),
                     ],
                   ),
-              
-                  const SizedBox(height: 32),
-              
+
+                  // const SizedBox(height: 32),
+
                   // Title
                   Center(
                     child: Text(
@@ -120,18 +152,18 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       style: AuthTextStyles.h1,
                     ),
                   ),
-              
+
                   const SizedBox(height: 8),
-              
+
                   Center(
                     child: Text(
                       'Enter information to create a new account.',
                       style: AuthTextStyles.stat1,
                     ),
                   ),
-              
+
                   const SizedBox(height: 32),
-              
+
                   // Name field
                   AuthInputField(
                     controller: _nameController,
@@ -141,9 +173,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     errorText: authState.nameError,
                     onChanged: _onNameChanged,
                   ),
-              
+
                   const SizedBox(height: 24),
-              
+
                   // Email field
                   AuthInputField(
                     controller: _emailController,
@@ -154,9 +186,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     errorText: authState.emailError,
                     onChanged: _onEmailChanged,
                   ),
-              
+
                   const SizedBox(height: 24),
-              
+
                   // Password field
                   AuthInputField(
                     controller: _passwordController,
@@ -176,7 +208,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     errorText: authState.passwordError,
                     onChanged: _onPasswordChanged,
                   ),
-              
+
                   // const SizedBox(height: 24),
                   //
                   // // Confirm Password field
@@ -198,9 +230,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   //   errorText: authState.confirmPasswordError,
                   //   onChanged: _onConfirmPasswordChanged,
                   // ),
-              
+
                   // const SizedBox(height: 24),
-              
+
                   // Terms checkbox
                   TermsCheckbox(
                     value: authState.agreeToTerms,
@@ -210,34 +242,34 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                           .toggleTermsAgreement();
                     },
                   ),
-              
+
                   const SizedBox(height: 32),
-              
-                  // Error message
-                  if (authState.error != null)
-                    AuthErrorMessage(message: authState.error!),
-              
-                  if (authState.error != null) const SizedBox(height: 16),
-              
+
+                  // // Error message
+                  // if (authState.error != null)
+                  //   AuthErrorMessage(message: authState.error!),
+                  //
+                  // if (authState.error != null) const SizedBox(height: 16),
+
                   // Sign Up button
                   AuthPrimaryButton(
                     text: 'Sign Up',
                     onPressed: _handleSignUp,
                     isLoading: authState.isLoading,
                   ),
-              
+
                   const SizedBox(height: 14),
-              
+
                   // Divider
                   const AuthDivider(),
-              
+
                   const SizedBox(height: 14),
-              
+
                   // Google Sign In button
                   GoogleSignInButton(onPressed: _handleGoogleSignIn),
-              
+
                   // const Spacer(),
-              
+
                   // Sign In link
                   Center(
                     child: RichText(
@@ -262,7 +294,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       ),
                     ),
                   ),
-              
+
                   const SizedBox(height: 24),
                 ],
               ),

@@ -1,3 +1,4 @@
+import 'package:bonique/core/utils/snackbar_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/auth_viewmodel.dart';
@@ -34,10 +35,30 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   void _handleSignIn() async {
     if (_formKey.currentState!.validate()) {
       final authViewModel = ref.read(authViewModelProvider.notifier);
-      await authViewModel.signIn(
+      final success = await authViewModel.signIn(
         _emailController.text,
         _passwordController.text,
       );
+
+      if (mounted) {
+        if (success) {
+          SnackbarUtils.showSuccess(
+            context,
+            title: 'Welcome Back!',
+            message: 'You have successfully signed in.',
+          );
+        } else {
+          // Get the error from state
+          final error = ref.read(authViewModelProvider).error;
+          if (error != null) {
+            SnackbarUtils.showError(
+              context,
+              title: 'Sign In Failed',
+              message: error,
+            );
+          }
+        }
+      }
     }
   }
 
@@ -45,9 +66,24 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final authViewModel = ref.read(authViewModelProvider.notifier);
     final success = await authViewModel.signInWithGoogle();
 
-    if (success) {
-      // Navigation will be handled by the auth state listener in auth_page.dart
-      print('Google sign-in successful!');
+    if (mounted) {
+      if (success) {
+        SnackbarUtils.showSuccess(
+          context,
+          title: 'Welcome!',
+          message: 'Google sign-in successful!',
+        );
+      } else {
+        // Get the error from state
+        final error = ref.read(authViewModelProvider).error;
+        if (error != null) {
+          SnackbarUtils.showError(
+            context,
+            title: 'Google Sign In Failed',
+            message: error,
+          );
+        }
+      }
     }
   }
 
@@ -83,22 +119,18 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 58,
-                          height: 58,
-                          decoration: BoxDecoration(
-                            color: kPrimaryColor,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.shopping_bag_outlined,
-                            color: Colors.white,
-                            size: 39,
+                          width: 150,
+                          height: 150,
+                          child: Image.asset(
+                            'assets/images/bonique/bonique - Copy-06.png',
+                            width: 150,
+                            height: 150,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 32),
+                    // const SizedBox(height: 32),
 
                     // Title
                     Center(
@@ -169,11 +201,11 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
                     const SizedBox(height: 32),
 
-                    // Error message
-                    if (authState.error != null)
-                      AuthErrorMessage(message: authState.error!),
-
-                    if (authState.error != null) const SizedBox(height: 16),
+                    // // Error message
+                    // if (authState.error != null)
+                    //   AuthErrorMessage(message: authState.error!),
+                    //
+                    // if (authState.error != null) const SizedBox(height: 16),
 
                     // Sign In button
                     AuthPrimaryButton(
