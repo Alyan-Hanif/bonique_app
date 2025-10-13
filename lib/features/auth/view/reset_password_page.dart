@@ -96,8 +96,6 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authViewModelProvider);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -127,14 +125,17 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
             children: [
               IconButton(
                 onPressed: widget.onBack,
-                icon: const Icon(Icons.arrow_back, color: kPrimaryColor),
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
               const Spacer(),
               Container(
                 width: 58,
                 height: 58,
                 decoration: BoxDecoration(
-                  color: kPrimaryColor,
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -155,10 +156,14 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: kPrimaryColor.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.lock_reset, color: kPrimaryColor, size: 40),
+            child: Icon(
+              Icons.lock_reset,
+              color: Theme.of(context).colorScheme.primary,
+              size: 40,
+            ),
           ),
 
           const SizedBox(height: 24),
@@ -189,6 +194,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
             controller: _emailController,
             label: 'Enter your email address',
             placeholder: 'example@gmail.com',
+            // placeholder: 'Enter your email address',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             errorText: authState.emailError,
@@ -255,7 +261,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                     TextSpan(
                       text: 'Sign In',
                       style: AuthTextStyles.stat2.copyWith(
-                        color: kPrimaryColor,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
                         decoration: TextDecoration.underline,
                       ),
@@ -333,7 +339,9 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
           },
           icon: const Icon(Icons.refresh),
           label: const Text('Send Again'),
-          style: TextButton.styleFrom(foregroundColor: kPrimaryColor),
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.primary,
+          ),
         ),
 
         const SizedBox(height: 16),

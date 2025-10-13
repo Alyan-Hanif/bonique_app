@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
 import 'wardrobe_page.dart';
@@ -69,11 +70,17 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: IndexedStack(index: currentIndex, children: _screens),
 
       // Floating Add Button (center docked)
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddItem,
-        backgroundColor: const Color(0xFF1B1A18),
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
+      floatingActionButton: SizedBox(
+        width: 60,
+        height: 60,
+        child: FloatingActionButton(
+          onPressed: _navigateToAddItem,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, color: Colors.white, size: 30),
+        ),
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       // Custom Bottom Navigation
@@ -85,11 +92,11 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(Icons.checkroom, 'Wardrobe', 0),
-              _buildNavItem(Icons.search, 'Discover', 1),
+              _buildNavItemWithSvg('assets/images/wardrobe.svg', 'Wardrobe', 0),
+              _buildNavItemWithSvg('assets/images/discover.svg', 'Discover', 1),
               const SizedBox(width: 40), // gap for FAB
-              _buildNavItem(Icons.checkroom, 'Try-On', 2),
-              _buildNavItem(Icons.person, 'Profile', 3),
+              _buildNavItemWithSvg('assets/images/try_on.svg', 'Try-On', 2),
+              _buildNavItemWithSvg('assets/images/profile.svg', 'Profile', 3),
             ],
           ),
         ),
@@ -110,7 +117,9 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             Icon(
               icon,
-              color: isSelected ? const Color(0xFF1B1A18) : Colors.grey,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey,
             ),
             const SizedBox(height: 4),
             Text(
@@ -118,7 +127,47 @@ class _HomePageState extends ConsumerState<HomePage> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? const Color(0xFF1B1A18) : Colors.grey,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItemWithSvg(String svgPath, String label, int index) {
+    final currentIndex = ref.watch(bottomNavigationIndexProvider);
+    final isSelected = currentIndex == index;
+
+    return GestureDetector(
+      onTap: () => _onTabTapped(index),
+      child: SizedBox(
+        width: 70,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(
+              svgPath,
+              width: 24,
+              height: 24,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey,
               ),
               overflow: TextOverflow.ellipsis,
             ),

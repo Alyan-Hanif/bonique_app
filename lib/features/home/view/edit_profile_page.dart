@@ -349,15 +349,15 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                           ),
                           child: TextFormField(
                             controller: _nameController,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF1B1A18),
+                              color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.w500,
                             ),
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Name',
                               labelStyle: TextStyle(
-                                color: Color(0xFF1B1A18),
+                                color: Theme.of(context).colorScheme.primary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -417,7 +417,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _updateProfile,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1B1A18),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(

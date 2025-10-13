@@ -280,12 +280,16 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                           WidgetSpan(
                             child: GestureDetector(
                               onTap: widget.onSignIn,
-                              child: Text(
-                                'Sign In',
-                                style: AuthTextStyles.stat2.copyWith(
-                                  color: kPrimaryColor,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
+                              child: Builder(
+                                builder: (context) => Text(
+                                  'Sign In',
+                                  style: AuthTextStyles.stat2.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
                             ),

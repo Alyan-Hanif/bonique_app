@@ -35,28 +35,33 @@ class AccountPage extends StatelessWidget {
                   crossAxisAlignment:
                       CrossAxisAlignment.center, // Center horizontally
                   children: [
-                    const SizedBox(height: 80), // Increased top spacing
+                    // const SizedBox(height: 80), // Increased top spacing
                     // App Logo
                     Container(
-                      width: 250,
-                      height: 250,
-
-                      child: Image.asset('assets/images/bonique/bonique - Copy-08.png')
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
+                        borderRadius: BorderRadius.circular(8.28),
+                      ),
+                      child: Image.asset(
+                        'assets/images/bonique/bonique - Copy-06.png',
+                      ),
                     ),
 
-                    // const SizedBox(height: 40), // Increased spacing after logo
+                    const SizedBox(height: 40), // Increased spacing after logo
                     // Welcome Text
-                    // Text(
-                    //   'Welcome to Bonique',
-                    //   style: AuthTextStyles.h1.copyWith(
-                    //     color: Colors.white,
-                    //     fontSize: 32,
-                    //     fontWeight: FontWeight.w700,
-                    //   ),
-                    //   textAlign: TextAlign.center,
-                    // ),
+                    Text(
+                      'Welcome to Bonique',
+                      style: AuthTextStyles.h1.copyWith(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
 
-                    // const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
                     // Description Text
                     Padding(

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Colors from Figma design
-const Color kPrimaryColor = Color(0xFF2C2C2C);
-const Color kSecondaryColor = Color(0xFFF5F5F5);
-const Color kAccentColor = Color(0xFFFF6B2C);
+// Colors - use theme colors instead of hardcoded values
 const Color kTextPrimary = Color(0xFF2C2C2C);
 const Color kTextSecondary = Color(0xFF666666);
 const Color kBorderColor = Color(0xFFE0E0E0);
@@ -18,7 +15,7 @@ class AuthTextStyles {
   );
 
   static const TextStyle h1 = TextStyle(
-    fontSize:26,
+    fontSize: 26,
     height: 48 / 48,
     fontWeight: FontWeight.bold,
     color: kTextPrimary,
@@ -53,7 +50,7 @@ class AuthTextStyles {
   );
 
   static const TextStyle stat3 = TextStyle(
-    fontSize: 12 ,
+    fontSize: 12,
     height: 22.5 / 18,
     fontWeight: FontWeight.normal,
     color: kTextSecondary,
@@ -138,7 +135,10 @@ class AuthInputField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: kPrimaryColor, width: 2),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -176,27 +176,24 @@ class AuthPrimaryButton extends StatelessWidget {
       height: 48, // fixed height
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1B1A18),
+          backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(48),
-            side: const BorderSide(
-              color: Colors.white,
-              width: 1,
-            ),
+            side: const BorderSide(color: Colors.white, width: 1),
           ),
           elevation: 0,
         ),
         onPressed: isLoading ? null : onPressed,
         child: isLoading
             ? const SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-            strokeWidth: 2,
-          ),
-        )
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
             : Text(text, style: AuthTextStyles.button),
       ),
     );
@@ -223,26 +220,29 @@ class AuthSecondaryButton extends StatelessWidget {
       height: 56,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: kPrimaryColor,
-          side: const BorderSide(color: kPrimaryColor, width: 2),
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          foregroundColor: Theme.of(context).colorScheme.primary,
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 2,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(48),
           ),
         ),
         onPressed: isLoading ? null : onPressed,
         child: isLoading
-            ? const SizedBox(
+            ? SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
-                  color: kPrimaryColor,
+                  color: Theme.of(context).colorScheme.primary,
                   strokeWidth: 2,
                 ),
               )
             : Text(
                 text,
-                style: AuthTextStyles.button.copyWith(color: kPrimaryColor),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
       ),
     );
@@ -333,7 +333,7 @@ class TermsCheckbox extends StatelessWidget {
         Checkbox(
           value: value,
           onChanged: onChanged,
-          activeColor: kPrimaryColor,
+          activeColor: Theme.of(context).colorScheme.primary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
         Expanded(
@@ -345,7 +345,7 @@ class TermsCheckbox extends StatelessWidget {
                 TextSpan(
                   text: 'Terms of Services',
                   style: AuthTextStyles.stat3.copyWith(
-                    color: kPrimaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     decoration: TextDecoration.underline,
                   ),
                 ),
@@ -353,7 +353,7 @@ class TermsCheckbox extends StatelessWidget {
                 TextSpan(
                   text: 'Privacy Policy',
                   style: AuthTextStyles.stat3.copyWith(
-                    color: kPrimaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     decoration: TextDecoration.underline,
                   ),
                 ),

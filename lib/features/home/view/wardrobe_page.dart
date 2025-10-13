@@ -1,29 +1,51 @@
-import 'package:bonique/features/home/view/try_on_page.dart';
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:bonique/data/repositories/wardrobe_repository.dart';
 import 'package:bonique/data/models/wardrobe_model.dart';
+import 'package:bonique/core/widgets/loading_animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // State management for wardrobe filtering
 final wardrobeFilterProvider = StateProvider<String>((ref) => 'All');
 
-// Real wardrobe data provider that fetches from Supabase
+// Real wardrobe data provider that fetches from Supabase and preloads images
 final wardrobeDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
+  print('🔄 WARDROBE DATA PROVIDER CALLED');
   final authState = ref.watch(authViewModelProvider);
-  
+
+  print(
+    '🔐 AUTH STATE: isLoggedIn=${authState.isLoggedIn}, currentUserModel=${authState.currentUserModel?.id}',
+  );
+
   if (!authState.isLoggedIn || authState.currentUserModel == null) {
+    print('❌ USER NOT LOGGED IN OR NO USER MODEL - RETURNING EMPTY LIST');
     return [];
   }
-  
+
   try {
+    print('📡 FETCHING WARDROBE ITEMS FROM SUPABASE...');
     final wardrobeItems = await WardrobeRepository.getWardrobeItems(
-      authState.currentUserModel!.id
+      authState.currentUserModel!.id,
     );
+    print('📦 WARDROBE DATA LOADED: ${wardrobeItems.length} items');
+
+    if (wardrobeItems.isNotEmpty) {
+      print('📋 WARDROBE ITEMS DETAILS:');
+      for (var item in wardrobeItems) {
+        print(
+          '   - ID: ${item.id}, Category: ${item.category}, Image: ${item.imagePath}',
+        );
+      }
+    } else {
+      print('⚠️ NO WARDROBE ITEMS RETURNED FROM REPOSITORY');
+    }
+
     return wardrobeItems;
   } catch (e) {
-    print('Error fetching wardrobe data: $e');
+    print('❌ ERROR FETCHING WARDROBE DATA: $e');
+    print('❌ STACK TRACE: ${StackTrace.current}');
     return [];
   }
 });
@@ -31,35 +53,95 @@ final wardrobeDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
 // Add this provider after the existing providers
 final selectedWardrobeItemsProvider = StateProvider<Set<int>>((ref) => <int>{});
 
-class WardrobePage extends ConsumerWidget {
+class WardrobePage extends ConsumerStatefulWidget {
   const WardrobePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedFilter = ref.watch(wardrobeFilterProvider);
-    final wardrobeAsyncValue = ref.watch(wardrobeDataProvider);
-    final selectedItems = ref.watch(selectedWardrobeItemsProvider);
+  ConsumerState<WardrobePage> createState() => _WardrobePageState();
+}
 
+class _WardrobePageState extends ConsumerState<WardrobePage> {
+  bool _imagesPreloaded = false;
+  List<WardrobeModel>? _lastWardrobeItems;
+
+  @override
+  void initState() {
+    super.initState();
+    print('🎬 WARDROBE PAGE INIT STATE');
+  }
+
+  Future<void> _preloadImages(List<WardrobeModel> wardrobeItems) async {
+    try {
+      print('🚀 STARTING _preloadImages() with ${wardrobeItems.length} items');
+
+      if (wardrobeItems.isNotEmpty) {
+        print('🖼️ PRELOADING ${wardrobeItems.length} images...');
+        for (var item in wardrobeItems) {
+          print(
+            '   - Item ID: ${item.id}, Category: ${item.category}, Image: ${item.imagePath}',
+          );
+        }
+
+        await Future.wait(
+          wardrobeItems.map(
+            (item) => precacheImage(NetworkImage(item.imagePath), context),
+          ),
+        );
+        print('✅ ALL IMAGES PRELOADED');
+      } else {
+        print('⚠️ NO WARDROBE ITEMS FOUND - EMPTY LIST');
+      }
+
+      if (mounted) {
+        print('🔄 SETTING STATE: _imagesPreloaded=true');
+        setState(() {
+          _imagesPreloaded = true;
+        });
+        print('✅ STATE UPDATED SUCCESSFULLY');
+      } else {
+        print('⚠️ WIDGET NOT MOUNTED - SKIPPING STATE UPDATE');
+      }
+    } catch (e) {
+      print('❌ ERROR in _preloadImages: $e');
+      print('❌ STACK TRACE: ${StackTrace.current}');
+      if (mounted) {
+        setState(() {
+          _imagesPreloaded = true;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedFilter = ref.watch(wardrobeFilterProvider);
+    final selectedItems = ref.watch(selectedWardrobeItemsProvider);
+    final wardrobeAsyncValue = ref.watch(wardrobeDataProvider);
+
+    print('🏗️ BUILD CALLED: _imagesPreloaded=$_imagesPreloaded');
+    print('🏗️ SELECTED FILTER: $selectedFilter');
+
+    // Always show the UI structure, handle loading/error states in the grid area
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Custom title bar
+            // Custom title bar - always visible
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: const Center(
+              child: Center(
                 child: Text(
                   'My Wardrobe',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1B1A18),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
             ),
-            // Filter bar
+            // Filter bar - always visible
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: SingleChildScrollView(
@@ -81,10 +163,30 @@ class WardrobePage extends ConsumerWidget {
                 ),
               ),
             ),
-            // Wardrobe grid
+            // Wardrobe grid - handle all states here
             Expanded(
               child: wardrobeAsyncValue.when(
                 data: (wardrobeItems) {
+                  print(
+                    '📦 WARDROBE DATA RECEIVED: ${wardrobeItems.length} items',
+                  );
+
+                  // Check if we have new data or need to start preloading
+                  final hasNewData =
+                      _lastWardrobeItems == null ||
+                      _lastWardrobeItems!.length != wardrobeItems.length ||
+                      !_imagesPreloaded;
+
+                  if (hasNewData) {
+                    print('🔄 NEW DATA DETECTED OR PRELOADING NEEDED');
+                    _lastWardrobeItems = wardrobeItems;
+                    _imagesPreloaded = false; // Reset preloading state
+                    print('🚀 STARTING PRELOADING...');
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _preloadImages(wardrobeItems);
+                    });
+                  }
+
                   // Filter items based on selected category
                   final filteredItems = selectedFilter == 'All'
                       ? wardrobeItems
@@ -92,60 +194,95 @@ class WardrobePage extends ConsumerWidget {
                             .where((item) => item.category == selectedFilter)
                             .toList();
 
-                  if (filteredItems.isEmpty) {
+                  print('🔍 FILTERING RESULTS:');
+                  print('   - Total items: ${wardrobeItems.length}');
+                  print('   - Selected filter: $selectedFilter');
+                  print('   - Filtered items: ${filteredItems.length}');
+
+                  if (wardrobeItems.isNotEmpty) {
+                    print('   - All categories in wardrobe:');
+                    final categories = wardrobeItems
+                        .map((item) => item.category)
+                        .toSet();
+                    for (var category in categories) {
+                      final count = wardrobeItems
+                          .where((item) => item.category == category)
+                          .length;
+                      print('     * $category: $count items');
+                    }
+                  }
+
+                  // Show loading in grid area while preloading
+                  if (!_imagesPreloaded) {
                     return const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.checkroom_outlined,
-                            size: 64,
-                            color: Colors.grey,
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'No items found',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Add some items to your wardrobe!',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
+                      child: LoadingAnimation(
+                        message: 'Loading your wardrobe...',
+                        width: 150,
+                        height: 150,
                       ),
                     );
                   }
 
-                  return GridView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio:
-                          121.3831787109375 /
-                          170.4719696044922, // Exact ratio from dimensions
-                    ),
-                    itemCount: filteredItems.length,
-                    itemBuilder: (context, index) {
-                      return _WardrobeTile(item: filteredItems[index]);
-                    },
+                  // Show content after preloading
+                  return AnimatedOpacity(
+                    opacity: _imagesPreloaded ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: filteredItems.isEmpty
+                        ? const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.checkroom_outlined,
+                                  size: 64,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No items found',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Add some items to your wardrobe!',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : GridView.builder(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  mainAxisSpacing: 12,
+                                  crossAxisSpacing: 12,
+                                  childAspectRatio:
+                                      121.3831787109375 /
+                                      170.4719696044922, // Exact ratio from dimensions
+                                ),
+                            itemCount: filteredItems.length,
+                            itemBuilder: (context, index) {
+                              return _WardrobeTile(item: filteredItems[index]);
+                            },
+                          ),
                   );
                 },
                 loading: () => const Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF1B1A18),
+                  child: LoadingAnimation(
+                    message: 'Loading your wardrobe...',
+                    width: 150,
+                    height: 150,
                   ),
                 ),
                 error: (error, stackTrace) => Center(
@@ -178,10 +315,12 @@ class WardrobePage extends ConsumerWidget {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
-                          ref.refresh(wardrobeDataProvider);
+                          ref.invalidate(wardrobeDataProvider);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1B1A18),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                         ),
                         child: const Text(
                           'Retry',
@@ -205,9 +344,9 @@ class WardrobePage extends ConsumerWidget {
                 ref.read(selectedWardrobeItemsProvider.notifier).state =
                     <int>{};
               },
-              backgroundColor: const Color(0xFF1B1A18),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               label: Text(
-                'Try On (${selectedItems.length})',
+                'Try On ',
                 style: const TextStyle(color: Colors.white),
               ),
             )
@@ -238,14 +377,20 @@ class _WardrobeFilter extends ConsumerWidget {
             height: 36,
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFF1B1A18)
+                  ? Theme.of(context).colorScheme.primary
                   : Colors.grey.shade200,
               borderRadius: BorderRadius.circular(18),
             ),
-            child: Icon(
-              _getIconForLabel(label),
-              size: 18,
-              color: isSelected ? Colors.white : Colors.grey.shade700,
+            child: Center(
+              child: SvgPicture.asset(
+                _getSvgPathForLabel(label),
+                width: 18,
+                height: 18,
+                colorFilter: ColorFilter.mode(
+                  isSelected ? Colors.white : Colors.grey.shade700,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -254,7 +399,7 @@ class _WardrobeFilter extends ConsumerWidget {
             style: TextStyle(
               fontSize: 12,
               color: isSelected
-                  ? const Color(0xFF1B1A18)
+                  ? Theme.of(context).colorScheme.primary
                   : Colors.grey.shade700,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             ),
@@ -264,40 +409,35 @@ class _WardrobeFilter extends ConsumerWidget {
     );
   }
 
-  IconData _getIconForLabel(String label) {
+  String _getSvgPathForLabel(String label) {
     switch (label.toLowerCase()) {
       case 'all':
-        return Icons.checkroom;
+        return 'assets/images/wardrobe.svg';
       case 'dresses':
-        return Icons.checkroom;
+        return 'assets/images/dresses.svg';
       case 'jeans':
-        return Icons.checkroom;
+        return 'assets/images/Pants.svg';
       case 'shirts':
-        return Icons.checkroom;
+        return 'assets/images/TShirt.svg';
       case 'skirts':
-        return Icons.checkroom;
+        return 'assets/images/skirts.svg';
       case 'hoodies':
-        return Icons.checkroom;
+        return 'assets/images/hoodies.svg';
       default:
-        return Icons.checkroom;
+        return 'assets/images/wardrobe.svg';
     }
   }
 }
 
-class _WardrobeTile extends ConsumerStatefulWidget {
+class _WardrobeTile extends ConsumerWidget {
   final WardrobeModel item;
 
   const _WardrobeTile({required this.item});
 
   @override
-  ConsumerState<_WardrobeTile> createState() => _WardrobeTileState();
-}
-
-class _WardrobeTileState extends ConsumerState<_WardrobeTile> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final selectedItems = ref.watch(selectedWardrobeItemsProvider);
-    final isSelected = selectedItems.contains(widget.item.id);
+    final isSelected = selectedItems.contains(item.id);
 
     return GestureDetector(
       onTap: () {
@@ -305,9 +445,9 @@ class _WardrobeTileState extends ConsumerState<_WardrobeTile> {
         final newSelected = Set<int>.from(currentSelected);
 
         if (isSelected) {
-          newSelected.remove(widget.item.id);
+          newSelected.remove(item.id);
         } else {
-          newSelected.add(widget.item.id);
+          newSelected.add(item.id);
         }
 
         ref.read(selectedWardrobeItemsProvider.notifier).state = newSelected;
@@ -319,12 +459,17 @@ class _WardrobeTileState extends ConsumerState<_WardrobeTile> {
           color: const Color(0xFFD9D9D9),
           borderRadius: BorderRadius.circular(8.93),
           border: isSelected
-              ? Border.all(color: const Color(0xFF1B1A18), width: 2.5)
+              ? Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2.5,
+                )
               : null,
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFF1B1A18).withOpacity(0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.3),
                     spreadRadius: 2,
                     blurRadius: 8,
                     offset: const Offset(0, 4),
@@ -350,25 +495,10 @@ class _WardrobeTileState extends ConsumerState<_WardrobeTile> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.93),
               child: Image.network(
-                widget.item.imagePath,
+                item.imagePath,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD9D9D9),
-                      borderRadius: BorderRadius.circular(8.93),
-                    ),
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Color(0xFF1B1A18),
-                      ),
-                    ),
-                  );
-                },
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     decoration: BoxDecoration(
@@ -389,8 +519,8 @@ class _WardrobeTileState extends ConsumerState<_WardrobeTile> {
                 child: Container(
                   width: 24,
                   height: 24,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF1B1A18),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.check, color: Colors.white, size: 16),

@@ -77,11 +77,12 @@ class _MyAppState extends State<MyApp> {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.orange,
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.orange,
-        ).copyWith(primary: const Color(0xFFFF6B2C)),
-        useMaterial3: false,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFA45A41),
+          primary: const Color(0xFFA45A41),
+          secondary: const Color(0xFFE9E2C6),
+        ),
+        useMaterial3: true,
       ),
       home: const SplashPage(),
       routes: {
@@ -89,6 +90,7 @@ class _MyAppState extends State<MyApp> {
         OnboardingPage.route: (context) => const OnboardingPage(),
         AuthPage.route: (context) => const AuthPage(),
         HomePage.route: (context) => const HomePage(),
+
         // Add more routes as needed
       },
     );

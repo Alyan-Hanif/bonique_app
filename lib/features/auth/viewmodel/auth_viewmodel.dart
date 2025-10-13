@@ -157,10 +157,47 @@ class AuthViewModel extends StateNotifier<AuthState> {
       return false;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       state = state.copyWith(
         isPasswordValid: false,
-        passwordError: 'Password must be at least 6 characters',
+        passwordError: 'Password must be at least 8 characters',
+      );
+      return false;
+    }
+
+    // Check for at least one uppercase letter
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      state = state.copyWith(
+        isPasswordValid: false,
+        passwordError: 'Password must contain at least one uppercase letter',
+      );
+      return false;
+    }
+
+    // Check for at least one lowercase letter
+    if (!RegExp(r'[a-z]').hasMatch(password)) {
+      state = state.copyWith(
+        isPasswordValid: false,
+        passwordError: 'Password must contain at least one lowercase letter',
+      );
+      return false;
+    }
+
+    // Check for at least one number
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      state = state.copyWith(
+        isPasswordValid: false,
+        passwordError: 'Password must contain at least one number',
+      );
+      return false;
+    }
+
+    // Check for at least one special character
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/~`]').hasMatch(password)) {
+      state = state.copyWith(
+        isPasswordValid: false,
+        passwordError:
+            r'Password must contain at least one special character (!@#$%^&*...)',
       );
       return false;
     }

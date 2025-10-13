@@ -60,9 +60,6 @@ class OnboardingPage extends ConsumerWidget {
             onPanUpdate: (details) {
               controller.handleScroll(details);
             },
-            onPanEnd: (details) {
-              controller.handleScrollEnd(details);
-            },
             child: Column(
               children: [
                 // Fixed background with clipped circle
@@ -76,7 +73,7 @@ class OnboardingPage extends ConsumerWidget {
                       child: Container(
                         width: double.infinity,
                         height: double.infinity,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Color(0xFF1B1A18),
                         child: Stack(
                           children: [
                             //left circle
@@ -86,7 +83,7 @@ class OnboardingPage extends ConsumerWidget {
                                 width: 75, // adjust size
                                 height: 150, // adjust size
                                 decoration: const BoxDecoration(
-                                  color: Color(0x47E2C647),
+                                  color: Color(0xFF424041),
                                   borderRadius: BorderRadius.only(
                                     topRight: Radius.circular(100),
                                     bottomRight: Radius.circular(100),
@@ -102,10 +99,10 @@ class OnboardingPage extends ConsumerWidget {
                                 -0.7,
                               ), // 1 = right, -1 = top, 0 = center, 1 = bottom
                               child: Container(
-                                width: 85,
+                                width: 80,
                                 height: 180,
                                 decoration: const BoxDecoration(
-                                  color: Color(0x47E2C647),
+                                  color: Color(0xFF424041),
                                   borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(100),
                                     bottomLeft: Radius.circular(100),
@@ -113,29 +110,17 @@ class OnboardingPage extends ConsumerWidget {
                                 ),
                               ),
                             ),
-
                             // Animated image
-                            Align(
-                              alignment: Alignment.bottomCenter,
+                            Center(
                               child: AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 300),
                                 child: Image.asset(
                                   pagesData[index].image,
                                   key: ValueKey(index),
-                                  width: 420, // was 362 → slightly bigger
-                                  height: 550, // was 475 → slightly bigger
+                                  width: 300,
+                                  height: 300,
                                   fit: BoxFit.contain,
                                 ),
-                              ),
-                            ),
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              child: Image.asset(
-                                pagesData[index].image,
-                                key: ValueKey(index),
-                                width: 362,
-                                height: 4,
-                                fit: BoxFit.contain,
                               ),
                             ),
                           ],
@@ -240,9 +225,7 @@ class OnboardingPage extends ConsumerWidget {
                                 width: 100,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
+                                    backgroundColor: darkGray,
                                     foregroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(48),

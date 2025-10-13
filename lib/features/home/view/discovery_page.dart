@@ -38,13 +38,13 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
             Container(
               height: 56,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: const Center(
+              child: Center(
                 child: Text(
                   'Discover',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1B1A18),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
@@ -168,7 +168,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                 // Navigate to results page
                 ref.read(bottomNavigationIndexProvider.notifier).state = 4;
               },
-              backgroundColor: const Color(0xFF1B1A18),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               label: const Text(
                 'Discover',
                 style: TextStyle(color: Colors.white),
@@ -196,7 +196,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
             fontWeight: FontWeight.w400,
             height: 1.5, // line-height: 24px / font-size: 16px = 1.5
             letterSpacing: 0,
-            color: Color(0xFF1B1A18),
+            color: Colors.black,
           ),
         ),
         const SizedBox(height: 12),
@@ -225,11 +225,13 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
         height: 48,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0x1B1A1842) : Colors.white,
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
+              : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF1B1A18)
+                ? Theme.of(context).colorScheme.primary
                 : const Color(0x6D797F99),
             width: 1,
           ),
@@ -242,11 +244,13 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF1B1A18) : Colors.grey,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey,
                   width: 2,
                 ),
                 color: isSelected
-                    ? const Color(0xFF1B1A18)
+                    ? Theme.of(context).colorScheme.primary
                     : Colors.transparent,
               ),
               child: isSelected
@@ -256,12 +260,10 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
             const SizedBox(width: 10),
             Text(
               option,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: isSelected
-                    ? const Color(0xFF1B1A18)
-                    : const Color(0xFF1B1A18),
+                color: Colors.black,
               ),
             ),
           ],

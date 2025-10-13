@@ -28,29 +28,35 @@ class HelpSupportPage extends ConsumerWidget {
           children: [
             // FAQ Section
             _buildSection(
+              context: context,
               title: 'Frequently Asked Questions',
               children: [
                 _buildFAQItem(
+                  context: context,
                   question: 'How do I add items to my wardrobe?',
                   answer:
                       'Go to the Wardrobe tab and tap the + button to add new clothing items. You can take photos or upload images from your gallery.',
                 ),
                 _buildFAQItem(
+                  context: context,
                   question: 'How does the outfit recommendation work?',
                   answer:
                       'Our AI analyzes your wardrobe items and suggests combinations based on your preferences, the occasion, and current fashion trends.',
                 ),
                 _buildFAQItem(
+                  context: context,
                   question: 'Can I share my outfits with friends?',
                   answer:
                       'Yes! You can share your favorite outfits on social media or send them directly to friends through the app.',
                 ),
                 _buildFAQItem(
+                  context: context,
                   question: 'How do I update my profile information?',
                   answer:
                       'Go to Profile > Edit Profile to update your name, email, bio, and profile picture.',
                 ),
                 _buildFAQItem(
+                  context: context,
                   question: 'Is my data secure?',
                   answer:
                       'Yes, we use industry-standard encryption to protect your personal information and wardrobe data.',
@@ -61,21 +67,25 @@ class HelpSupportPage extends ConsumerWidget {
 
             // Contact Support Section
             _buildSection(
+              context: context,
               title: 'Contact Support',
               children: [
                 _buildContactTile(
+                  context: context,
                   icon: Icons.email_outlined,
                   title: 'Email Support',
                   subtitle: 'Get help via email',
                   onTap: () => _launchEmail(),
                 ),
                 _buildContactTile(
+                  context: context,
                   icon: Icons.chat_bubble_outline,
                   title: 'Live Chat',
                   subtitle: 'Chat with our support team',
                   onTap: () => _showComingSoon(context, 'Live Chat'),
                 ),
                 _buildContactTile(
+                  context: context,
                   icon: Icons.phone_outlined,
                   title: 'Phone Support',
                   subtitle: '+1 (555) 123-4567',
@@ -87,21 +97,25 @@ class HelpSupportPage extends ConsumerWidget {
 
             // Resources Section
             _buildSection(
+              context: context,
               title: 'Resources',
               children: [
                 _buildContactTile(
+                  context: context,
                   icon: Icons.book_outlined,
                   title: 'User Guide',
                   subtitle: 'Learn how to use all features',
                   onTap: () => _showComingSoon(context, 'User Guide'),
                 ),
                 _buildContactTile(
+                  context: context,
                   icon: Icons.video_library_outlined,
                   title: 'Video Tutorials',
                   subtitle: 'Watch step-by-step guides',
                   onTap: () => _showComingSoon(context, 'Video Tutorials'),
                 ),
                 _buildContactTile(
+                  context: context,
                   icon: Icons.bug_report_outlined,
                   title: 'Report a Bug',
                   subtitle: 'Help us improve the app',
@@ -113,16 +127,27 @@ class HelpSupportPage extends ConsumerWidget {
 
             // App Information
             _buildSection(
+              context: context,
               title: 'App Information',
               children: [
-                _buildInfoTile(title: 'Version', value: '1.0.0'),
-                _buildInfoTile(title: 'Build', value: '2024.01.15'),
                 _buildInfoTile(
+                  context: context,
+                  title: 'Version',
+                  value: '1.0.0',
+                ),
+                _buildInfoTile(
+                  context: context,
+                  title: 'Build',
+                  value: '2024.01.15',
+                ),
+                _buildInfoTile(
+                  context: context,
                   title: 'Privacy Policy',
                   value: 'View our privacy policy',
                   onTap: () => _showComingSoon(context, 'Privacy Policy'),
                 ),
                 _buildInfoTile(
+                  context: context,
                   title: 'Terms of Service',
                   value: 'View our terms of service',
                   onTap: () => _showComingSoon(context, 'Terms of Service'),
@@ -136,6 +161,7 @@ class HelpSupportPage extends ConsumerWidget {
   }
 
   Widget _buildSection({
+    required BuildContext context,
     required String title,
     required List<Widget> children,
   }) {
@@ -144,10 +170,10 @@ class HelpSupportPage extends ConsumerWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1B1A18),
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         const SizedBox(height: 12),
@@ -164,13 +190,17 @@ class HelpSupportPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildFAQItem({required String question, required String answer}) {
+  Widget _buildFAQItem({
+    required BuildContext context,
+    required String question,
+    required String answer,
+  }) {
     return ExpansionTile(
       title: Text(
         question,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w500,
-          color: Color(0xFF1B1A18),
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
       children: [
@@ -186,18 +216,19 @@ class HelpSupportPage extends ConsumerWidget {
   }
 
   Widget _buildContactTile({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF1B1A18)),
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w500,
-          color: Color(0xFF1B1A18),
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
       subtitle: Text(
@@ -214,6 +245,7 @@ class HelpSupportPage extends ConsumerWidget {
   }
 
   Widget _buildInfoTile({
+    required BuildContext context,
     required String title,
     required String value,
     VoidCallback? onTap,
@@ -221,9 +253,9 @@ class HelpSupportPage extends ConsumerWidget {
     return ListTile(
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w500,
-          color: Color(0xFF1B1A18),
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
       trailing: Row(

@@ -19,13 +19,13 @@ class TryOnPage extends ConsumerWidget {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: const Center(
+              child: Center(
                 child: Text(
                   'Try-On',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1B1A18),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
@@ -33,7 +33,7 @@ class TryOnPage extends ConsumerWidget {
 
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Container(color: Colors.black12),
               ),
             ),
@@ -42,9 +42,9 @@ class TryOnPage extends ConsumerWidget {
 
             SizedBox(height: 10),
 
-            TryOnBtn(text: "Save Outfit ", onPressed: () {}, isLoading: false),
+            SaveOutfitBtn(text: "Save Outfit ", onPressed: () {}, isLoading: false),
 
-            SizedBox(height: 20),
+            SizedBox(height: 40),
           ],
         ),
       ),

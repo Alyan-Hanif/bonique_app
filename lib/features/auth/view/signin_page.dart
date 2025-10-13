@@ -119,10 +119,14 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 150,
-                          height: 150,
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
                           child: Image.asset(
-                            'assets/images/bonique/bonique - Copy-06.png',
+                            'assets/images/bonique/bonique - Copy-08.png',
                             width: 150,
                             height: 150,
                           ),
@@ -130,7 +134,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       ],
                     ),
 
-                    // const SizedBox(height: 32),
+                    const SizedBox(height: 10),
 
                     // Title
                     Center(
@@ -155,7 +159,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     AuthInputField(
                       controller: _emailController,
                       label: 'Enter your email address',
-                      placeholder: 'raheema@gmail.com',
+                      placeholder: 'jongsoo@gmail.com',
                       prefixIcon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                       errorText: authState.emailError,
@@ -189,11 +193,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: widget.onForgotPassword,
-                        child: Text(
-                          'Forgot Password?',
-                          style: AuthTextStyles.stat2.copyWith(
-                            color: kPrimaryColor,
-                            decoration: TextDecoration.underline,
+                        child: Builder(
+                          builder: (context) => Text(
+                            'Forgot Password?',
+                            style: AuthTextStyles.stat2.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ),
@@ -236,12 +242,16 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                             WidgetSpan(
                               child: GestureDetector(
                                 onTap: widget.onSignUp,
-                                child: Text(
-                                  'Sign Up',
-                                  style: AuthTextStyles.stat2.copyWith(
-                                    color: kPrimaryColor,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
+                                child: Builder(
+                                  builder: (context) => Text(
+                                    'Sign Up',
+                                    style: AuthTextStyles.stat2.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                    ),
                                   ),
                                 ),
                               ),

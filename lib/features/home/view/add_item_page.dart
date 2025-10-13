@@ -48,12 +48,12 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
                 const SizedBox(height: 20),
 
                 // Title
-                const Text(
+                Text(
                   'Select Image Source',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1B1A18),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -73,12 +73,12 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
                       size: 24,
                     ),
                   ),
-                  title: const Text(
+                  title: Text(
                     'Gallery',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF1B1A18),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   subtitle: const Text(
@@ -106,12 +106,12 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
                       size: 24,
                     ),
                   ),
-                  title: const Text(
+                  title: Text(
                     'Camera',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF1B1A18),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   subtitle: const Text(
@@ -297,12 +297,12 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Add new items',
           style: TextStyle(
             fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1B1A18),
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
       ),
@@ -431,7 +431,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _isUploading
                       ? Colors.grey.shade400
-                      : const Color(0xFF1B1A18),
+                      : Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../viewmodel/splash_viewmodel.dart';
 import '../../onboarding/view/onboarding_page.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../../home/view/home_page.dart';
@@ -102,7 +101,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1B1A18),
+      backgroundColor: Theme.of(context).colorScheme.primary,
       body: Stack(
         children: [
           // Smoke background animation

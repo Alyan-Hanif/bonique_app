@@ -8,10 +8,9 @@ class HomeGreeting extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       'Hello, \\${name.isEmpty ? 'Guest' : name}',
-      style: Theme.of(context)
-          .textTheme
-          .titleLarge
-          ?.copyWith(fontWeight: FontWeight.w700),
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
     );
   }
 }
@@ -22,47 +21,93 @@ class TryOnBtn extends StatelessWidget {
   final bool isLoading;
 
   const TryOnBtn({
-    super.key ,
+    super.key,
     required this.text,
     required this.onPressed,
-    required this.isLoading});
+    required this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 382,
-      height: 48,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20,),
+      child: SizedBox(
+        width: 382,
+        height: 48,
         child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1B1A18),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(48),
-            side: const BorderSide(
-              color: Colors.white,
-              width: 1,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(48),
+              side: const BorderSide(color: Colors.white, width: 1),
             ),
+            elevation: 0,
           ),
-          elevation: 0,
+          onPressed: isLoading ? null : onPressed,
+          child: isLoading
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : Text(text),
         ),
-        onPressed: isLoading ? null : onPressed,
-        child: isLoading
-            ? const SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-            strokeWidth: 2,
-          ),
-        )
-            : Text(text),
       ),
     );
-
   }
 }
 
+class SaveOutfitBtn extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
 
+  const SaveOutfitBtn({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    required this.isLoading,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(
+        width: 382,
+        height: 48,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+            Theme.of(context).colorScheme.primary.withOpacity(0.15),
+            foregroundColor:
+            Theme.of(context).colorScheme.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(48),
+              side: const BorderSide(color: Colors.white, width: 1),
+            ),
+            elevation: 0,
+          ),
+          onPressed: isLoading ? null : onPressed,
+          child: isLoading
+              ? const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          )
+              : Text(text),
+        ),
+      ),
+    );
+  }
+}
 
 //
 //   @override
