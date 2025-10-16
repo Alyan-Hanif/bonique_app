@@ -18,6 +18,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _addressController = TextEditingController();
   // final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -26,6 +27,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _addressController.dispose();
     // _confirmPasswordController.dispose();
     super.dispose();
   }
@@ -100,6 +102,11 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   void _onPasswordChanged(String value) {
     final authViewModel = ref.read(authViewModelProvider.notifier);
     authViewModel.validatePassword(value);
+  }
+
+  void _onAddressChanged(String value) {
+    final authViewModel = ref.read(authViewModelProvider.notifier);
+    authViewModel.validateName(value);
   }
 
   // void _onConfirmPasswordChanged(String value) {
@@ -209,6 +216,18 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     onChanged: _onPasswordChanged,
                   ),
 
+                  const SizedBox(height: 24),
+
+                  // Address field
+                  AuthInputField(
+                    controller: _addressController,
+                    label: 'Enter your Address',
+                    placeholder: '123 Main St, Anytown, USA',
+                    prefixIcon: Icons.location_on_outlined,
+                    keyboardType: TextInputType.streetAddress,
+                    errorText: authState.nameError,
+                    onChanged: _onAddressChanged,
+                  ),
                   // const SizedBox(height: 24),
                   //
                   // // Confirm Password field

@@ -1,19 +1,23 @@
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
-import 'package:bonique/data/repositories/wardrobe_repository.dart';
 import 'package:bonique/data/models/wardrobe_model.dart';
+import 'package:bonique/data/repositories/recommendations_repository.dart';
 import 'package:bonique/core/widgets/loading_animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// Provider to store discovery answers
+final discoveryAnswersProvider = StateProvider<String>((ref) => '');
+
 // State management for results filtering
 final resultsFilterProvider = StateProvider<String>((ref) => 'All');
 
-// Real results data provider that fetches from Supabase
+// Results data provider that fetches recommendations from API
 final resultsDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
   print('🔄 RESULTS DATA PROVIDER CALLED');
-  final authState = ref.watch(authViewModelProvider);
 
+  // Get auth state to retrieve user ID
+  final authState = ref.watch(authViewModelProvider);
   print(
     '🔐 AUTH STATE: isLoggedIn=${authState.isLoggedIn}, currentUserModel=${authState.currentUserModel?.id}',
   );
@@ -23,28 +27,28 @@ final resultsDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
     return [];
   }
 
+  // Get discovery answers
+  final discoveryAnswers = ref.watch(discoveryAnswersProvider);
+  print('📝 Discovery Answers from Provider: "$discoveryAnswers"');
+
+  // If no answers, return empty list
+  if (discoveryAnswers.isEmpty) {
+    print('⚠️ NO DISCOVERY ANSWERS - RETURNING EMPTY LIST');
+    return [];
+  }
+
   try {
-    print('📡 FETCHING RESULTS ITEMS FROM SUPABASE...');
-    final wardrobeItems = await WardrobeRepository.getWardrobeItems(
-      authState.currentUserModel!.id,
-    );
-    print('📦 RESULTS DATA LOADED: ${wardrobeItems.length} items');
-
-    if (wardrobeItems.isNotEmpty) {
-      print('📋 RESULTS ITEMS DETAILS:');
-      for (var item in wardrobeItems) {
-        print(
-          '   - ID: ${item.id}, Category: ${item.category}, Image: ${item.imagePath}',
+    // Fetch recommendations from API using repository
+    final recommendations =
+        await RecommendationsRepository.fetchRecommendations(
+          userId: authState.currentUserModel!.id,
+          query: discoveryAnswers,
         );
-      }
-    } else {
-      print('⚠️ NO RESULTS ITEMS RETURNED FROM REPOSITORY');
-    }
 
-    return wardrobeItems;
+    return recommendations;
   } catch (e) {
-    print('❌ ERROR FETCHING RESULTS DATA: $e');
-    print('❌ STACK TRACE: ${StackTrace.current}');
+    print('❌ ERROR IN RESULTS DATA PROVIDER: $e');
+    // Return empty list on error instead of throwing
     return [];
   }
 });

@@ -1,22 +1,23 @@
 import 'dart:io';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
 import '../models/wardrobe_model.dart';
 import '../../core/services/supabase_service.dart';
 
 class WardrobeRepository {
   static const String _bucketName = 'wardrobe';
   static const String _tableName = 'wardrobe';
+  static const String _baseUrl = 'https://9ef0f3990b51.ngrok-free.app';
 
   // Upload image to Supabase storage
   static Future<String> uploadImage(File imageFile, String userId) async {
     try {
-      print('Starting image upload for user: $userId');
+      print('📤 Starting image upload to Supabase for user: $userId');
       final fileName = '${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final filePath = '$userId/$fileName';
 
-      print('Uploading to path: $filePath');
+      print('📁 Uploading to path: $filePath');
       final bytes = await imageFile.readAsBytes();
-      print('Image size: ${bytes.length} bytes');
+      print('📏 Image size: ${bytes.length} bytes');
 
       await SupabaseService.client.storage
           .from(_bucketName)
@@ -27,11 +28,58 @@ class WardrobeRepository {
           .from(_bucketName)
           .getPublicUrl(filePath);
 
-      print('Upload successful, public URL: $publicUrl');
+      print('✅ Supabase upload successful! Public URL: $publicUrl');
       return publicUrl;
     } catch (e) {
-      print('Upload failed: $e');
-      throw Exception('Failed to upload image: $e');
+      print('❌ Supabase upload failed: $e');
+      throw Exception('Failed to upload image to Supabase: $e');
+    }
+  }
+
+  // Call backend API with image (additional processing)
+  static Future<void> processImageWithAPI(File imageFile, String userId) async {
+    try {
+      print('🌐 Sending image to backend API for processing...');
+      print('👤 User ID: $userId');
+      print('📁 Image path: ${imageFile.path}');
+
+      // Build URL with user_id query parameter
+      final url = Uri.parse(
+        '$_baseUrl/images/upload',
+      ).replace(queryParameters: {'user_id': userId});
+      print('🔗 API URL: $url');
+
+      // Create multipart request
+      final request = http.MultipartRequest('POST', url);
+
+      // Add headers
+      request.headers.addAll({'ngrok-skip-browser-warning': 'true'});
+
+      // Add the image file
+      final multipartFile = await http.MultipartFile.fromPath(
+        'file',
+        imageFile.path,
+      );
+      request.files.add(multipartFile);
+
+      print('📤 Sending to API...');
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print('📡 API Response Status: ${response.statusCode}');
+      print('📡 API Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('✅ API processing successful!');
+      } else {
+        print(
+          '⚠️ API processing failed: ${response.statusCode} - ${response.body}',
+        );
+        // Don't throw error - we still want to save to database even if API fails
+      }
+    } catch (e) {
+      print('⚠️ API processing error: $e');
+      // Don't throw error - we still want to save to database even if API fails
     }
   }
 

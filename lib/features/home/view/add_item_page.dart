@@ -217,25 +217,31 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
             'Processing image ${i + 1}/${_selectedImages.length}: ${imageFile.path}',
           );
 
-          // Upload image to Supabase storage
+          // Step 1: Upload image to Supabase storage
           final imagePath = await WardrobeRepository.uploadImage(
             File(imageFile.path),
             user.id,
           );
-          print('Image uploaded successfully: $imagePath');
+          print('✅ Image uploaded to Supabase: $imagePath');
 
-          // Save wardrobe item to database
+          // Step 2: Send image to backend API for processing (runs in parallel)
+          WardrobeRepository.processImageWithAPI(
+            File(imageFile.path),
+            user.id,
+          ); // Don't await - let it run in background
+
+          // Step 3: Save wardrobe item to database
           await WardrobeRepository.saveWardrobeItem(
             userId: user.id,
             imagePath: imagePath,
             category: 'Shirt',
             description: 'blue colour with red pattern',
           );
-          print('Wardrobe item saved successfully');
+          print('✅ Wardrobe item saved to database');
 
           successCount++;
         } catch (e) {
-          print('Error processing image ${imageFile.path}: $e');
+          print('❌ Error processing image ${imageFile.path}: $e');
           failCount++;
         }
       }

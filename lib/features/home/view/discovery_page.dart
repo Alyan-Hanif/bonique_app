@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../viewmodel/home_viewmodel.dart'; // Add this import
+import '../viewmodel/home_viewmodel.dart';
+import '../viewmodel/discovery_viewmodel.dart';
+import 'results_page.dart';
 
 class DiscoveryPage extends ConsumerStatefulWidget {
   const DiscoveryPage({super.key});
@@ -10,24 +12,19 @@ class DiscoveryPage extends ConsumerStatefulWidget {
 }
 
 class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
-  String? selectedEvent;
-  String? selectedType;
-  String? selectedColor;
-  final TextEditingController _otherController = TextEditingController();
-
   @override
-  void dispose() {
-    _otherController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    // Fetch questions when the page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(discoveryControllerProvider.notifier).fetchQuestions();
+    });
   }
-
-  // Check if all options are selected
-  bool get hasSelection =>
-      selectedEvent != null && selectedType != null && selectedColor != null;
 
   @override
   Widget build(BuildContext context) {
     final maxContentWidth = 600.0; // Max width for content on larger screens
+    final discoveryState = ref.watch(discoveryControllerProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -51,120 +48,26 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
             ),
             // Content
             Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxContentWidth),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 16),
-                        // Event Section
-                        _buildSection(
-                          title: 'Event',
-                          options: ['Work', 'Casual', 'Party', 'Other'],
-                          selectedValue: selectedEvent,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedEvent = value;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 15),
-
-                        // Type Section
-                        _buildSection(
-                          title: 'Type',
-                          options: ['Formal', 'Elegant', 'Fancy', 'Other'],
-                          selectedValue: selectedType,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedType = value;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 15),
-
-                        // Color Section
-                        _buildSection(
-                          title: 'Color',
-                          options: ['Black', 'White'],
-                          selectedValue: selectedColor,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedColor = value;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 15),
-
-                        // Conditional input field for Event "Other"
-                        if (selectedEvent == 'Other') ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: const Color(0x6D797F99),
-                                width: 1,
-                              ),
-                            ),
-                            child: TextField(
-                              controller: _otherController,
-                              decoration: const InputDecoration(
-                                hintText: 'Type your preference',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                        ],
-
-                        // Conditional input field for Type "Other"
-                        if (selectedType == 'Other') ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: const Color(0x6D797F99),
-                                width: 1,
-                              ),
-                            ),
-                            child: TextField(
-                              decoration: const InputDecoration(
-                                hintText: 'Type your preference',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                        ],
-                        const SizedBox(height: 80), // Space for floating button
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              child: _buildContent(context, discoveryState, maxContentWidth),
             ),
           ],
         ),
       ),
       // Floating Discover Button (similar to wardrobe page)
-      floatingActionButton: hasSelection
+      floatingActionButton: discoveryState.hasAllAnswers
           ? FloatingActionButton.extended(
               onPressed: () {
+                // Collect selected answers and join them with spaces
+                final selectedAnswersText = discoveryState
+                    .selectedAnswers
+                    .values
+                    .join(' ');
+                print('🔍 Selected answers: $selectedAnswersText');
+
+                // Store the answers in the provider
+                ref.read(discoveryAnswersProvider.notifier).state =
+                    selectedAnswersText;
+
                 // Navigate to results page
                 ref.read(bottomNavigationIndexProvider.notifier).state = 4;
               },
@@ -176,6 +79,109 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
             )
           : null,
       bottomNavigationBar: const SizedBox(height: 0),
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    DiscoveryState state,
+    double maxContentWidth,
+  ) {
+    // Show loading indicator
+    if (state.isLoading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      );
+    }
+
+    // Show error message
+    if (state.errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Failed to load questions',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                state.errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ref
+                      .read(discoveryControllerProvider.notifier)
+                      .fetchQuestions();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show questions
+    if (state.questions.isEmpty) {
+      return Center(
+        child: Text(
+          'No questions available',
+          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+        ),
+      );
+    }
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxContentWidth),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 16),
+              // Dynamically build sections from API data
+              ...state.questions.asMap().entries.map((entry) {
+                final index = entry.key;
+                final question = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 15),
+                  child: _buildSection(
+                    title: question.question,
+                    options: question.options,
+                    selectedValue: state.selectedAnswers[index],
+                    onChanged: (value) {
+                      ref
+                          .read(discoveryControllerProvider.notifier)
+                          .selectAnswer(index, value!);
+                    },
+                  ),
+                );
+              }),
+              const SizedBox(height: 80), // Space for floating button
+            ],
+          ),
+        ),
+      ),
     );
   }
 
