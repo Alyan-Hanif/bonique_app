@@ -51,7 +51,9 @@ final wardrobeDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
 });
 
 // Add this provider after the existing providers
-final selectedWardrobeItemsProvider = StateProvider<Set<int>>((ref) => <int>{});
+final selectedWardrobeItemsProvider = StateProvider<Set<String>>(
+  (ref) => <String>{},
+);
 
 class WardrobePage extends ConsumerStatefulWidget {
   const WardrobePage({super.key});
@@ -338,11 +340,32 @@ class _WardrobePageState extends ConsumerState<WardrobePage> {
       floatingActionButton: selectedItems.isNotEmpty
           ? FloatingActionButton.extended(
               onPressed: () {
+                // Get the full wardrobe items data
+                final wardrobeAsyncValue = ref.read(wardrobeDataProvider);
+                wardrobeAsyncValue.whenData((wardrobeItems) {
+                  // Filter to get only selected items
+                  final selectedWardrobeItems = wardrobeItems
+                      .where((item) => selectedItems.contains(item.id))
+                      .toList();
+
+                  // Store selected items for try-on page
+                  ref.read(tryOnItemsProvider.notifier).state =
+                      selectedWardrobeItems;
+
+                  print(
+                    '🎯 Selected ${selectedWardrobeItems.length} items for try-on',
+                  );
+                  for (var item in selectedWardrobeItems) {
+                    print('   - ${item.category}: ${item.imagePath}');
+                  }
+                });
+
                 // Navigate to try-on page using bottom navigation
                 ref.read(bottomNavigationIndexProvider.notifier).state = 2;
+
                 // Clear selection after action
                 ref.read(selectedWardrobeItemsProvider.notifier).state =
-                    <int>{};
+                    <String>{};
               },
               backgroundColor: Theme.of(context).colorScheme.primary,
               label: Text(
@@ -442,7 +465,7 @@ class _WardrobeTile extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         final currentSelected = ref.read(selectedWardrobeItemsProvider);
-        final newSelected = Set<int>.from(currentSelected);
+        final newSelected = Set<String>.from(currentSelected);
 
         if (isSelected) {
           newSelected.remove(item.id);

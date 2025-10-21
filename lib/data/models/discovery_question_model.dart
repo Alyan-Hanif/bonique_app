@@ -19,19 +19,39 @@ class DiscoveryQuestion {
 }
 
 class DiscoveryQuestionsResponse {
+  final bool success;
+  final String status;
+  final String message;
   final List<DiscoveryQuestion> questions;
+  final int count;
 
-  DiscoveryQuestionsResponse({required this.questions});
+  DiscoveryQuestionsResponse({
+    required this.success,
+    required this.status,
+    required this.message,
+    required this.questions,
+    required this.count,
+  });
 
   factory DiscoveryQuestionsResponse.fromJson(Map<String, dynamic> json) {
     return DiscoveryQuestionsResponse(
-      questions: (json['questions'] as List<dynamic>)
+      success: json['success'] as bool,
+      status: json['status'] as String,
+      message: json['message'] as String,
+      questions: (json['data'] as List<dynamic>)
           .map((q) => DiscoveryQuestion.fromJson(q as Map<String, dynamic>))
           .toList(),
+      count: json['count'] as int,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'questions': questions.map((q) => q.toJson()).toList()};
+    return {
+      'success': success,
+      'status': status,
+      'message': message,
+      'data': questions.map((q) => q.toJson()).toList(),
+      'count': count,
+    };
   }
 }

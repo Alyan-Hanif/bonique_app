@@ -1,9 +1,10 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../core/config/env_config.dart';
 import '../models/wardrobe_model.dart';
 
 class RecommendationsRepository {
-  static const String _baseUrl = 'https://9ef0f3990b51.ngrok-free.app';
+  static String get _baseUrl => EnvConfig.boniqueAiUrl;
 
   /// Fetches product recommendations based on discovery answers
   /// [userId] - The user's ID

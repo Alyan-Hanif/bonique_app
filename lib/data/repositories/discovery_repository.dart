@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../core/config/env_config.dart';
 import '../../core/services/supabase_service.dart';
 import '../models/discovery_question_model.dart';
 
 class DiscoveryRepository {
   // API endpoint
-  static const String _baseUrl = 'https://9ef0f3990b51.ngrok-free.app';
+  static String get _baseUrl => EnvConfig.boniqueAiUrl;
   static const String _questionsEndpoint = '/wardrobe/questions';
 
   /// Fetches discovery questions from the API
@@ -41,7 +42,13 @@ class DiscoveryRepository {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        return DiscoveryQuestionsResponse.fromJson(jsonData);
+        final apiResponse = DiscoveryQuestionsResponse.fromJson(jsonData);
+
+        print('✅ API Response: ${apiResponse.message}');
+        print('📋 Questions count: ${apiResponse.count}');
+        print('🎯 Success: ${apiResponse.success}');
+
+        return apiResponse;
       } else {
         throw Exception(
           'Failed to load questions: ${response.statusCode} - ${response.body}',

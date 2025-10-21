@@ -135,11 +135,40 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
 
   Future<void> _pickFromGallery() async {
     try {
-      final List<XFile> images = await _picker.pickMultiImage();
+      final List<XFile> images = await _picker.pickMultiImage(
+        imageQuality: 85, // Compress to 85% quality
+      );
+
       if (images.isNotEmpty && mounted) {
-        setState(() {
-          _selectedImages.addAll(images);
-        });
+        // Validate that all selected files are images
+        final validImages = <XFile>[];
+        final invalidFiles = <String>[];
+
+        for (final image in images) {
+          if (_isValidImageFile(image)) {
+            validImages.add(image);
+          } else {
+            invalidFiles.add(image.name);
+          }
+        }
+
+        if (validImages.isNotEmpty) {
+          setState(() {
+            _selectedImages.addAll(validImages);
+          });
+        }
+
+        // Show warning if any invalid files were selected
+        if (invalidFiles.isNotEmpty && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Only image files are allowed. ${invalidFiles.length} file(s) skipped.',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -152,11 +181,26 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
 
   Future<void> _pickFromCamera() async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85, // Compress to 85% quality
+        preferredCameraDevice: CameraDevice.rear, // Use rear camera by default
+      );
+
       if (image != null && mounted) {
-        setState(() {
-          _selectedImages.add(image);
-        });
+        // Validate it's an image file
+        if (_isValidImageFile(image)) {
+          setState(() {
+            _selectedImages.add(image);
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid file type. Only images are allowed.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -165,6 +209,31 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
         ).showSnackBar(SnackBar(content: Text('Error taking photo: $e')));
       }
     }
+  }
+
+  /// Validates that the file is a valid image type
+  bool _isValidImageFile(XFile file) {
+    final String fileName = file.name.toLowerCase();
+    final List<String> validExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.bmp',
+      '.webp',
+    ];
+
+    // Check file extension
+    final bool hasValidExtension = validExtensions.any(
+      (ext) => fileName.endsWith(ext),
+    );
+
+    // Check MIME type if available
+    final String? mimeType = file.mimeType?.toLowerCase();
+    final bool hasValidMimeType =
+        mimeType == null || mimeType.startsWith('image/');
+
+    return hasValidExtension && hasValidMimeType;
   }
 
   Future<File> _compressImage(File file) async {
@@ -250,6 +319,11 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
         print('Setting _isUploading to false');
         setState(() {
           _isUploading = false;
+          // Clear selected images if any items were successfully processed
+          if (successCount > 0) {
+            _selectedImages.clear();
+            print('✅ Cleared selected images');
+          }
         });
 
         // Show result message

@@ -228,7 +228,7 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 48,
+        constraints: const BoxConstraints(minHeight: 48),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
@@ -264,12 +264,16 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
                   : null,
             ),
             const SizedBox(width: 10),
-            Text(
-              option,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
+            Expanded(
+              child: Text(
+                option,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+                maxLines: null,
+                overflow: TextOverflow.visible,
               ),
             ),
           ],

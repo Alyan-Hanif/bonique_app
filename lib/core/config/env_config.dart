@@ -21,6 +21,9 @@ class EnvConfig {
   static String get appPackageName => dotenv.env['APP_PACKAGE_NAME'] ?? '';
   static String get appName => dotenv.env['APP_NAME'] ?? '';
 
+  // Bonique AI Backend Configuration
+  static String get boniqueAiUrl => dotenv.env['BONIQUE_AI_URL'] ?? '';
+
   // Validation method to ensure all required environment variables are set
   static bool validateConfig() {
     final requiredVars = [
@@ -32,6 +35,7 @@ class EnvConfig {
       googleOAuthClientId,
       appPackageName,
       appName,
+      boniqueAiUrl,
     ];
 
     for (final variable in requiredVars) {

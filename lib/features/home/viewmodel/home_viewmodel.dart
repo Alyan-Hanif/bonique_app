@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
+import '../../../data/models/wardrobe_model.dart';
 
 @immutable
 class HomeState {
@@ -41,3 +42,12 @@ class HomeController extends StateNotifier<HomeState> {
 
 // Bottom navigation index provider
 final bottomNavigationIndexProvider = StateProvider<int>((ref) => 0);
+
+// Provider to store selected wardrobe items for try-on
+final tryOnItemsProvider = StateProvider<List<WardrobeModel>>((ref) => []);
+
+// Provider to store the try-on result image URL
+final tryOnResultProvider = StateProvider<String?>((ref) => null);
+
+// Provider to track try-on loading state
+final tryOnLoadingProvider = StateProvider<bool>((ref) => false);

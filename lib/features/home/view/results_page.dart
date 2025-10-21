@@ -54,7 +54,9 @@ final resultsDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
 });
 
 // Selected items for try-on
-final selectedResultItemsProvider = StateProvider<Set<int>>((ref) => <int>{});
+final selectedResultItemsProvider = StateProvider<Set<String>>(
+  (ref) => <String>{},
+);
 
 class ResultsPage extends ConsumerStatefulWidget {
   const ResultsPage({super.key});
@@ -344,7 +346,8 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
                 // Navigate to try-on page using bottom navigation
                 ref.read(bottomNavigationIndexProvider.notifier).state = 2;
                 // Clear selection after action
-                ref.read(selectedResultItemsProvider.notifier).state = <int>{};
+                ref.read(selectedResultItemsProvider.notifier).state =
+                    <String>{};
               },
               backgroundColor: Theme.of(context).colorScheme.primary,
               label: Text(
@@ -438,7 +441,7 @@ class _ResultTile extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         final currentSelected = ref.read(selectedResultItemsProvider);
-        final newSelected = Set<int>.from(currentSelected);
+        final newSelected = Set<String>.from(currentSelected);
 
         if (isSelected) {
           newSelected.remove(item.id);
