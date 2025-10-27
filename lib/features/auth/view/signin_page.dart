@@ -126,15 +126,15 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                             borderRadius: BorderRadius.all(Radius.circular(8)),
                           ),
                           child: Image.asset(
-                            'assets/images/bonique/bonique - Copy-08.png',
-                            width: 150,
-                            height: 150,
+                            'assets/images/bonique/auth-logo.png',
+                            width: 60,
+                            height: 60,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 30),
 
                     // Title
                     Center(
@@ -150,6 +150,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       child: Text(
                         'Enter information to Sign In to your account.',
                         style: AuthTextStyles.stat1,
+                        textAlign: TextAlign.center,
                       ),
                     ),
 

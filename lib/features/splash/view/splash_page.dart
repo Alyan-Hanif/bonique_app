@@ -151,9 +151,9 @@ class _SplashPageState extends ConsumerState<SplashPage>
                       //   ),
                       // ),
                       Image.asset(
-                        'assets/images/bonique/bonique - Copy-05.png',
-                        width: 200,
-                        height: 200,
+                        'assets/images/bonique/splash-logo.png',
+                        width: 202,
+                        height: 178,
                       ),
                       const SizedBox(height: 24),
 

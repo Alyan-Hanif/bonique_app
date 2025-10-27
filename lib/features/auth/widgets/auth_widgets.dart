@@ -36,7 +36,7 @@ class AuthTextStyles {
   );
 
   static const TextStyle stat1 = TextStyle(
-    fontSize: 16,
+    fontSize: 15.2,
     height: 28 / 20,
     fontWeight: FontWeight.normal,
     color: kTextSecondary,

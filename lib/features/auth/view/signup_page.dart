@@ -139,18 +139,18 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       // ),
                       // const Spacer(),
                       Container(
-                        width: 150,
-                        height: 150,
+                        width: 60,
+                        height: 60,
                         child: Image.asset(
-                          'assets/images/bonique/bonique - Copy-06.png',
-                          width: 150,
-                          height: 150,
+                          'assets/images/bonique/auth-logo.png',
+                          width: 60,
+                          height: 60,
                         ),
                       ),
                     ],
                   ),
 
-                  // const SizedBox(height: 32),
+                  const SizedBox(height: 30),
 
                   // Title
                   Center(
@@ -219,15 +219,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   const SizedBox(height: 24),
 
                   // Address field
-                  AuthInputField(
-                    controller: _addressController,
-                    label: 'Enter your Address',
-                    placeholder: '123 Main St, Anytown, USA',
-                    prefixIcon: Icons.location_on_outlined,
-                    keyboardType: TextInputType.streetAddress,
-                    errorText: authState.nameError,
-                    onChanged: _onAddressChanged,
-                  ),
+                  // AuthInputField(
+                  //   controller: _addressController,
+                  //   label: 'Enter your Address',
+                  //   placeholder: '123 Main St, Anytown, USA',
+                  //   prefixIcon: Icons.location_on_outlined,
+                  //   keyboardType: TextInputType.streetAddress,
+                  //   errorText: authState.nameError,
+                  //   onChanged: _onAddressChanged,
+                  // ),
                   // const SizedBox(height: 24),
                   //
                   // // Confirm Password field

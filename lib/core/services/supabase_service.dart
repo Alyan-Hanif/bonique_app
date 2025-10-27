@@ -7,8 +7,15 @@ class SupabaseService {
       await Supabase.initialize(
         url: EnvConfig.supabaseUrl,
         anonKey: EnvConfig.supabaseAnonKey,
+        authOptions: const FlutterAuthClientOptions(
+          authFlowType: AuthFlowType.pkce,
+          // This enables automatic deep link handling for password reset
+          autoRefreshToken: true,
+        ),
       );
       print('Supabase initialized successfully');
+      print('Auth flow type: PKCE');
+      print('Auto refresh token: enabled');
     } catch (e) {
       print('Supabase initialization error: $e');
       rethrow;
@@ -20,10 +27,7 @@ class SupabaseService {
   // Test method to verify connection
   static Future<bool> testConnection() async {
     try {
-      await client
-          .from('_test_connection')
-          .select('*')
-          .limit(1);
+      await client.from('_test_connection').select('*').limit(1);
       return true;
     } catch (e) {
       print('Supabase connection test failed: $e');

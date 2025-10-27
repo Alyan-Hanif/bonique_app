@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/splash/view/splash_page.dart';
 import 'features/onboarding/view/onboarding_page.dart';
 import 'features/auth/view/auth_page.dart';
+import 'features/auth/view/update_password_page.dart';
 import 'features/home/view/home_page.dart';
 import 'core/services/supabase_service.dart';
 import 'core/services/deep_link_service.dart';
@@ -89,6 +90,7 @@ class _MyAppState extends State<MyApp> {
         SplashPage.route: (context) => const SplashPage(),
         OnboardingPage.route: (context) => const OnboardingPage(),
         AuthPage.route: (context) => const AuthPage(),
+        UpdatePasswordPage.route: (context) => const UpdatePasswordPage(),
         HomePage.route: (context) => const HomePage(),
 
         // Add more routes as needed

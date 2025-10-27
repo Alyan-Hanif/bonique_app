@@ -116,14 +116,14 @@ class OnboardingPage extends ConsumerWidget {
 
                             // Animated image
                             Align(
-                              alignment: Alignment.bottomCenter,
+                              alignment: Alignment.topCenter,
                               child: AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 300),
                                 child: Image.asset(
                                   pagesData[index].image,
                                   key: ValueKey(index),
-                                  width: 420, // was 362 → slightly bigger
-                                  height: 550, // was 475 → slightly bigger
+                                  width: 420,
+                                  height: 550,
                                   fit: BoxFit.contain,
                                 ),
                               ),
