@@ -190,25 +190,81 @@ class WardrobeRepository {
     }
   }
 
+  // Upload person image to Supabase storage
+  static Future<String> uploadPersonImage(File imageFile, String userId) async {
+    try {
+      print('📤 Starting person image upload to Supabase for user: $userId');
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final filePath = '$userId/$fileName';
+
+      print('📁 Uploading to path: personImages/$filePath');
+      final bytes = await imageFile.readAsBytes();
+      print('📏 Image size: ${bytes.length} bytes');
+
+      await SupabaseService.client.storage
+          .from('personImages')
+          .uploadBinary(filePath, bytes);
+
+      // Get public URL
+      final publicUrl = SupabaseService.client.storage
+          .from('personImages')
+          .getPublicUrl(filePath);
+
+      print('✅ Person image upload successful! Public URL: $publicUrl');
+      return publicUrl;
+    } catch (e) {
+      print('❌ Person image upload failed: $e');
+      throw Exception('Failed to upload person image to Supabase: $e');
+    }
+  }
+
   // Try-on API call
   static Future<String> tryOnClothing({
     required String clothingPath,
     required String personPath,
   }) async {
     try {
-      print('👗 Starting try-on API call...');
-      print('👕 Clothing path: $clothingPath');
-      print('👤 Person path: $personPath');
+      // --- Clean the clothing path ---
+      String trimmedClothingPath = clothingPath
+          .split('productimages/')
+          .last
+          .trim();
+      if (trimmedClothingPath.endsWith('?')) {
+        trimmedClothingPath = trimmedClothingPath.substring(
+          0,
+          trimmedClothingPath.length - 1,
+        );
+      }
 
-      // Build URL with query parameters as expected by the API
+      // --- Clean the person path ---
+      String trimmedPersonPath = personPath.split('personImages/').last.trim();
+      if (trimmedPersonPath.endsWith('?')) {
+        trimmedPersonPath = trimmedPersonPath.substring(
+          0,
+          trimmedPersonPath.length - 1,
+        );
+      }
+
+      // Extract user_id from person path (format: {user_id}/{image_name})
+      final userId = trimmedPersonPath.split('/').first;
+
+      print('👗 Starting try-on API call...');
+      print('👕 Clothing path: $clothingPath → $trimmedClothingPath');
+      print('👤 Person path: $personPath → $trimmedPersonPath');
+      print('👤 User ID: $userId');
+
+      // --- Build URL with parameters ---
       final url = Uri.parse('$_baseUrl/images/try-on').replace(
         queryParameters: {
-          'clothing_path': clothingPath,
-          'person_path': personPath,
+          'clothing_path': trimmedClothingPath,
+          'person_path': trimmedPersonPath,
+          'user_id': userId,
         },
       );
+
       print('🔗 API URL: $url');
 
+      // --- Send request ---
       final response = await http.post(
         url,
         headers: {
@@ -220,22 +276,25 @@ class WardrobeRepository {
       print('📡 Try-on API Response Status: ${response.statusCode}');
       print('📡 Try-on API Response Body: ${response.body}');
 
+      // --- Handle successful response ---
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         print('✅ Try-on API call successful!');
         print('📦 Full API Response: $jsonResponse');
 
-        // For now, just log the response and return a placeholder
-        // TODO: Extract actual result image URL when API response structure is confirmed
-        print(
-          '🖼️ API Response received - structure: ${jsonResponse.runtimeType}',
-        );
-        print(
-          '🖼️ Response keys: ${jsonResponse is Map ? jsonResponse.keys.toList() : 'Not a Map'}',
-        );
+        // ✅ Extract the try-on image URL
+        final data = jsonResponse['data'];
+        String? tryOnImageUrl = data?['try_on_image_url'];
 
-        // Return a placeholder for now
-        return 'https://via.placeholder.com/400x600/FF6B2C/FFFFFF?text=Try-On+Result';
+        // --- Clean up image URL if needed ---
+        if (tryOnImageUrl != null) {
+          tryOnImageUrl = tryOnImageUrl.split('?').first; // remove trailing '?'
+          print('🖼️ Final Try-on Image URL: $tryOnImageUrl');
+          return tryOnImageUrl;
+        } else {
+          print('⚠️ No try_on_image_url found in response.');
+          return 'https://via.placeholder.com/400x600/FF6B2C/FFFFFF?text=No+Try-On+Image';
+        }
       } else {
         print(
           '❌ Try-on API call failed: ${response.statusCode} - ${response.body}',

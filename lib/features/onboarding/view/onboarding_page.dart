@@ -116,19 +116,23 @@ class OnboardingPage extends ConsumerWidget {
 
                             // Animated image
                             Align(
-                              alignment: Alignment.topCenter,
+                              alignment: Alignment.bottomCenter, // move image to bottom
                               child: AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 300),
-                                child: Image.asset(
-                                  pagesData[index].image,
-                                  key: ValueKey(index),
-                                  width: 420,
-                                  height: 550,
-                                  fit: BoxFit.contain,
+                                child: Container(
+                                  width: 350, // adjust circle size
+
+                                  child: Image.asset(
+                                    pagesData[index].image,
+                                    fit: BoxFit.cover, // fill circle properly
+                                    alignment: Alignment.bottomCenter,
+                                  ),
                                 ),
                               ),
                             ),
+
                             AnimatedSwitcher(
+                              
                               duration: const Duration(milliseconds: 300),
                               child: Image.asset(
                                 pagesData[index].image,

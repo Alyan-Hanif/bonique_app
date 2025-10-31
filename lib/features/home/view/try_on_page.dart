@@ -1,397 +1,330 @@
-import 'package:bonique/features/home/widgets/home_widgets.dart';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:bonique/data/repositories/wardrobe_repository.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../widgets/home_widgets.dart'; // for TryOnBtn & SaveOutfitBtn
 
-class TryOnPage extends ConsumerWidget {
+class TryOnPage extends ConsumerStatefulWidget {
   const TryOnPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedItems = ref.watch(tryOnItemsProvider);
-    final tryOnResult = ref.watch(tryOnResultProvider);
-    final isLoading = ref.watch(tryOnLoadingProvider);
-    final authState = ref.watch(authViewModelProvider);
+  ConsumerState<TryOnPage> createState() => _TryOnPageState();
+}
 
-    // Function to handle try-on API call
-    Future<void> _handleTryOn() async {
-      if (selectedItems.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select an item first')),
-        );
-        return;
-      }
+class _TryOnPageState extends ConsumerState<TryOnPage> {
+  final ImagePicker _picker = ImagePicker();
 
-      if (authState.currentUserModel?.avatarUrl == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please set a profile picture first')),
-        );
-        return;
-      }
+  void _showImageSourcePicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle bar
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-      try {
-        // Set loading state
-        ref.read(tryOnLoadingProvider.notifier).state = true;
-        ref.read(tryOnResultProvider.notifier).state = null;
-
-        // Call the try-on API
-        final resultImageUrl = await WardrobeRepository.tryOnClothing(
-          clothingPath: selectedItems.first.imagePath,
-          personPath: authState.currentUserModel!.avatarUrl!,
-        );
-
-        // Store the result
-        ref.read(tryOnResultProvider.notifier).state = resultImageUrl;
-      } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Try-on failed: $e')));
-      } finally {
-        // Clear loading state
-        ref.read(tryOnLoadingProvider.notifier).state = false;
-      }
-    }
-
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Center(
-                child: Text(
-                  'Try-On',
+                // Title
+                Text(
+                  'Select Your Photo',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
+                const SizedBox(height: 20),
+
+                // Gallery option
+                ListTile(
+                  leading: Icon(
+                    Icons.photo_library_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: const Text(
+                    'Choose from Gallery',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickFromGallery();
+                  },
+                ),
+
+                const Divider(),
+
+                // Camera option
+                ListTile(
+                  leading: Icon(
+                    Icons.camera_alt_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: const Text(
+                    'Take a Photo',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickFromCamera();
+                  },
+                ),
+
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null && mounted) {
+        await _processTryOn(File(image.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error selecting image: $e')));
+      }
+    }
+  }
+
+  Future<void> _pickFromCamera() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+        preferredCameraDevice: CameraDevice.front,
+      );
+
+      if (image != null && mounted) {
+        await _processTryOn(File(image.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error taking photo: $e')));
+      }
+    }
+  }
+
+  Future<void> _processTryOn(File imageFile) async {
+    final selectedItems = ref.read(tryOnItemsProvider);
+    final authState = ref.read(authViewModelProvider);
+
+    if (selectedItems.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select an outfit from wardrobe'),
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!authState.isLoggedIn) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Please log in first')));
+      }
+      return;
+    }
+
+    try {
+      ref.read(tryOnLoadingProvider.notifier).state = true;
+      ref.read(tryOnResultProvider.notifier).state = null;
+
+      // Upload person image to personImages bucket
+      final userId = authState.currentUserModel!.id;
+      final personImageUrl = await WardrobeRepository.uploadPersonImage(
+        imageFile,
+        userId,
+      );
+
+      print('✅ Person image uploaded: $personImageUrl');
+
+      // Call try-on API with uploaded person image
+      final resultImageUrl = await WardrobeRepository.tryOnClothing(
+        clothingPath: selectedItems.first.imagePath,
+        personPath: personImageUrl,
+      );
+
+      ref.read(tryOnResultProvider.notifier).state = resultImageUrl;
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Try-on complete!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Try-on failed: $e')));
+      }
+    } finally {
+      ref.read(tryOnLoadingProvider.notifier).state = false;
+    }
+  }
+
+  Future<void> _handleTryOn() async {
+    final selectedItems = ref.read(tryOnItemsProvider);
+
+    if (selectedItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an outfit from wardrobe')),
+      );
+      return;
+    }
+
+    // Show image picker options
+    _showImageSourcePicker();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedItems = ref.watch(tryOnItemsProvider);
+    final tryOnResult = ref.watch(tryOnResultProvider);
+    final isLoading = ref.watch(tryOnLoadingProvider);
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 12),
+            Text(
+              'Try-On',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
+            const SizedBox(height: 12),
 
+            // Image container
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: selectedItems.isEmpty
-                    ? Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[300]!),
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.checkroom_outlined,
-                                size: 64,
-                                color: Colors.grey[400],
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Center(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: selectedItems.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Select an outfit from your wardrobe to try on',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No items selected',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey[700],
+                            ),
+                          )
+                        : tryOnResult != null
+                        ? Image.network(
+                            tryOnResult,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value:
+                                      loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                      : null,
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Select items from your wardrobe to try on',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[500],
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Center(
+                                  child: Icon(Icons.broken_image, size: 40),
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                          )
+                        : Image.network(
+                            selectedItems.first.imagePath,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value:
+                                      loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Center(
+                                  child: Icon(Icons.broken_image, size: 40),
+                                ),
                           ),
-                        ),
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[300]!),
-                        ),
-                        child: Column(
-                          children: [
-                            // Title section
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    'Selected Item',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.grey[800],
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  IconButton(
-                                    icon: const Icon(Icons.close, size: 20),
-                                    onPressed: () {
-                                      ref
-                                              .read(tryOnItemsProvider.notifier)
-                                              .state =
-                                          [];
-                                      ref
-                                              .read(
-                                                tryOnResultProvider.notifier,
-                                              )
-                                              .state =
-                                          null;
-                                    },
-                                    color: Colors.grey[600],
-                                    tooltip: 'Clear selection',
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Divider(height: 1),
-                            // Image display
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: tryOnResult != null
-                                    ? Column(
-                                        children: [
-                                          // Original item
-                                          Expanded(
-                                            flex: 1,
-                                            child: Container(
-                                              width: double.infinity,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                border: Border.all(
-                                                  color: Colors.grey[300]!,
-                                                ),
-                                              ),
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                child: Image.network(
-                                                  selectedItems.first.imagePath,
-                                                  fit: BoxFit.contain,
-                                                  loadingBuilder: (context, child, loadingProgress) {
-                                                    if (loadingProgress == null)
-                                                      return child;
-                                                    return Center(
-                                                      child: CircularProgressIndicator(
-                                                        value:
-                                                            loadingProgress
-                                                                    .expectedTotalBytes !=
-                                                                null
-                                                            ? loadingProgress
-                                                                      .cumulativeBytesLoaded /
-                                                                  loadingProgress
-                                                                      .expectedTotalBytes!
-                                                            : null,
-                                                      ),
-                                                    );
-                                                  },
-                                                  errorBuilder:
-                                                      (
-                                                        context,
-                                                        error,
-                                                        stackTrace,
-                                                      ) {
-                                                        return Container(
-                                                          color:
-                                                              Colors.grey[300],
-                                                          child: const Center(
-                                                            child: Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              children: [
-                                                                Icon(
-                                                                  Icons.image,
-                                                                  color: Colors
-                                                                      .grey,
-                                                                  size: 40,
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 8,
-                                                                ),
-                                                                Text(
-                                                                  'Failed to load image',
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 16),
-                                          // Try-on result
-                                          Expanded(
-                                            flex: 1,
-                                            child: Container(
-                                              width: double.infinity,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                border: Border.all(
-                                                  color: Colors.grey[300]!,
-                                                ),
-                                              ),
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                child: Image.network(
-                                                  tryOnResult,
-                                                  fit: BoxFit.contain,
-                                                  loadingBuilder: (context, child, loadingProgress) {
-                                                    if (loadingProgress == null)
-                                                      return child;
-                                                    return Center(
-                                                      child: CircularProgressIndicator(
-                                                        value:
-                                                            loadingProgress
-                                                                    .expectedTotalBytes !=
-                                                                null
-                                                            ? loadingProgress
-                                                                      .cumulativeBytesLoaded /
-                                                                  loadingProgress
-                                                                      .expectedTotalBytes!
-                                                            : null,
-                                                      ),
-                                                    );
-                                                  },
-                                                  errorBuilder:
-                                                      (
-                                                        context,
-                                                        error,
-                                                        stackTrace,
-                                                      ) {
-                                                        return Container(
-                                                          color:
-                                                              Colors.grey[300],
-                                                          child: const Center(
-                                                            child: Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              children: [
-                                                                Icon(
-                                                                  Icons.image,
-                                                                  color: Colors
-                                                                      .grey,
-                                                                  size: 40,
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 8,
-                                                                ),
-                                                                Text(
-                                                                  'Failed to load result',
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : Container(
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey[300]!,
-                                          ),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Image.network(
-                                            selectedItems.first.imagePath,
-                                            fit: BoxFit.contain,
-                                            loadingBuilder: (context, child, loadingProgress) {
-                                              if (loadingProgress == null)
-                                                return child;
-                                              return Center(
-                                                child: CircularProgressIndicator(
-                                                  value:
-                                                      loadingProgress
-                                                              .expectedTotalBytes !=
-                                                          null
-                                                      ? loadingProgress
-                                                                .cumulativeBytesLoaded /
-                                                            loadingProgress
-                                                                .expectedTotalBytes!
-                                                      : null,
-                                                ),
-                                              );
-                                            },
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                                  return Container(
-                                                    color: Colors.grey[300],
-                                                    child: const Center(
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Icon(
-                                                            Icons.image,
-                                                            color: Colors.grey,
-                                                            size: 40,
-                                                          ),
-                                                          SizedBox(height: 8),
-                                                          Text(
-                                                            'Failed to load image',
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                          ),
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                  ),
+                ),
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            // Buttons
             TryOnBtn(
-              text: "Try On",
+              text: tryOnResult != null ? "Try Another" : "Try On",
               onPressed: isLoading ? null : _handleTryOn,
               isLoading: isLoading,
             ),
-
-            const SizedBox(height: 10),
-
+            const SizedBox(height: 12),
             SaveOutfitBtn(
               text: "Save Outfit",
-              onPressed: () {},
+              onPressed: tryOnResult == null ? null : () {},
               isLoading: false,
             ),
-
             const SizedBox(height: 40),
           ],
         ),
