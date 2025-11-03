@@ -9,11 +9,11 @@ class RecommendationsRepository {
   /// Fetches product recommendations based on discovery answers
   /// [userId] - The user's ID
   /// [query] - Space-separated discovery answers (e.g., "summer dress work")
-  /// [topK] - Number of top results to return (default 20, max 20)
+  /// [topK] - Number of top results to return (default 5, max 5)
   static Future<List<WardrobeModel>> fetchRecommendations({
     required String userId,
     required String query,
-    int topK = 20,
+    int topK = 5,
   }) async {
     print('🌐 FETCHING RECOMMENDATIONS FROM API');
     print('👤 User ID: $userId');
@@ -59,14 +59,39 @@ class RecommendationsRepository {
         print('✅ API Response parsed successfully');
         print('📦 Full Response: $jsonResponse');
 
-        // Parse the recommendations
-        if (jsonResponse.containsKey('recommendations')) {
-          final List<dynamic> recommendationsJson =
-              jsonResponse['recommendations'];
+        // Parse the recommendations from 'data' key
+        if (jsonResponse.containsKey('data')) {
+          final List<dynamic> recommendationsJson = jsonResponse['data'];
           print('📋 Recommendations count: ${recommendationsJson.length}');
 
-          final recommendations = recommendationsJson.map((item) {
-            return WardrobeModel.fromJson(item as Map<String, dynamic>);
+          final recommendations = recommendationsJson.asMap().entries.map((
+            entry,
+          ) {
+            final index = entry.key;
+            final item = entry.value as Map<String, dynamic>;
+
+            // Transform API response to match WardrobeModel structure
+            final transformedItem = {
+              'id':
+                  'rec_${DateTime.now().millisecondsSinceEpoch}_$index', // Generate temporary ID
+              'user_id': item['user_id'] ?? userId,
+              'image_url': item['image_url'] as String,
+              'caption': item['content'] as String?,
+              'type_':
+                  item['type']
+                      as String?, // Note: WardrobeModel expects 'type_'
+              'color': item['color'] as String?,
+              'fabric': item['fabric'] as String?,
+              'pattern': item['pattern'] as String?,
+              'style': item['style'] as String?,
+              'season': item['season'] as String?,
+              'occasion': item['occasion'] as String?,
+              'created_at': DateTime.now()
+                  .toIso8601String(), // Use current time
+              'updated_at': null,
+            };
+
+            return WardrobeModel.fromJson(transformedItem);
           }).toList();
 
           print(
@@ -80,7 +105,7 @@ class RecommendationsRepository {
 
           return recommendations;
         } else {
-          print('⚠️ No recommendations key found in response');
+          print('⚠️ No data key found in response');
           return [];
         }
       } else {

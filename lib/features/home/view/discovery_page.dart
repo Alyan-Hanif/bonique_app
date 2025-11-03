@@ -13,15 +13,6 @@ class DiscoveryPage extends ConsumerStatefulWidget {
 
 class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
   @override
-  void initState() {
-    super.initState();
-    // Fetch questions when the page loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(discoveryControllerProvider.notifier).fetchQuestions();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final maxContentWidth = 600.0; // Max width for content on larger screens
     final discoveryState = ref.watch(discoveryControllerProvider);
@@ -54,15 +45,17 @@ class _DiscoveryPageState extends ConsumerState<DiscoveryPage> {
         ),
       ),
       // Floating Discover Button (similar to wardrobe page)
-      floatingActionButton: discoveryState.hasAllAnswers
+      floatingActionButton: discoveryState.hasAnyAnswer
           ? FloatingActionButton.extended(
               onPressed: () {
-                // Collect selected answers and join them with spaces
+                // Collect only the selected answers and join them with spaces
                 final selectedAnswersText = discoveryState
                     .selectedAnswers
                     .values
                     .join(' ');
-                print('🔍 Selected answers: $selectedAnswersText');
+                print(
+                  '🔍 Selected answers (${discoveryState.selectedAnswers.length}/${discoveryState.questions.length}): $selectedAnswersText',
+                );
 
                 // Store the answers in the provider
                 ref.read(discoveryAnswersProvider.notifier).state =

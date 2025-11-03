@@ -34,6 +34,8 @@ class DiscoveryState {
 
   bool get hasAllAnswers =>
       questions.isNotEmpty && selectedAnswers.length == questions.length;
+
+  bool get hasAnyAnswer => questions.isNotEmpty && selectedAnswers.isNotEmpty;
 }
 
 // Provider for the DiscoveryRepository
@@ -71,10 +73,17 @@ class DiscoveryController extends StateNotifier<DiscoveryState> {
     }
   }
 
-  /// Selects an answer for a specific question
+  /// Selects or deselects an answer for a specific question (toggle)
   void selectAnswer(int questionIndex, String answer) {
     final updatedAnswers = Map<int, String>.from(state.selectedAnswers);
-    updatedAnswers[questionIndex] = answer;
+
+    // Toggle: if the same answer is selected, deselect it
+    if (updatedAnswers[questionIndex] == answer) {
+      updatedAnswers.remove(questionIndex);
+    } else {
+      updatedAnswers[questionIndex] = answer;
+    }
+
     state = state.copyWith(selectedAnswers: updatedAnswers);
   }
 

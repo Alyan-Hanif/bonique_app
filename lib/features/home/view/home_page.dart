@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
+import '../viewmodel/discovery_viewmodel.dart';
 import 'wardrobe_page.dart';
 import 'discovery_page.dart';
 import 'try_on_page.dart';
@@ -44,7 +45,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         ref.refresh(wardrobeDataProvider);
         break;
       case 1: // Discover
-        // Add discovery data provider refresh if needed
+        // Fetch new questions every time the Discovery tab is clicked
+        ref.read(discoveryControllerProvider.notifier).fetchQuestions();
         break;
       case 2: // Try-On
         // Add try-on data provider refresh if needed

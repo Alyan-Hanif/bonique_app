@@ -60,11 +60,40 @@ class WardrobeRepository {
       // Add headers
       request.headers.addAll({'ngrok-skip-browser-warning': 'true'});
 
-      // Add the image file
+      // Add the image file with proper filename and content type
+      final filePath = imageFile.path;
+      final originalFileName = filePath.split('/').last;
+
+      // Ensure filename has proper extension for API detection
+      String fileName = originalFileName;
+      if (!fileName.contains('.')) {
+        // If no extension, add .jpg as default
+        fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      } else {
+        // Sanitize filename by replacing spaces and special characters with underscores
+        // Extract extension first
+        final parts = fileName.split('.');
+        final extension = parts.length > 1 ? '.${parts.last}' : '';
+        final nameWithoutExt = parts.sublist(0, parts.length - 1).join('.');
+
+        // Replace spaces and special characters with underscores
+        final sanitizedName = nameWithoutExt
+            .replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_')
+            .replaceAll(
+              RegExp(r'_+'),
+              '_',
+            ); // Replace multiple underscores with single
+
+        fileName = '${sanitizedName}${extension}';
+      }
+
+      // Create multipart file - fromPath auto-detects content type from file
       final multipartFile = await http.MultipartFile.fromPath(
         'file',
-        imageFile.path,
+        filePath,
+        filename: fileName,
       );
+
       request.files.add(multipartFile);
 
       print('📤 Sending to API...');
@@ -74,8 +103,9 @@ class WardrobeRepository {
       print('📡 API Response Status: ${response.statusCode}');
       print('📡 API Response Body: ${response.body}');
 
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+      final jsonResponse = json.decode(response.body);
+
+      if (response.statusCode == 200 && jsonResponse['success'] == true) {
         print('✅ API processing successful!');
         print('📦 Full API Response: $jsonResponse');
 
@@ -138,8 +168,8 @@ class WardrobeRepository {
             'image_url': imagePath,
             'caption': description ?? '',
             'type_': category ?? 'Uncategorized',
-            'color': color,
-            'fabric': fabric,
+            'color': color ?? 'Unknown', // Default color if not provided
+            'fabric': fabric ?? 'Unknown', // Default fabric if not provided
             'pattern': pattern,
             'style': style,
             'season': season,

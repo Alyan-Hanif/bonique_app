@@ -7,6 +7,7 @@ import '../viewmodel/home_viewmodel.dart';
 import '../widgets/dashed_border.dart';
 import '../../../data/repositories/wardrobe_repository.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../core/utils/snackbar_utils.dart';
 
 class AddItemPage extends ConsumerStatefulWidget {
   const AddItemPage({super.key});
@@ -160,21 +161,21 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
 
         // Show warning if any invalid files were selected
         if (invalidFiles.isNotEmpty && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
+          SnackbarUtils.showWarning(
+            context,
+            title: 'Invalid Files',
+            message:
                 'Only image files are allowed. ${invalidFiles.length} file(s) skipped.',
-              ),
-              backgroundColor: Colors.orange,
-            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        SnackbarUtils.showError(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error picking images: $e')));
+          title: 'Error',
+          message: 'Failed to pick images: $e',
+        );
       }
     }
   }
@@ -194,19 +195,20 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
             _selectedImages.add(image);
           });
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Invalid file type. Only images are allowed.'),
-              backgroundColor: Colors.red,
-            ),
+          SnackbarUtils.showError(
+            context,
+            title: 'Invalid File',
+            message: 'Invalid file type. Only images are allowed.',
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        SnackbarUtils.showError(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error taking photo: $e')));
+          title: 'Error',
+          message: 'Failed to take photo: $e',
+        );
       }
     }
   }
@@ -257,8 +259,10 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
 
   Future<void> _addToWardrobe() async {
     if (_selectedImages.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one item')),
+      SnackbarUtils.showWarning(
+        context,
+        title: 'No Items Selected',
+        message: 'Please select at least one item to add to your wardrobe.',
       );
       return;
     }
@@ -286,27 +290,12 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
             'Processing image ${i + 1}/${_selectedImages.length}: ${imageFile.path}',
           );
 
-          // Step 1: Upload image to Supabase storage
-          final imagePath = await WardrobeRepository.uploadImage(
+          // Upload and process image via API, which will save to database with AI metadata
+          await WardrobeRepository.processImageWithAPI(
             File(imageFile.path),
             user.id,
           );
-          print('✅ Image uploaded to Supabase: $imagePath');
-
-          // Step 2: Send image to backend API for processing (runs in parallel)
-          WardrobeRepository.processImageWithAPI(
-            File(imageFile.path),
-            user.id,
-          ); // Don't await - let it run in background
-
-          // Step 3: Save wardrobe item to database
-          await WardrobeRepository.saveWardrobeItem(
-            userId: user.id,
-            imagePath: imagePath,
-            category: 'Shirt',
-            description: 'blue colour with red pattern',
-          );
-          print('✅ Wardrobe item saved to database');
+          print('✅ Image processed and saved with AI metadata');
 
           successCount++;
         } catch (e) {
@@ -327,22 +316,28 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
         });
 
         // Show result message
-        String message;
+        print('Showing success message');
         if (successCount > 0 && failCount == 0) {
-          message = 'Successfully added $successCount item(s) to wardrobe';
+          SnackbarUtils.showSuccess(
+            context,
+            title: 'Success!',
+            message:
+                'Successfully added $successCount item(s) to your wardrobe.',
+          );
         } else if (successCount > 0 && failCount > 0) {
-          message = 'Added $successCount item(s), $failCount failed';
+          SnackbarUtils.showWarning(
+            context,
+            title: 'Partial Success',
+            message:
+                'Added $successCount item(s) to wardrobe, but $failCount item(s) failed.',
+          );
         } else {
-          message = 'Failed to add items to wardrobe';
+          SnackbarUtils.showError(
+            context,
+            title: 'Failed',
+            message: 'Failed to add items to wardrobe. Please try again.',
+          );
         }
-
-        print('Showing success message: $message');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: failCount > 0 ? Colors.orange : Colors.green,
-          ),
-        );
 
         // Navigate back to wardrobe page if at least one item was added
         if (successCount > 0) {
@@ -358,12 +353,10 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
           _isUploading = false;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Critical error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
+        SnackbarUtils.showError(
+          context,
+          title: 'Critical Error',
+          message: 'An error occurred while adding items: ${e.toString()}',
         );
       }
     }
