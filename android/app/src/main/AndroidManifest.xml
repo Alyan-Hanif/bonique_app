@@ -25,7 +25,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     
     <application
-        android:label="bonique"
+        android:label="Bonique"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
