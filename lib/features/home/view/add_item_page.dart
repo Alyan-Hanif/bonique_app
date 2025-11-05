@@ -8,6 +8,7 @@ import '../widgets/dashed_border.dart';
 import '../../../data/repositories/wardrobe_repository.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/utils/snackbar_utils.dart';
+import '../../../core/services/permission_service.dart';
 
 class AddItemPage extends ConsumerStatefulWidget {
   const AddItemPage({super.key});
@@ -135,6 +136,21 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
   }
 
   Future<void> _pickFromGallery() async {
+    // Check permission first
+    final hasPermission = await PermissionService.requestPhotoWithDialog(
+      context,
+    );
+    if (!hasPermission) {
+      if (mounted) {
+        SnackbarUtils.showError(
+          context,
+          title: 'Permission Required',
+          message: 'Photo library permission is required to select images.',
+        );
+      }
+      return;
+    }
+
     try {
       final List<XFile> images = await _picker.pickMultiImage(
         imageQuality: 85, // Compress to 85% quality
@@ -181,6 +197,21 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
   }
 
   Future<void> _pickFromCamera() async {
+    // Check permission first
+    final hasPermission = await PermissionService.requestCameraWithDialog(
+      context,
+    );
+    if (!hasPermission) {
+      if (mounted) {
+        SnackbarUtils.showError(
+          context,
+          title: 'Permission Required',
+          message: 'Camera permission is required to take photos.',
+        );
+      }
+      return;
+    }
+
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,

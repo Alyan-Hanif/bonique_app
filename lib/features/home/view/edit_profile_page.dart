@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../core/services/permission_service.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
   const EditProfilePage({super.key});
@@ -39,6 +40,22 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   }
 
   Future<void> _pickImage() async {
+    // Check permission first
+    final hasPermission = await PermissionService.requestPhotoWithDialog(
+      context,
+    );
+    if (!hasPermission) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Photo library permission is required'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
     try {
       print('🔄 Starting image picker...');
       final picker = ImagePicker();

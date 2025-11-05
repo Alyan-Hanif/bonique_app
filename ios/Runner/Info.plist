@@ -56,5 +56,21 @@
 			</array>
 		</dict>
 	</array>
+	
+	<!-- Camera and Photo Library Permissions -->
+	<key>NSCameraUsageDescription</key>
+	<string>Bonique needs access to your camera to take photos of your outfits and products.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Bonique needs access to your photo library to select and upload images.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Bonique needs permission to save photos to your photo library.</string>
+	
+	<!-- Optional: Microphone permission if needed for video recording -->
+	<!-- <key>NSMicrophoneUsageDescription</key>
+	<string>Bonique needs access to your microphone for video recording.</string> -->
+	
+	<!-- Optional: Location permission if needed -->
+	<!-- <key>NSLocationWhenInUseUsageDescription</key>
+	<string>Bonique needs your location to show nearby stores and fashion events.</string> -->
 </dict>
 </plist>

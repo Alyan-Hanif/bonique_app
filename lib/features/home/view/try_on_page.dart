@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:bonique/data/repositories/wardrobe_repository.dart';
+import 'package:bonique/core/services/permission_service.dart';
 import '../widgets/home_widgets.dart'; // for TryOnBtn & SaveOutfitBtn
 
 class TryOnPage extends ConsumerStatefulWidget {
@@ -97,6 +98,19 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
   }
 
   Future<void> _pickFromGallery() async {
+    // Check permission first
+    final hasPermission = await PermissionService.requestPhotoWithDialog(
+      context,
+    );
+    if (!hasPermission) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Photo library permission is required')),
+        );
+      }
+      return;
+    }
+
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -118,6 +132,19 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
   }
 
   Future<void> _pickFromCamera() async {
+    // Check permission first
+    final hasPermission = await PermissionService.requestCameraWithDialog(
+      context,
+    );
+    if (!hasPermission) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Camera permission is required')),
+        );
+      }
+      return;
+    }
+
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,

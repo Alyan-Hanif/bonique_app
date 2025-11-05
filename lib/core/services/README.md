@@ -63,6 +63,44 @@ if (uri.host == 'your-route' || uri.path == '/your-route') {
 }
 ```
 
+### 3. PermissionService (`permission_service.dart`)
+
+Handles runtime permission requests for camera, photo library, and other device features.
+
+**Features:**
+
+- ✅ User-friendly permission dialogs
+- ✅ Automatic handling of denied/permanently denied states
+- ✅ Direct navigation to app settings when needed
+- ✅ Simple async API for permission checks
+
+**Usage:**
+
+```dart
+// Request camera permission
+final hasPermission = await PermissionService.requestCameraWithDialog(context);
+if (hasPermission) {
+  // Open camera
+}
+
+// Request photo library permission
+final hasPhotoPermission = await PermissionService.requestPhotoWithDialog(context);
+if (hasPhotoPermission) {
+  // Open photo picker
+}
+
+// Check permission status without requesting
+final isGranted = await PermissionService.isCameraPermissionGranted();
+```
+
+**Supported Permissions:**
+
+- 📸 Camera access
+- 🖼️ Photo library/gallery access
+- 💾 Storage access (handled automatically per platform)
+
+See [PERMISSIONS_SETUP.md](../../../PERMISSIONS_SETUP.md) for detailed configuration.
+
 ## Architecture Benefits
 
 ### Separation of Concerns
@@ -71,6 +109,7 @@ Each service handles a specific domain:
 
 - `SupabaseService` → Backend connection
 - `DeepLinkService` → Navigation from external links
+- `PermissionService` → Device permission management
 
 ### Testability
 

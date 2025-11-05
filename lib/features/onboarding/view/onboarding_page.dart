@@ -116,7 +116,8 @@ class OnboardingPage extends ConsumerWidget {
 
                             // Animated image
                             Align(
-                              alignment: Alignment.bottomCenter, // move image to bottom
+                              alignment: Alignment
+                                  .bottomCenter, // move image to bottom
                               child: AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 300),
                                 child: Container(
@@ -132,7 +133,6 @@ class OnboardingPage extends ConsumerWidget {
                             ),
 
                             AnimatedSwitcher(
-                              
                               duration: const Duration(milliseconds: 300),
                               child: Image.asset(
                                 pagesData[index].image,
