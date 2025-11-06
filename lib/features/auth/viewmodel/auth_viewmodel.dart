@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../repository/auth_repository.dart';
 import '../../../data/models/user_model.dart';
+import '../../../core/utils/connectivity_utils.dart';
 
 // Provider for AuthRepository
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -128,7 +129,10 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
   // Form validation methods
   bool validateEmail(String email) {
-    if (email.isEmpty) {
+    // Trim whitespace
+    final trimmedEmail = email.trim();
+
+    if (trimmedEmail.isEmpty) {
       state = state.copyWith(
         isEmailValid: false,
         emailError: 'Email is required',
@@ -136,10 +140,70 @@ class AuthViewModel extends StateNotifier<AuthState> {
       return false;
     }
 
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+    // Check for whitespace (leading/trailing spaces were removed, but internal spaces are invalid)
+    if (trimmedEmail.contains(' ')) {
       state = state.copyWith(
         isEmailValid: false,
-        emailError: 'Please enter a valid email',
+        emailError: 'Email cannot contain spaces',
+      );
+      return false;
+    }
+
+    // More strict email validation
+    // Must have: local part + @ + domain + . + TLD (at least 2 chars)
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$',
+    );
+
+    if (!emailRegex.hasMatch(trimmedEmail)) {
+      state = state.copyWith(
+        isEmailValid: false,
+        emailError: 'Please enter a valid email address',
+      );
+      return false;
+    }
+
+    // Additional checks for edge cases
+    // Check for invalid patterns like user@com, user@., etc.
+    final parts = trimmedEmail.split('@');
+    if (parts.length != 2) {
+      state = state.copyWith(
+        isEmailValid: false,
+        emailError: 'Please enter a valid email address',
+      );
+      return false;
+    }
+
+    final localPart = parts[0];
+    final domainPart = parts[1];
+
+    // Check local part is not empty
+    if (localPart.isEmpty) {
+      state = state.copyWith(
+        isEmailValid: false,
+        emailError: 'Email must have a username before @',
+      );
+      return false;
+    }
+
+    // Check domain has at least one dot and valid structure
+    if (!domainPart.contains('.') ||
+        domainPart.startsWith('.') ||
+        domainPart.endsWith('.')) {
+      state = state.copyWith(
+        isEmailValid: false,
+        emailError: 'Please enter a valid email domain',
+      );
+      return false;
+    }
+
+    // Check TLD (top-level domain) is at least 2 characters
+    final domainParts = domainPart.split('.');
+    final tld = domainParts.last;
+    if (tld.length < 2) {
+      state = state.copyWith(
+        isEmailValid: false,
+        emailError: 'Email domain must end with a valid extension',
       );
       return false;
     }
@@ -149,6 +213,15 @@ class AuthViewModel extends StateNotifier<AuthState> {
   }
 
   bool validatePassword(String password) {
+    // Check for leading or trailing spaces (passwords should not be trimmed as spaces might be intentional)
+    if (password != password.trim()) {
+      state = state.copyWith(
+        isPasswordValid: false,
+        passwordError: 'Password cannot have leading or trailing spaces',
+      );
+      return false;
+    }
+
     if (password.isEmpty) {
       state = state.copyWith(
         isPasswordValid: false,
@@ -241,18 +314,36 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
   // Authentication methods
   Future<bool> signIn(String email, String password) async {
+    // Trim email
+    final trimmedEmail = email.trim();
+
     // Validate inputs
-    final isEmailValid = validateEmail(email);
+    final isEmailValid = validateEmail(trimmedEmail);
     final isPasswordValid = validatePassword(password);
 
     if (!isEmailValid || !isPasswordValid) {
       return false;
     }
 
+    // Prevent double submission by checking if already loading
+    if (state.isLoading) {
+      return false;
+    }
+
+    // Check internet connectivity before attempting sign in
+    final hasConnection = await ConnectivityUtils.hasInternetConnection();
+    if (!hasConnection) {
+      state = state.copyWith(
+        error:
+            'No internet connection. Please check your network and try again.',
+      );
+      return false;
+    }
+
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final response = await _repository.signIn(email, password);
+      final response = await _repository.signIn(trimmedEmail, password);
 
       // Check if sign-in was successful by verifying the user exists
       if (response.user != null) {
@@ -285,22 +376,63 @@ class AuthViewModel extends StateNotifier<AuthState> {
       // Provide more user-friendly error messages
       String errorMessage = 'Sign-in failed. Please try again.';
 
-      if (e.toString().contains('Invalid login credentials') ||
-          e.toString().contains('invalid_credentials')) {
+      final errorString = e.toString().toLowerCase();
+
+      if (errorString.contains('invalid login credentials') ||
+          errorString.contains('invalid_credentials') ||
+          errorString.contains('invalid login') ||
+          errorString.contains('wrong password') ||
+          errorString.contains('incorrect password')) {
         errorMessage =
-            'Invalid email or password. Please check your credentials.';
-      } else if (e.toString().contains('User not found')) {
+            'Invalid email or password. Please check your credentials and try again.';
+      } else if (errorString.contains('user not found') ||
+          errorString.contains('no user found') ||
+          errorString.contains('user does not exist')) {
         errorMessage =
             'No account found with this email. Please sign up first.';
-      } else if (e.toString().contains('Email not confirmed')) {
+      } else if (errorString.contains('email not confirmed') ||
+          errorString.contains('email not verified') ||
+          errorString.contains('confirm your email') ||
+          errorString.contains('verify your email')) {
         errorMessage =
-            'Please check your email and confirm your account before signing in.';
-      } else if (e.toString().contains('Too many requests')) {
+            'Please verify your email address before signing in. Check your inbox for the verification link.';
+      } else if (errorString.contains('user disabled') ||
+          errorString.contains('account disabled') ||
+          errorString.contains('account has been disabled') ||
+          errorString.contains('user banned')) {
         errorMessage =
-            'Too many sign-in attempts. Please wait a moment and try again.';
-      } else if (e.toString().contains('AuthSessionMissingException')) {
+            'Your account has been disabled. Please contact support for assistance.';
+      } else if (errorString.contains('account deleted') ||
+          errorString.contains('user deleted')) {
+        errorMessage =
+            'This account no longer exists. Please sign up for a new account.';
+      } else if (errorString.contains('too many requests') ||
+          errorString.contains('rate limit') ||
+          errorString.contains('too many attempts')) {
+        errorMessage =
+            'Too many sign-in attempts. Please wait a few minutes and try again.';
+      } else if (errorString.contains('network') ||
+          errorString.contains('failed to connect') ||
+          errorString.contains('unable to resolve host')) {
+        errorMessage =
+            'Network error. Please check your internet connection and try again.';
+      } else if (errorString.contains('timeout') ||
+          errorString.contains('timed out')) {
+        errorMessage =
+            'Request timed out. Please check your connection and try again.';
+      } else if (errorString.contains('server') ||
+          errorString.contains('503') ||
+          errorString.contains('502') ||
+          errorString.contains('500') ||
+          errorString.contains('internal server error')) {
+        errorMessage =
+            'Server is temporarily unavailable. Please try again later.';
+      } else if (errorString.contains('authsessionmissingexception')) {
         errorMessage =
             'Connection error. Please check your internet connection and try again.';
+      } else if (errorString.contains('socketexception')) {
+        errorMessage =
+            'No internet connection. Please check your network and try again.';
       }
 
       state = state.copyWith(isLoading: false, error: errorMessage);
@@ -314,10 +446,14 @@ class AuthViewModel extends StateNotifier<AuthState> {
     String fullName,
     // String confirmPassword,
   ) async {
+    // Trim email and full name
+    final trimmedEmail = email.trim();
+    final trimmedFullName = fullName.trim();
+
     // Validate inputs
-    final isEmailValid = validateEmail(email);
+    final isEmailValid = validateEmail(trimmedEmail);
     final isPasswordValid = validatePassword(password);
-    final isNameValid = validateName(fullName);
+    final isNameValid = validateName(trimmedFullName);
     // final isConfirmPasswordValid = validateConfirmPassword(
     //   password
     //   confirmPassword,
@@ -337,13 +473,28 @@ class AuthViewModel extends StateNotifier<AuthState> {
       return false;
     }
 
+    // Prevent double submission by checking if already loading
+    if (state.isLoading) {
+      return false;
+    }
+
+    // Check internet connectivity before attempting signup
+    final hasConnection = await ConnectivityUtils.hasInternetConnection();
+    if (!hasConnection) {
+      state = state.copyWith(
+        error:
+            'No internet connection. Please check your network and try again.',
+      );
+      return false;
+    }
+
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final response = await _repository.signUp(
-        email,
+        trimmedEmail,
         password,
-        fullName: fullName,
+        fullName: trimmedFullName,
       );
 
       // Check if signup was successful
@@ -380,16 +531,40 @@ class AuthViewModel extends StateNotifier<AuthState> {
       // Provide more user-friendly error messages
       String errorMessage = 'Signup failed. Please try again.';
 
-      if (e.toString().contains('User already registered')) {
+      final errorString = e.toString().toLowerCase();
+
+      if (errorString.contains('user already registered') ||
+          errorString.contains('already been registered') ||
+          errorString.contains('duplicate') ||
+          errorString.contains('already exists')) {
         errorMessage =
             'An account with this email already exists. Please sign in instead.';
-      } else if (e.toString().contains('Invalid email')) {
+      } else if (errorString.contains('invalid email') ||
+          errorString.contains('email format')) {
         errorMessage = 'Please enter a valid email address.';
-      } else if (e.toString().contains('Password should be at least')) {
+      } else if (errorString.contains('password should be at least')) {
         errorMessage = 'Password must be at least 6 characters long.';
-      } else if (e.toString().contains('AuthSessionMissingException')) {
+      } else if (errorString.contains('network') ||
+          errorString.contains('failed to connect') ||
+          errorString.contains('unable to resolve host')) {
+        errorMessage =
+            'Network error. Please check your internet connection and try again.';
+      } else if (errorString.contains('timeout') ||
+          errorString.contains('timed out')) {
+        errorMessage =
+            'Request timed out. Please check your connection and try again.';
+      } else if (errorString.contains('server') ||
+          errorString.contains('503') ||
+          errorString.contains('502') ||
+          errorString.contains('500')) {
+        errorMessage =
+            'Server is temporarily unavailable. Please try again later.';
+      } else if (errorString.contains('authsessionmissingexception')) {
         errorMessage =
             'Connection error. Please check your internet connection and try again.';
+      } else if (errorString.contains('socketexception')) {
+        errorMessage =
+            'No internet connection. Please check your network and try again.';
       }
 
       state = state.copyWith(isLoading: false, error: errorMessage);

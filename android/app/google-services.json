@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:1051919162406:android:6kmsaekalhpja17c7k6ihpvtnn6t3lap",
         "android_client_info": {
-          "package_name": "com.example.bonique"
+          "package_name": "com.bonique.app"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "1051919162406-6kmsaekalhpja17c7k6ihpvtnn6t3lap.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.bonique",
+            "package_name": "com.bonique.app",
             "certificate_hash": "dafb88bfb54890a7bbfa04d78374f8e5e0d1d1c1"
           }
         }

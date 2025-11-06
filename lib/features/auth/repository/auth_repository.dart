@@ -16,10 +16,17 @@ class AuthRepository {
   // Sign in with email and password
   Future<AuthResponse> signIn(String email, String password) async {
     try {
-      final response = await _client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+      // Add timeout to handle slow networks
+      final response = await _client.auth
+          .signInWithPassword(email: email, password: password)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw Exception(
+                'Request timed out. Please check your connection and try again.',
+              );
+            },
+          );
 
       // If sign-in is successful, ensure user exists in our users table
       if (response.user != null) {
@@ -40,11 +47,21 @@ class AuthRepository {
     String? fullName,
   }) async {
     try {
-      final response = await _client.auth.signUp(
-        email: email,
-        password: password,
-        data: fullName != null ? {'full_name': fullName} : null,
-      );
+      // Add timeout to handle slow networks
+      final response = await _client.auth
+          .signUp(
+            email: email,
+            password: password,
+            data: fullName != null ? {'full_name': fullName} : null,
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw Exception(
+                'Request timed out. Please check your connection and try again.',
+              );
+            },
+          );
 
       // If signup is successful and user is created, store user data in users table
       if (response.user != null) {

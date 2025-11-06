@@ -166,7 +166,8 @@ class DeepLinkService {
         debugPrint('🔐 Waiting for Supabase SDK to process the code...');
 
         // Give Supabase SDK time to process the deep link
-        await Future.delayed(const Duration(milliseconds: 1000));
+        // Increased delay to ensure SDK completes before checking session
+        await Future.delayed(const Duration(milliseconds: 2500));
 
         // Check if session was established by the SDK
         final currentUser = SupabaseService.client.auth.currentUser;
@@ -215,7 +216,7 @@ class DeepLinkService {
         // IMPORTANT: Supabase SDK automatically handles the session when the app opens with
         // the deep link URL. We don't need to manually set the session.
         // Just wait a moment for Supabase to process the URL
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 2500));
 
         // Check if session was established
         final currentUser = SupabaseService.client.auth.currentUser;

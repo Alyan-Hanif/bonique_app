@@ -282,12 +282,12 @@ class _UpdatePasswordPageState extends ConsumerState<UpdatePasswordPage> {
                   children: [
                     // App logo
                     Container(
-                      width: 150,
-                      height: 150,
+                      width: 60,
+                      height: 60,
                       child: Image.asset(
-                        'assets/images/bonique/bonique - Copy-01.png',
-                        width: 150,
-                        height: 150,
+                        'assets/images/bonique/auth-logo.png',
+                        width: 60,
+                        height: 60,
                       ),
                     ),
 

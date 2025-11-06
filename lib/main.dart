@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'features/splash/view/splash_page.dart';
 import 'features/onboarding/view/onboarding_page.dart';
 import 'features/auth/view/auth_page.dart';
@@ -7,6 +9,8 @@ import 'features/auth/view/update_password_page.dart';
 import 'features/home/view/home_page.dart';
 import 'core/services/supabase_service.dart';
 import 'core/services/deep_link_service.dart';
+import 'core/services/session_manager.dart';
+import 'core/utils/connectivity_utils.dart';
 import 'core/config/env_config.dart';
 
 void main() async {
@@ -34,6 +38,10 @@ void main() async {
     } else {
       print('⚠️ Supabase connection test failed');
     }
+
+    // Initialize session manager for token handling
+    SessionManager().initialize();
+    print('✅ Session manager initialized');
   } catch (e) {
     print('❌ Initialization failed: $e');
     // You might want to show an error screen or handle this gracefully
@@ -54,21 +62,74 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   final DeepLinkService _deepLinkService = DeepLinkService();
+  final SessionManager _sessionManager = SessionManager();
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   @override
   void initState() {
     super.initState();
     // Initialize deep link service with navigator key
     _deepLinkService.initialize(navigatorKey);
+
+    // Add lifecycle observer to handle app state changes
+    WidgetsBinding.instance.addObserver(this);
+
+    // Listen to connectivity changes
+    _connectivitySubscription = ConnectivityUtils.onConnectivityChanged.listen(
+      _onConnectivityChanged,
+    );
   }
 
   @override
   void dispose() {
     _deepLinkService.dispose();
+    _sessionManager.dispose();
+    _connectivitySubscription?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  /// Handle connectivity changes
+  void _onConnectivityChanged(List<ConnectivityResult> results) {
+    final hasConnection =
+        results.isNotEmpty && !results.contains(ConnectivityResult.none);
+
+    if (hasConnection) {
+      print('🌐 Network connection restored');
+      _sessionManager.onConnectivityChange(true);
+    } else {
+      print('📵 Network connection lost');
+      _sessionManager.onConnectivityChange(false);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // Handle app lifecycle changes
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // App came back to foreground - check session health
+        print('📱 App resumed - checking session...');
+        _sessionManager.onAppResume();
+        break;
+      case AppLifecycleState.paused:
+        print('📱 App paused');
+        break;
+      case AppLifecycleState.inactive:
+        print('📱 App inactive');
+        break;
+      case AppLifecycleState.detached:
+        print('📱 App detached');
+        break;
+      case AppLifecycleState.hidden:
+        print('📱 App hidden');
+        break;
+    }
   }
 
   @override
