@@ -117,22 +117,42 @@ class WardrobeRepository {
         print('📝 Caption Data: $captionData');
         print('🖼️ Image URL: $imageUrl');
 
+        // TODO: COMMENTED OUT - AI backend already saves to database
+        // This was causing duplicate entries in the articles table
         // Save article to database with AI-generated metadata
-        final article = await saveWardrobeItem(
+        // final article = await saveWardrobeItem(
+        //   userId: userId,
+        //   imagePath: imageUrl,
+        //   category: captionData['type_'] as String?,
+        //   description: captionData['caption'] as String?,
+        //   color: captionData['color'] as String?,
+        //   fabric: captionData['fabric'] as String?,
+        //   pattern: captionData['pattern'] as String?,
+        //   style: captionData['style'] as String?,
+        //   season: captionData['season'] as String?,
+        //   occasion: captionData['occasion'] as String?,
+        // );
+
+        // print('✅ Article saved to database with AI metadata');
+        // return article;
+
+        // Instead, return a WardrobeModel from the API response data
+        print('✅ AI backend already saved article to database');
+        return WardrobeModel(
+          id: data['id'] ?? '', // Assuming backend returns the article ID
           userId: userId,
-          imagePath: imageUrl,
-          category: captionData['type_'] as String?,
-          description: captionData['caption'] as String?,
+          imageUrl: imageUrl,
+          type: captionData['type_'] as String? ?? 'Uncategorized',
+          caption: captionData['caption'] as String? ?? '',
           color: captionData['color'] as String?,
           fabric: captionData['fabric'] as String?,
           pattern: captionData['pattern'] as String?,
           style: captionData['style'] as String?,
           season: captionData['season'] as String?,
           occasion: captionData['occasion'] as String?,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         );
-
-        print('✅ Article saved to database with AI metadata');
-        return article;
       } else {
         print(
           '❌ API processing failed: ${response.statusCode} - ${response.body}',

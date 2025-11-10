@@ -3,8 +3,10 @@ import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:bonique/data/models/wardrobe_model.dart';
 import 'package:bonique/data/repositories/recommendations_repository.dart';
 import 'package:bonique/core/widgets/loading_animation.dart';
+import 'package:bonique/core/utils/clothing_category_mapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // Provider to store discovery answers
 final discoveryAnswersProvider = StateProvider<String>((ref) => '');
@@ -53,10 +55,8 @@ final resultsDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
   }
 });
 
-// Selected items for try-on
-final selectedResultItemsProvider = StateProvider<Set<String>>(
-  (ref) => <String>{},
-);
+// Provider for single item selection (changed from Set to single String)
+final selectedResultItemProvider = StateProvider<String?>((ref) => null);
 
 class ResultsPage extends ConsumerStatefulWidget {
   const ResultsPage({super.key});
@@ -120,7 +120,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
   @override
   Widget build(BuildContext context) {
     final selectedFilter = ref.watch(resultsFilterProvider);
-    final selectedItems = ref.watch(selectedResultItemsProvider);
+    final selectedItemId = ref.watch(selectedResultItemProvider);
     final resultsAsyncValue = ref.watch(resultsDataProvider);
 
     print('🏗️ BUILD CALLED: _imagesPreloaded=$_imagesPreloaded');
@@ -192,12 +192,15 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
                     });
                   }
 
-                  // Filter items based on selected category
-                  final filteredItems = selectedFilter == 'All'
-                      ? resultsItems
-                      : resultsItems
-                            .where((item) => item.category == selectedFilter)
-                            .toList();
+                  // Filter items based on selected category using the category mapper
+                  final filteredItems = resultsItems
+                      .where(
+                        (item) => ClothingCategoryMapper.belongsToCategory(
+                          item.type,
+                          selectedFilter,
+                        ),
+                      )
+                      .toList();
 
                   print('🔍 FILTERING RESULTS:');
                   print('   - Total items: ${resultsItems.length}');
@@ -205,16 +208,27 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
                   print('   - Filtered items: ${filteredItems.length}');
 
                   if (resultsItems.isNotEmpty) {
-                    print('   - All categories in results:');
-                    final categories = resultsItems
-                        .map((item) => item.category)
-                        .toSet();
-                    for (var category in categories) {
-                      final count = resultsItems
-                          .where((item) => item.category == category)
-                          .length;
-                      print('     * $category: $count items');
+                    print('   - AI types mapped to categories:');
+                    for (var item in resultsItems) {
+                      final mappedCategory =
+                          ClothingCategoryMapper.mapToCategory(item.type);
+                      print(
+                        '     * AI: "${item.type}" → Mapped: "${mappedCategory ?? "Uncategorized"}"',
+                      );
                     }
+
+                    print('   - Category distribution:');
+                    final categoryGroups = <String, int>{};
+                    for (var item in resultsItems) {
+                      final mapped =
+                          ClothingCategoryMapper.mapToCategory(item.type) ??
+                          'Uncategorized';
+                      categoryGroups[mapped] =
+                          (categoryGroups[mapped] ?? 0) + 1;
+                    }
+                    categoryGroups.forEach((category, count) {
+                      print('     * $category: $count items');
+                    });
                   }
 
                   // Show loading in grid area while preloading
@@ -340,19 +354,37 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
           ],
         ),
       ),
-      floatingActionButton: selectedItems.isNotEmpty
+      floatingActionButton: selectedItemId != null
           ? FloatingActionButton.extended(
               onPressed: () {
+                // Get the full results items data
+                final resultsAsyncValue = ref.read(resultsDataProvider);
+                resultsAsyncValue.whenData((resultsItems) {
+                  // Find the selected item
+                  final selectedItem = resultsItems.firstWhere(
+                    (item) => item.id == selectedItemId,
+                    orElse: () => resultsItems.first,
+                  );
+
+                  // Store selected item for try-on page (as a single-item list)
+                  ref.read(tryOnItemsProvider.notifier).state = [selectedItem];
+
+                  print('🎯 Selected item for try-on:');
+                  print(
+                    '   - ${selectedItem.category}: ${selectedItem.imagePath}',
+                  );
+                });
+
                 // Navigate to try-on page using bottom navigation
                 ref.read(bottomNavigationIndexProvider.notifier).state = 2;
+
                 // Clear selection after action
-                ref.read(selectedResultItemsProvider.notifier).state =
-                    <String>{};
+                ref.read(selectedResultItemProvider.notifier).state = null;
               },
               backgroundColor: Theme.of(context).colorScheme.primary,
-              label: Text(
-                'Try On (${selectedItems.length})',
-                style: const TextStyle(color: Colors.white),
+              label: const Text(
+                'Try On',
+                style: TextStyle(color: Colors.white),
               ),
             )
           : null,
@@ -386,10 +418,16 @@ class _ResultsFilter extends ConsumerWidget {
                   : Colors.grey.shade200,
               borderRadius: BorderRadius.circular(18),
             ),
-            child: Icon(
-              _getIconForLabel(label),
-              size: 18,
-              color: isSelected ? Colors.white : Colors.grey.shade700,
+            child: Center(
+              child: SvgPicture.asset(
+                _getSvgPathForLabel(label),
+                width: 18,
+                height: 18,
+                colorFilter: ColorFilter.mode(
+                  isSelected ? Colors.white : Colors.grey.shade700,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -408,22 +446,22 @@ class _ResultsFilter extends ConsumerWidget {
     );
   }
 
-  IconData _getIconForLabel(String label) {
+  String _getSvgPathForLabel(String label) {
     switch (label.toLowerCase()) {
       case 'all':
-        return Icons.search;
+        return 'assets/images/wardrobe.svg';
       case 'dresses':
-        return Icons.checkroom;
+        return 'assets/images/dresses.svg';
       case 'jeans':
-        return Icons.checkroom;
+        return 'assets/images/Pants.svg';
       case 'shirts':
-        return Icons.checkroom;
+        return 'assets/images/TShirt.svg';
       case 'skirts':
-        return Icons.checkroom;
+        return 'assets/images/skirts.svg';
       case 'hoodies':
-        return Icons.checkroom;
+        return 'assets/images/hoodies.svg';
       default:
-        return Icons.checkroom;
+        return 'assets/images/wardrobe.svg';
     }
   }
 }
@@ -435,21 +473,17 @@ class _ResultTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedItems = ref.watch(selectedResultItemsProvider);
-    final isSelected = selectedItems.contains(item.id);
+    final selectedItemId = ref.watch(selectedResultItemProvider);
+    final isSelected = selectedItemId == item.id;
 
     return GestureDetector(
       onTap: () {
-        final currentSelected = ref.read(selectedResultItemsProvider);
-        final newSelected = Set<String>.from(currentSelected);
-
+        // Toggle selection - if already selected, deselect; otherwise select this item
         if (isSelected) {
-          newSelected.remove(item.id);
+          ref.read(selectedResultItemProvider.notifier).state = null;
         } else {
-          newSelected.add(item.id);
+          ref.read(selectedResultItemProvider.notifier).state = item.id;
         }
-
-        ref.read(selectedResultItemsProvider.notifier).state = newSelected;
       },
       child: Container(
         width: 120,

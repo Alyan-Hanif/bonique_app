@@ -5,7 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:bonique/data/repositories/wardrobe_repository.dart';
+import 'package:bonique/data/models/wardrobe_model.dart';
 import 'package:bonique/core/services/permission_service.dart';
+import 'package:bonique/core/utils/snackbar_utils.dart';
 import '../widgets/home_widgets.dart'; // for TryOnBtn & SaveOutfitBtn
 
 class TryOnPage extends ConsumerStatefulWidget {
@@ -17,6 +19,30 @@ class TryOnPage extends ConsumerStatefulWidget {
 
 class _TryOnPageState extends ConsumerState<TryOnPage> {
   final ImagePicker _picker = ImagePicker();
+  List<WardrobeModel>? _lastSelectedItems;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the last selected items
+    _lastSelectedItems = ref.read(tryOnItemsProvider);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check if selected items have changed
+    final currentItems = ref.read(tryOnItemsProvider);
+    if (_lastSelectedItems != null &&
+        _lastSelectedItems!.isNotEmpty &&
+        currentItems.isNotEmpty &&
+        _lastSelectedItems!.first.id != currentItems.first.id) {
+      // Different item selected, clear the previous result
+      print('🔄 New item selected, clearing previous try-on result');
+      ref.read(tryOnResultProvider.notifier).state = null;
+    }
+    _lastSelectedItems = currentItems;
+  }
 
   void _showImageSourcePicker() {
     showModalBottomSheet(
@@ -104,8 +130,10 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
     );
     if (!hasPermission) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Photo library permission is required')),
+        SnackbarUtils.showError(
+          context,
+          title: 'Permission Required',
+          message: 'Photo library permission is required to select images.',
         );
       }
       return;
@@ -124,9 +152,11 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        SnackbarUtils.showError(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error selecting image: $e')));
+          title: 'Error',
+          message: 'Failed to select image: ${e.toString()}',
+        );
       }
     }
   }
@@ -138,8 +168,10 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
     );
     if (!hasPermission) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Camera permission is required')),
+        SnackbarUtils.showError(
+          context,
+          title: 'Permission Required',
+          message: 'Camera permission is required to take photos.',
         );
       }
       return;
@@ -159,9 +191,11 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        SnackbarUtils.showError(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error taking photo: $e')));
+          title: 'Error',
+          message: 'Failed to take photo: ${e.toString()}',
+        );
       }
     }
   }
@@ -172,10 +206,10 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
 
     if (selectedItems.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select an outfit from wardrobe'),
-          ),
+        SnackbarUtils.showWarning(
+          context,
+          title: 'No Outfit Selected',
+          message: 'Please select an outfit from your wardrobe first.',
         );
       }
       return;
@@ -183,9 +217,11 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
 
     if (!authState.isLoggedIn) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        SnackbarUtils.showError(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Please log in first')));
+          title: 'Authentication Required',
+          message: 'Please log in to use the try-on feature.',
+        );
       }
       return;
     }
@@ -212,18 +248,19 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
       ref.read(tryOnResultProvider.notifier).state = resultImageUrl;
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Try-on complete!'),
-            backgroundColor: Colors.green,
-          ),
+        SnackbarUtils.showSuccess(
+          context,
+          title: 'Try-On Complete!',
+          message: 'Your virtual try-on is ready!',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        SnackbarUtils.showError(
           context,
-        ).showSnackBar(SnackBar(content: Text('Try-on failed: $e')));
+          title: 'Try-On Failed',
+          message: 'Failed to process try-on: ${e.toString()}',
+        );
       }
     } finally {
       ref.read(tryOnLoadingProvider.notifier).state = false;
@@ -232,11 +269,34 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
 
   Future<void> _handleTryOn() async {
     final selectedItems = ref.read(tryOnItemsProvider);
+    final tryOnResult = ref.read(tryOnResultProvider);
+
+    // If "Try Another" is pressed (result exists), navigate to wardrobe
+    if (tryOnResult != null) {
+      // Clear the current selection and result
+      ref.read(tryOnItemsProvider.notifier).state = [];
+      ref.read(tryOnResultProvider.notifier).state = null;
+
+      SnackbarUtils.showInfo(
+        context,
+        title: 'Select New Outfit',
+        message: 'Choose a new outfit from your wardrobe.',
+      );
+
+      // Navigate to wardrobe page (index 0) to select a new outfit
+      ref.read(bottomNavigationIndexProvider.notifier).state = 0;
+      return;
+    }
 
     if (selectedItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an outfit from wardrobe')),
+      SnackbarUtils.showWarning(
+        context,
+        title: 'No Outfit Selected',
+        message: 'Please select an outfit from your wardrobe to try on.',
       );
+
+      // Navigate to wardrobe page (index 0) to select an outfit
+      ref.read(bottomNavigationIndexProvider.notifier).state = 0;
       return;
     }
 
@@ -249,6 +309,17 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
     final selectedItems = ref.watch(tryOnItemsProvider);
     final tryOnResult = ref.watch(tryOnResultProvider);
     final isLoading = ref.watch(tryOnLoadingProvider);
+
+    // Listen for changes in selected items and clear result
+    ref.listen<List<WardrobeModel>>(tryOnItemsProvider, (previous, next) {
+      if (previous != null &&
+          next.isNotEmpty &&
+          previous.isNotEmpty &&
+          previous.first.id != next.first.id) {
+        print('🔄 Item changed, clearing try-on result');
+        ref.read(tryOnResultProvider.notifier).state = null;
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.white,

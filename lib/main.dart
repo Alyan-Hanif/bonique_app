@@ -10,6 +10,7 @@ import 'features/home/view/home_page.dart';
 import 'core/services/supabase_service.dart';
 import 'core/services/deep_link_service.dart';
 import 'core/services/session_manager.dart';
+import 'core/services/version_checker.dart';
 import 'core/utils/connectivity_utils.dart';
 import 'core/config/env_config.dart';
 
@@ -42,6 +43,12 @@ void main() async {
     // Initialize session manager for token handling
     SessionManager().initialize();
     print('✅ Session manager initialized');
+
+    // Check app version and logout if needed (on install/update)
+    final versionChanged = await VersionChecker.checkVersionAndLogout();
+    if (versionChanged) {
+      print('🔄 App version changed - user logged out for security');
+    }
   } catch (e) {
     print('❌ Initialization failed: $e');
     // You might want to show an error screen or handle this gracefully

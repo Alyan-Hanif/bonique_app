@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'dart:io';
 import '../viewmodel/home_viewmodel.dart';
 import '../widgets/dashed_border.dart';
@@ -430,26 +431,31 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                              width: 2,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
-                          child: _isUploading
-                              ? const CircularProgressIndicator()
-                              : Icon(
+                        _isUploading
+                            ? Lottie.asset(
+                                'assets/animations/dot_loader.json',
+                                width: 200,
+                                height: 200,
+                                fit: BoxFit.contain,
+                              )
+                            : Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 2,
+                                    style: BorderStyle.solid,
+                                  ),
+                                ),
+                                child: Icon(
                                   Icons.upload_file,
                                   size: 40,
                                   color: Colors.grey.shade400,
                                 ),
-                        ),
+                              ),
                         const SizedBox(height: 20),
                         Text(
                           _isUploading
