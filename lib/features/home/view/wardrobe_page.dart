@@ -540,7 +540,7 @@ class _WardrobeTile extends ConsumerWidget {
                   );
                 },
               ),
-            )
+            ),
             // if (isSelected)
             //   Positioned(
             //     top: 8,

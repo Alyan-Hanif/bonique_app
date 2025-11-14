@@ -418,11 +418,11 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
               isLoading: isLoading,
             ),
             const SizedBox(height: 12),
-            // SaveOutfitBtn(
-            //   text: "Save Outfit",
-            //   onPressed: tryOnResult == null ? null : () {},
-            //   isLoading: false,
-            // ),
+            SaveOutfitBtn(
+              text: "Save Outfit",
+              onPressed: tryOnResult == null ? null : () {},
+              isLoading: false,
+            ),
             const SizedBox(height: 40),
           ],
         ),

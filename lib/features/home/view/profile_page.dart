@@ -116,12 +116,12 @@ class ProfilePage extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    // _SettingsItem(
-                    //   icon: Icons.history,
-                    //   title: 'Outfit History',
-                    //   subtitle: 'Saved Outfits',
-                    //   onTap: () => {},
-                    // ),
+                    _SettingsItem(
+                      icon: Icons.history,
+                      title: 'Outfit History',
+                      subtitle: 'Saved Outfits',
+                      onTap: () => {},
+                    ),
                     _SettingsItem(
                       icon: Icons.help_outline,
                       title: 'Help & Support',
