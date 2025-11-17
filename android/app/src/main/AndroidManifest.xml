@@ -95,5 +95,9 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        
+        <!-- Required for Google Sign-In on Android 11+ (API 30+) -->
+        <!-- Package visibility: Allows app to query and interact with Google Play Services -->
+        <package android:name="com.google.android.gms" />
     </queries>
 </manifest>
