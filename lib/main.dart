@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'features/splash/view/splash_page.dart';
 import 'features/onboarding/view/onboarding_page.dart';
+import 'features/demo/view/demo_intro_page.dart';
+import 'features/demo/view/demo_video_page.dart';
 import 'features/auth/view/auth_page.dart';
 import 'features/auth/view/update_password_page.dart';
 import 'features/home/view/home_page.dart';
@@ -157,6 +159,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       routes: {
         SplashPage.route: (context) => const SplashPage(),
         OnboardingPage.route: (context) => const OnboardingPage(),
+        DemoIntroPage.route: (context) => const DemoIntroPage(),
+        DemoVideoPage.route: (context) => const DemoVideoPage(),
         AuthPage.route: (context) => const AuthPage(),
         UpdatePasswordPage.route: (context) => const UpdatePasswordPage(),
         HomePage.route: (context) => const HomePage(),
