@@ -39,6 +39,7 @@ class RecommendationsRepository {
               'Content-Type': 'application/json',
               'ngrok-skip-browser-warning': 'true',
               'User-Agent': 'Bonique-Flutter-App',
+              'X-API-Key': EnvConfig.boniqueApiKey,
             },
           )
           .timeout(

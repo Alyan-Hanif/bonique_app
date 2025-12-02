@@ -34,6 +34,7 @@ class DiscoveryRepository {
         headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true', // Required for ngrok-free.app
+          'X-API-Key': EnvConfig.boniqueApiKey,
         },
       );
 

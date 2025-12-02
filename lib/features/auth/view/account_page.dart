@@ -69,15 +69,15 @@ class AccountPage extends ConsumerWidget {
 
                     // App Icon
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: 60,
+                      height: 60,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
                         child: Image.asset(
-                          'assets/images/bonique/bonique - Copy-06.png',
+                          'assets/images/bonique/account_logo.png',
                           width: 60,
                           height: 60,
                         ),
@@ -91,7 +91,7 @@ class AccountPage extends ConsumerWidget {
                       'Welcome to Bonique',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 28,
+                        fontSize: 26,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.5,
                       ),
@@ -118,60 +118,72 @@ class AccountPage extends ConsumerWidget {
                     // const Spacer(flex: 2),
                     SizedBox(height: 15),
                     // Continue with Google Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black87,
-                          shape: RoundedRectangleBorder(
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return Colors.white; // keep same background when loading
+                          }
+                          return Colors.white;
+                        }),
+                        foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return Colors.black87; // keep text color when loading
+                          }
+                          return Colors.black87;
+                        }),
+                        shape: MaterialStateProperty.all(
+                          RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28),
                           ),
-                          elevation: 0,
                         ),
-                        onPressed: authState.isLoading
-                            ? null
-                            : () => _handleGoogleSignIn(context, ref),
-                        child: authState.isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.black87,
-                                  ),
-                                ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/google_logo.png',
-                                    width: 24,
-                                    height: 24,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(
-                                        Icons.g_mobiledata,
-                                        size: 28,
-                                        color: Colors.black87,
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(width: 12),
-                                  const Text(
-                                    'Continue with Google',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                        elevation: MaterialStateProperty.all(0),
+                      ),
+
+                      onPressed: authState.isLoading
+                          ? null
+                          : () => _handleGoogleSignIn(context, ref),
+
+                      child: authState.isLoading
+                          ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black87),
+                        ),
+                      )
+                          : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/google_logo.png',
+                            width: 24,
+                            height: 24,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.g_mobiledata,
+                                size: 28,
+                                color: Colors.black87,
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Continue with Google',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                  ),
 
                     const SizedBox(height: 16),
 

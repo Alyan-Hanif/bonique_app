@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/onboarding_viewmodel.dart';
 import '../widgets/onboarding_dot_indicator.dart';
 import '../../demo/view/demo_intro_page.dart';
+import '../../auth/view/account_page.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
@@ -127,45 +128,56 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
                   // Main content area
                   Expanded(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 600),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: SlideTransition(
-                                position:
-                                    Tween<Offset>(
-                                      begin: const Offset(0.3, 0.0),
-                                      end: Offset.zero,
-                                    ).animate(
-                                      CurvedAnimation(
-                                        parent: animation,
-                                        curve: Curves.easeOutCubic,
-                                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Main image
+                        Expanded(
+                          flex: 5,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 600),
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: SlideTransition(
+                                      position:
+                                          Tween<Offset>(
+                                            begin: const Offset(0.3, 0.0),
+                                            end: Offset.zero,
+                                          ).animate(
+                                            CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeOutCubic,
+                                            ),
+                                          ),
+                                      child: child,
                                     ),
-                                child: child,
-                              ),
-                            );
-                          },
-                      child: Column(
-                        key: ValueKey(index),
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Main image
-                          Expanded(
-                            flex: 5,
+                                  );
+                                },
                             child: Image.asset(
                               pagesData[index].image,
+                              key: ValueKey(index),
                               fit: BoxFit.contain,
                             ),
                           ),
+                        ),
 
-                          const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                          // Title
-                          Text(
+                        // Title
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 600),
+                          transitionBuilder:
+                              (Widget child, Animation<double> animation) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                          child: Text(
                             pagesData[index].title,
+                            key: ValueKey('title_$index'),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
@@ -174,26 +186,24 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                               height: 1.2,
                             ),
                           ),
+                        ),
 
-                          const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                          // Dot indicators
-                          OnboardingDots(
-                            count: pagesData.length,
-                            activeIndex: index,
-                            activeColor: const Color(0xFFB87C5C),
-                            inactiveColor: const Color(
-                              0xFFB87C5C,
-                            ).withOpacity(0.3),
-                          ),
+                        // Dot indicators (no animation)
+                        OnboardingDots(
+                          count: pagesData.length,
+                          activeIndex: index,
+                          activeColor: const Color(0xFFB87C5C),
+                          inactiveColor: const Color(
+                            0xFFB87C5C,
+                          ).withOpacity(0.3),
+                        ),
 
-                          const SizedBox(height: 32),
-                        ],
-                      ),
+                        const SizedBox(height: 32),
+                      ],
                     ),
                   ),
-
-                  // const SizedBox(height: 32),
 
                   // Get Started button
                   SizedBox(
@@ -209,14 +219,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         elevation: 0,
                       ),
                       onPressed: () {
-                        _resetAutoScroll(); // Reset timer on button press
-                        if (index < pagesData.length - 1) {
-                          controller.nextPage();
-                        } else {
-                          _autoScrollTimer
-                              ?.cancel(); // Cancel timer before navigating
-                          goToDemo(context);
-                        }
+                        _autoScrollTimer
+                            ?.cancel(); // Cancel timer before navigating
+                        goToDemo(context);
                       },
                       child: const Text(
                         'Get Started',
@@ -235,7 +240,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     onPressed: () {
                       _autoScrollTimer
                           ?.cancel(); // Cancel timer before navigating
-                      goToDemo(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => AccountPage(
+                            onSignIn: () {},
+                            onCreateAccount: () {},
+                          ),
+                        ),
+                      );
                     },
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),

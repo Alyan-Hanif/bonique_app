@@ -11,104 +11,99 @@ class DemoVideoPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 32.0,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Spacer(flex: 1),
+
+              // Logo at the top
+              Image.asset(
+                'assets/images/onboarding_logoo.png',
+                width: 156,
+                height: 57,
+                fit: BoxFit.contain,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,   // vertical center
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Logo at the top
-                  Image.asset(
-                    'assets/images/onboarding_logoo.png',
-                    width: 156,
-                    height: 57,
-                    fit: BoxFit.contain,
+
+              const Spacer(flex: 1),
+
+              // Main content - Video placeholder
+              Flexible(
+                flex: 8,
+                child: Container(
+                  width: double.infinity,
+                  height: 400,
+                  constraints: const BoxConstraints(maxHeight: 400),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(20),
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/account_page.jpg'),
+                      fit: BoxFit.cover,
+                    ),
                   ),
-
-                  const SizedBox(height: 32),
-
-                  // Main content - Video placeholder
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Stack(
                     children: [
-                      // Video thumbnail/placeholder
+                      // Dark overlay
                       Container(
-                        width: double.infinity,
-                        height: 300,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(20),
-                          image: const DecorationImage(
-                            image: AssetImage('assets/images/account_page.jpg'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        child: Stack(
-                          children: [
-                            // Dark overlay
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: Colors.black.withOpacity(0.3),
-                              ),
-                            ),
-
-                            // Play button
-                            Center(
-                              child: Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.play_arrow_rounded,
-                                    size: 48,
-                                    color: Color(0xFFB87C5C),
-                                  ),
-                                  onPressed: () {
-                                    // TODO: Implement video playback
-                                    // For now, show a snackbar
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Video playback will be implemented here',
-                                        ),
-                                        duration: Duration(seconds: 2),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
+                          color: Colors.black.withOpacity(0.3),
                         ),
                       ),
 
-                      const SizedBox(height: 24),
+                      // Play button
+                      Center(
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 20,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.play_arrow_rounded,
+                              size: 48,
+                              color: Color(0xFFB87C5C),
+                            ),
+                            onPressed: () {
+                              // TODO: Implement video playback
+                              // For now, show a snackbar
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Video playback will be implemented here',
+                                  ),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
                     ],
                   ),
+                ),
+              ),
 
-                  const SizedBox(height: 32),
+              const Spacer(flex: 1),
 
-                  // Play Demo button
+              // Play Demo button
+              Column(
+                children: [
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 48,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFB87C5C),
@@ -152,7 +147,9 @@ class DemoVideoPage extends StatelessWidget {
                   // Next button (skip demo)
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pushReplacementNamed(AuthPage.route);
+                      Navigator.of(
+                        context,
+                      ).pushReplacementNamed(AuthPage.route);
                     },
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -168,7 +165,9 @@ class DemoVideoPage extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
+
+              const Spacer(flex: 1),
+            ],
           ),
         ),
       ),

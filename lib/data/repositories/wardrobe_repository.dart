@@ -57,8 +57,11 @@ class WardrobeRepository {
       // Create multipart request
       final request = http.MultipartRequest('POST', url);
 
-      // Add headers
-      request.headers.addAll({'ngrok-skip-browser-warning': 'true'});
+      // Add headers including API key
+      request.headers.addAll({
+        'ngrok-skip-browser-warning': 'true',
+        'X-API-Key': EnvConfig.boniqueApiKey,
+      });
 
       // Add the image file with proper filename and content type
       final filePath = imageFile.path;
@@ -320,6 +323,7 @@ class WardrobeRepository {
         headers: {
           'accept': 'application/json',
           'ngrok-skip-browser-warning': 'true',
+          'X-API-Key': EnvConfig.boniqueApiKey,
         },
       );
 
@@ -356,6 +360,51 @@ class WardrobeRepository {
     } catch (e) {
       print('❌ Try-on API call error: $e');
       throw Exception('Failed to process try-on: $e');
+    }
+  }
+
+  // Get try-on history for a user
+  static Future<Map<String, dynamic>> getTryOnHistory(String userId) async {
+    try {
+      print('📜 Fetching try-on history for user: $userId');
+
+      // --- Build URL with user_id parameter ---
+      final url = Uri.parse(
+        '$_baseUrl/images/try-on/history',
+      ).replace(queryParameters: {'user_id': userId});
+
+      print('🔗 API URL: $url');
+
+      // --- Send request ---
+      final response = await http.get(
+        url,
+        headers: {
+          'accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          'X-API-Key': EnvConfig.boniqueApiKey,
+        },
+      );
+
+      print('📡 Try-on History API Response Status: ${response.statusCode}');
+      print('📡 Try-on History API Response Body: ${response.body}');
+
+      // --- Handle successful response ---
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        print('✅ Try-on history API call successful!');
+        print('📦 Full API Response: $jsonResponse');
+        return jsonResponse;
+      } else {
+        print(
+          '❌ Try-on history API call failed: ${response.statusCode} - ${response.body}',
+        );
+        throw Exception(
+          'Try-on history API call failed: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      print('❌ Try-on history API call error: $e');
+      throw Exception('Failed to fetch try-on history: $e');
     }
   }
 }
