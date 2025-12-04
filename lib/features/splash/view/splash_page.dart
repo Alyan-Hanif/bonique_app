@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../onboarding/view/onboarding_page.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
+import '../../auth/view/body_picture_upload_page.dart';
 import '../../home/view/home_page.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -78,12 +79,20 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
   void _checkAuthAndNavigate() {
     if (mounted) {
-      final authViewModel = ref.read(authViewModelProvider.notifier);
+      final authState = ref.read(authViewModelProvider);
 
       // Check if user is logged in
-      if (authViewModel.isUserLoggedIn) {
-        // User is logged in, navigate to home
-        Navigator.of(context).pushReplacementNamed(HomePage.route);
+      if (authState.isLoggedIn && authState.currentUserModel != null) {
+        // User is logged in, check if body picture is uploaded
+        if (!authState.currentUserModel!.hasUploadedBodyPic) {
+          // Navigate to body picture upload page
+          Navigator.of(
+            context,
+          ).pushReplacementNamed(BodyPictureUploadPage.route);
+        } else {
+          // Navigate to home
+          Navigator.of(context).pushReplacementNamed(HomePage.route);
+        }
       } else {
         // User is not logged in, navigate to onboarding
         Navigator.of(context).pushReplacementNamed(OnboardingPage.route);

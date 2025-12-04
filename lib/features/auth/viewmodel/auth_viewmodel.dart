@@ -646,6 +646,11 @@ class AuthViewModel extends StateNotifier<AuthState> {
     }
   }
 
+  // Update current user model (used after profile updates)
+  void updateCurrentUser(UserModel userModel) {
+    state = state.copyWith(currentUserModel: userModel);
+  }
+
   // Check if user is already logged in
   bool get isUserLoggedIn => _repository.isLoggedIn;
 
