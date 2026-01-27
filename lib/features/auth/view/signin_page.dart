@@ -221,15 +221,15 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       isLoading: authState.isLoading,
                     ),
 
-                    const SizedBox(height: 14),
-
-                    // Divider
-                    const AuthDivider(),
-
-                    const SizedBox(height: 14),
-
-                    // Google Sign In button
-                    GoogleSignInButton(onPressed: _handleGoogleSignIn),
+                    // const SizedBox(height: 14),
+                    //
+                    // // Divider
+                    // const AuthDivider(),
+                    //
+                    // const SizedBox(height: 14),
+                    //
+                    // // Google Sign In button
+                    // GoogleSignInButton(onPressed: _handleGoogleSignIn),
 
                     const SizedBox(height: 20),
 

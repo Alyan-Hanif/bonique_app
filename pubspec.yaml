@@ -51,6 +51,9 @@ dependencies:
   connectivity_plus: ^6.0.0
   package_info_plus: ^8.0.0
   shared_preferences: ^2.2.2
+  photo_view: ^0.15.0
+  video_player: ^2.9.2
+  chewie: ^1.8.5
 
 dev_dependencies:
   flutter_test:
@@ -77,6 +80,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/videos/
     - assets/images/bonique/
     - assets/animations/
     - .env

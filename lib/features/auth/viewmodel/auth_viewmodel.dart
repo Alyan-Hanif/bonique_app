@@ -101,29 +101,32 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
     if (isLoggedIn) {
       try {
+        print('🔍 Checking initial auth status...');
         userModel = await _repository.getCurrentUserModel();
 
-        // ENFORCE: If user is authenticated but not in database, sign them out
-        if (userModel == null) {
-          print('User authenticated but not found in database. Signing out...');
-          await _repository.signOut();
-          state = AuthState();
-          return;
+        if (userModel != null) {
+          print('✅ User found in database: ${userModel.email}');
+        } else {
+          print('⚠️ User authenticated but not found in database.');
+          // DON'T log out immediately - the user might be in the middle of signup
+          // or there might be a temporary database issue
+          // Instead, just set the state and let the app flow handle it
         }
       } catch (e) {
-        print('Error getting current user model: $e');
-        // Sign out on error to ensure clean state
-        await _repository.signOut();
-        state = AuthState();
-        return;
+        print('⚠️ Error getting current user model: $e');
+        // DON'T log out on error - it could be a network issue
+        // Keep the Supabase session active and try to recover
+        // The user can still be logged in, we'll fetch user data later
       }
     }
 
     state = state.copyWith(
-      isLoggedIn:
-          isLoggedIn &&
-          userModel != null, // Only logged in if user exists in DB
+      isLoggedIn: isLoggedIn, // Trust Supabase session
       currentUserModel: userModel,
+    );
+
+    print(
+      '✅ Auth state updated: isLoggedIn=$isLoggedIn, hasUserModel=${userModel != null}',
     );
   }
 
@@ -644,6 +647,11 @@ class AuthViewModel extends StateNotifier<AuthState> {
         print('Error refreshing user model: $e');
       }
     }
+  }
+
+  // Update current user model (used after profile updates)
+  void updateCurrentUser(UserModel userModel) {
+    state = state.copyWith(currentUserModel: userModel);
   }
 
   // Check if user is already logged in

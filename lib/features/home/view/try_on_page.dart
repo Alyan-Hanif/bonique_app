@@ -148,7 +148,7 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
       );
 
       if (image != null && mounted) {
-        await _processTryOn(File(image.path));
+        await _processTryOn(imageFile: File(image.path));
       }
     } catch (e) {
       if (mounted) {
@@ -187,7 +187,7 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
       );
 
       if (image != null && mounted) {
-        await _processTryOn(File(image.path));
+        await _processTryOn(imageFile: File(image.path));
       }
     } catch (e) {
       if (mounted) {
@@ -200,7 +200,7 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
     }
   }
 
-  Future<void> _processTryOn(File imageFile) async {
+  Future<void> _processTryOn({File? imageFile, String? imageUrl}) async {
     final selectedItems = ref.read(tryOnItemsProvider);
     final authState = ref.read(authViewModelProvider);
 
@@ -230,16 +230,26 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
       ref.read(tryOnLoadingProvider.notifier).state = true;
       ref.read(tryOnResultProvider.notifier).state = null;
 
-      // Upload person image to personImages bucket
-      final userId = authState.currentUserModel!.id;
-      final personImageUrl = await WardrobeRepository.uploadPersonImage(
-        imageFile,
-        userId,
-      );
+      String personImageUrl;
 
-      print('✅ Person image uploaded: $personImageUrl');
+      // If imageUrl is provided, use it directly (from user's profile)
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        personImageUrl = imageUrl;
+        print('✅ Using saved body picture: $personImageUrl');
+      }
+      // Otherwise, upload the new image file
+      else if (imageFile != null) {
+        final userId = authState.currentUserModel!.id;
+        personImageUrl = await WardrobeRepository.uploadPersonImage(
+          imageFile,
+          userId,
+        );
+        print('✅ Person image uploaded: $personImageUrl');
+      } else {
+        throw Exception('No image provided for try-on');
+      }
 
-      // Call try-on API with uploaded person image
+      // Call try-on API with person image
       final resultImageUrl = await WardrobeRepository.tryOnClothing(
         clothingPath: selectedItems.first.imagePath,
         personPath: personImageUrl,
@@ -270,6 +280,7 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
   Future<void> _handleTryOn() async {
     final selectedItems = ref.read(tryOnItemsProvider);
     final tryOnResult = ref.read(tryOnResultProvider);
+    final authState = ref.read(authViewModelProvider);
 
     // If "Try Another" is pressed (result exists), navigate to wardrobe
     if (tryOnResult != null) {
@@ -300,8 +311,18 @@ class _TryOnPageState extends ConsumerState<TryOnPage> {
       return;
     }
 
-    // Show image picker options
-    _showImageSourcePicker();
+    // Check if user has a saved body picture
+    final userBodyPicUrl = authState.currentUserModel?.bodyPicUrl;
+
+    if (userBodyPicUrl != null && userBodyPicUrl.isNotEmpty) {
+      // Use saved body picture automatically
+      print('🎯 Using saved body picture from profile');
+      await _processTryOn(imageUrl: userBodyPicUrl);
+    } else {
+      // No saved body picture, show image picker
+      print('📸 No saved body picture, requesting image selection');
+      _showImageSourcePicker();
+    }
   }
 
   @override

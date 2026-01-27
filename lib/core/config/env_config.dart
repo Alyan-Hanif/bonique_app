@@ -23,6 +23,7 @@ class EnvConfig {
 
   // Bonique AI Backend Configuration
   static String get boniqueAiUrl => dotenv.env['BONIQUE_AI_URL'] ?? '';
+  static String get boniqueApiKey => dotenv.env['BONIQUE_API_KEY'] ?? '';
 
   // Validation method to ensure all required environment variables are set
   static bool validateConfig() {
@@ -36,6 +37,7 @@ class EnvConfig {
       appPackageName,
       appName,
       boniqueAiUrl,
+      // boniqueApiKey,
     ];
 
     for (final variable in requiredVars) {

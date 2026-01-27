@@ -216,7 +216,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     onChanged: _onPasswordChanged,
                   ),
 
-                  const SizedBox(height: 24),
+                  // const SizedBox(height: 24),
 
                   // Address field
                   // AuthInputField(
@@ -278,14 +278,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   ),
 
                   const SizedBox(height: 14),
-
-                  // Divider
-                  const AuthDivider(),
-
-                  const SizedBox(height: 14),
-
-                  // Google Sign In button
-                  GoogleSignInButton(onPressed: _handleGoogleSignIn),
+                  //
+                  // // Divider
+                  // const AuthDivider(),
+                  //
+                  // const SizedBox(height: 14),
+                  //
+                  // // Google Sign In button
+                  // GoogleSignInButton(onPressed: _handleGoogleSignIn),
 
                   // const Spacer(),
 

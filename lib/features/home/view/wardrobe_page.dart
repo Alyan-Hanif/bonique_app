@@ -7,6 +7,7 @@ import 'package:bonique/core/utils/clothing_category_mapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:photo_view/photo_view.dart';
 
 // State management for wardrobe filtering
 final wardrobeFilterProvider = StateProvider<String>((ref) => 'All');
@@ -481,6 +482,15 @@ class _WardrobeTile extends ConsumerWidget {
           ref.read(selectedWardrobeItemProvider.notifier).state = item.id;
         }
       },
+      onLongPress: () {
+        // Long press to view image in full screen with zoom
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => _WardrobeImageViewer(item: item),
+          ),
+        );
+      },
       child: Container(
         width: 120,
         height: 170,
@@ -541,23 +551,199 @@ class _WardrobeTile extends ConsumerWidget {
                 },
               ),
             ),
-            // if (isSelected)
-            //   Positioned(
-            //     top: 8,
-            //     right: 8,
-            //     child: Container(
-            //       width: 24,
-            //       height: 24,
-            //       decoration: BoxDecoration(
-            //         color: Theme.of(context).colorScheme.primary,
-            //         shape: BoxShape.circle,
-            //       ),
-            //       child: const Icon(Icons.check, color: Colors.white, size: 16),
+            // Zoom icon hint
+            // Positioned(
+            //   top: 4,
+            //   right: 4,
+            //   child: Container(
+            //     padding: const EdgeInsets.all(4),
+            //     decoration: BoxDecoration(
+            //       color: Colors.black.withOpacity(0.5),
+            //       borderRadius: BorderRadius.circular(4),
             //     ),
+            //     child: const Icon(Icons.zoom_in, color: Colors.white, size: 14),
             //   ),
+            // ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _WardrobeImageViewer extends StatelessWidget {
+  final WardrobeModel item;
+
+  const _WardrobeImageViewer({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          item.type ?? 'Wardrobe Item',
+          style: const TextStyle(color: Colors.white),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+            onPressed: () => _showInfoBottomSheet(context),
+          ),
+        ],
+      ),
+      body: PhotoView(
+        imageProvider: NetworkImage(item.imagePath),
+        minScale: PhotoViewComputedScale.contained,
+        maxScale: PhotoViewComputedScale.covered * 3,
+        initialScale: PhotoViewComputedScale.contained,
+        backgroundDecoration: const BoxDecoration(color: Colors.black),
+        loadingBuilder: (context, event) => Center(
+          child: CircularProgressIndicator(
+            value: event == null
+                ? 0
+                : event.cumulativeBytesLoaded / (event.expectedTotalBytes ?? 1),
+            color: Colors.white,
+          ),
+        ),
+        errorBuilder: (context, error, stackTrace) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.broken_image, size: 60, color: Colors.white54),
+              const SizedBox(height: 16),
+              Text(
+                'Failed to load image',
+                style: TextStyle(color: Colors.white54),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.black,
+        padding: const EdgeInsets.all(16),
+        child: SafeArea(
+          child: Text(
+            item.caption ?? 'No description available',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showInfoBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Title
+            const Text(
+              'Item Details',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 20),
+
+            // Details
+            if (item.type != null)
+              _buildInfoRow(Icons.category, 'Type', item.type!),
+            if (item.caption != null && item.caption!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _buildInfoRow(Icons.description, 'Description', item.caption!),
+            ],
+            if (item.color != null) ...[
+              const SizedBox(height: 12),
+              _buildInfoRow(Icons.palette, 'Color', item.color!),
+            ],
+            if (item.fabric != null) ...[
+              const SizedBox(height: 12),
+              _buildInfoRow(Icons.texture, 'Fabric', item.fabric!),
+            ],
+            if (item.pattern != null) ...[
+              const SizedBox(height: 12),
+              _buildInfoRow(Icons.pattern, 'Pattern', item.pattern!),
+            ],
+            if (item.style != null) ...[
+              const SizedBox(height: 12),
+              _buildInfoRow(Icons.style, 'Style', item.style!),
+            ],
+            if (item.season != null) ...[
+              const SizedBox(height: 12),
+              _buildInfoRow(Icons.wb_sunny, 'Season', item.season!),
+            ],
+            if (item.occasion != null) ...[
+              const SizedBox(height: 12),
+              _buildInfoRow(Icons.event, 'Occasion', item.occasion!),
+            ],
+
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[700]),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

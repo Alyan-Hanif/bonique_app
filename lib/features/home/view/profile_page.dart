@@ -1,7 +1,6 @@
-import 'package:bonique/features/auth/view/account_page.dart';
 import 'package:bonique/features/home/view/edit_profile_page.dart';
 import 'package:bonique/features/home/view/account_security_page.dart';
-// import 'package:bonique/features/home/view/outfit_history_page.dart';
+import 'package:bonique/features/home/view/outfit_history_page.dart';
 import 'package:bonique/features/home/view/help_support_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -120,7 +119,12 @@ class ProfilePage extends ConsumerWidget {
                       icon: Icons.history,
                       title: 'Outfit History',
                       subtitle: 'Saved Outfits',
-                      onTap: () => {},
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const OutfitHistoryPage(),
+                        ),
+                      ),
                     ),
                     _SettingsItem(
                       icon: Icons.help_outline,

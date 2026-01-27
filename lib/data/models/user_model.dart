@@ -5,6 +5,8 @@ class UserModel {
   final String email;
   final String? fullName;
   final String? avatarUrl;
+  final bool hasUploadedBodyPic;
+  final String? bodyPicUrl;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final Map<String, dynamic>? metadata;
@@ -14,6 +16,8 @@ class UserModel {
     required this.email,
     this.fullName,
     this.avatarUrl,
+    this.hasUploadedBodyPic = false,
+    this.bodyPicUrl,
     this.createdAt,
     this.updatedAt,
     this.metadata,
@@ -26,11 +30,12 @@ class UserModel {
       email: user.email ?? '',
       fullName: user.userMetadata?['full_name'] as String?,
       avatarUrl: user.userMetadata?['avatar_url'] as String?,
-      createdAt: user.createdAt != null && user.createdAt!.isNotEmpty 
-          ? DateTime.tryParse(user.createdAt!) 
-          : null,
-      updatedAt: user.updatedAt != null && user.updatedAt!.isNotEmpty 
-          ? DateTime.tryParse(user.updatedAt!) 
+      hasUploadedBodyPic:
+          user.userMetadata?['has_uploaded_body_pic'] as bool? ?? false,
+      bodyPicUrl: user.userMetadata?['body_pic_url'] as String?,
+      createdAt: DateTime.tryParse(user.createdAt),
+      updatedAt: user.updatedAt != null
+          ? DateTime.tryParse(user.updatedAt!)
           : null,
       metadata: user.userMetadata,
     );
@@ -43,10 +48,12 @@ class UserModel {
       email: json['email'] as String,
       fullName: json['full_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
-      createdAt: json['created_at'] != null 
+      hasUploadedBodyPic: json['has_uploaded_body_pic'] as bool? ?? false,
+      bodyPicUrl: json['body_pic_url'] as String?,
+      createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
-      updatedAt: json['updated_at'] != null 
+      updatedAt: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'] as String)
           : null,
       metadata: json['metadata'] as Map<String, dynamic>?,
@@ -60,6 +67,8 @@ class UserModel {
       'email': email,
       'full_name': fullName,
       'avatar_url': avatarUrl,
+      'has_uploaded_body_pic': hasUploadedBodyPic,
+      'body_pic_url': bodyPicUrl,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'metadata': metadata,
@@ -72,6 +81,8 @@ class UserModel {
     String? email,
     String? fullName,
     String? avatarUrl,
+    bool? hasUploadedBodyPic,
+    String? bodyPicUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
     Map<String, dynamic>? metadata,
@@ -81,6 +92,8 @@ class UserModel {
       email: email ?? this.email,
       fullName: fullName ?? this.fullName,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      hasUploadedBodyPic: hasUploadedBodyPic ?? this.hasUploadedBodyPic,
+      bodyPicUrl: bodyPicUrl ?? this.bodyPicUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       metadata: metadata ?? this.metadata,

@@ -1,44 +1,89 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/onboarding_viewmodel.dart';
 import '../widgets/onboarding_dot_indicator.dart';
-import '../../auth/view/auth_page.dart';
+import '../../demo/view/demo_intro_page.dart';
+import '../../auth/view/account_page.dart';
 
-class OnboardingPage extends ConsumerWidget {
+class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
 
   static const route = '/onboarding';
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OnboardingPage> createState() => _OnboardingPageState();
+}
+
+class _OnboardingPageState extends ConsumerState<OnboardingPage> {
+  Timer? _autoScrollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoScroll();
+  }
+
+  @override
+  void dispose() {
+    _autoScrollTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      final index = ref.read(onboardingControllerProvider);
+      final controller = ref.read(onboardingControllerProvider.notifier);
+
+      if (index < 2) {
+        controller.nextPage();
+      } else {
+        // On the last page, navigate to demo
+        timer.cancel();
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const DemoIntroPage()),
+          );
+        }
+      }
+    });
+  }
+
+  void _resetAutoScroll() {
+    _startAutoScroll();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final index = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
 
     final pagesData = [
       (
-        image: 'assets/images/onboarding_1.png',
-        title: 'Meet Bonique',
+        image: 'assets/images/onboarding_prototype_1.png',
+        title: 'Discover Looks from Your Own Closet',
         subtitle:
-            'Bonique is your personal AI-powered stylist - helping you explore your wardrobe, discover new outfit ideas, and try on looks virtually, so you can step out with confidence every day.',
+            'Upload your wardrobe and let Bonique create endless outfit combinations from the clothes you already own.',
       ),
       (
-        image: 'assets/images/onboarding_2.png',
-        title: 'Fashion, Made Effortless',
+        image: 'assets/images/onboarding_prototype_2.png',
+        title: 'Loved by 500+ People Around the World',
         subtitle:
-            'Say goodbye to decision fatigue and hello to confidence. Bonique blends your wardrobe with endless AI-curated possibilities, so you always step out feeling polished, stylish, and authentically you.',
+            'Join thousands of fashion lovers who trust Bonique for their daily outfit inspiration and styling needs.',
       ),
       (
-        image: 'assets/images/onboarding_3.png',
-        title: 'Discover Looks',
+        image: 'assets/images/onboarding_prototype_3.png',
+        title: 'See yourself in every style, effortlessly',
         subtitle:
-            'Turn dressing into a seamless experience with intelligent, tailored outfit suggestions that adapt to your mood, align with your events, and evolve with the seasons - ensuring you always feel confident and effortlessly stylish.',
+            'Try on any outfit virtually with AI-powered visualization. See how you look before you step out.',
       ),
     ];
 
-    final Color darkGray = const Color(0xFF2C2C2C);
-
-    void goToAuth(BuildContext context) {
-      Navigator.of(context).pushReplacementNamed(AuthPage.route);
+    void goToDemo(BuildContext context) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const DemoIntroPage()),
+      );
     }
 
     return WillPopScope(
@@ -46,15 +91,16 @@ class OnboardingPage extends ConsumerWidget {
         // Handle back button - go to previous page or exit onboarding
         if (index > 0) {
           controller.previousPage();
+          _resetAutoScroll(); // Reset timer on manual navigation
           return false; // Don't pop the route
         } else {
-          // If on first page, go to auth page
-          goToAuth(context);
+          // If on first page, go to demo page
+          goToDemo(context);
           return false; // Don't pop the route
         }
       },
       child: Scaffold(
-        backgroundColor: darkGray,
+        backgroundColor: Colors.white,
         body: SafeArea(
           child: GestureDetector(
             onPanUpdate: (details) {
@@ -62,265 +108,165 @@ class OnboardingPage extends ConsumerWidget {
             },
             onPanEnd: (details) {
               controller.handleScrollEnd(details);
+              _resetAutoScroll(); // Reset timer after swipe
             },
-            child: Column(
-              children: [
-                // Fixed background with clipped circle
-                Expanded(
-                  flex: 60,
-                  child: Container(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 32.0,
+              ),
+              child: Column(
+                children: [
+                  // Logo at the top
+                  Image.asset(
+                    'assets/images/onboarding_logoo.png',
+                    height: 60,
+                    fit: BoxFit.contain,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Main content area
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Main image
+                        Expanded(
+                          flex: 5,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 600),
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: SlideTransition(
+                                      position:
+                                          Tween<Offset>(
+                                            begin: const Offset(0.3, 0.0),
+                                            end: Offset.zero,
+                                          ).animate(
+                                            CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeOutCubic,
+                                            ),
+                                          ),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                            child: Image.asset(
+                              pagesData[index].image,
+                              key: ValueKey(index),
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // Title
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 600),
+                          transitionBuilder:
+                              (Widget child, Animation<double> animation) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                          child: Text(
+                            pagesData[index].title,
+                            key: ValueKey('title_$index'),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF2C2C2C),
+                              fontSize: 20,
+                              height: 1.2,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Dot indicators (no animation)
+                        OnboardingDots(
+                          count: pagesData.length,
+                          activeIndex: index,
+                          activeColor: const Color(0xFFB87C5C),
+                          inactiveColor: const Color(
+                            0xFFB87C5C,
+                          ).withOpacity(0.3),
+                        ),
+
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
+
+                  // Get Started button
+                  SizedBox(
                     width: double.infinity,
-                    color: Colors.white,
-                    child: ClipPath(
-                      clipper: TopWaveClipper(),
-                      child: Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        color: Theme.of(context).colorScheme.primary,
-                        child: Stack(
-                          children: [
-                            //left circle
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Container(
-                                width: 75, // adjust size
-                                height: 150, // adjust size
-                                decoration: const BoxDecoration(
-                                  color: Color(0x47E2C647),
-                                  borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(100),
-                                    bottomRight: Radius.circular(100),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            //right circle
-                            Align(
-                              alignment: const Alignment(
-                                1,
-                                -0.7,
-                              ), // 1 = right, -1 = top, 0 = center, 1 = bottom
-                              child: Container(
-                                width: 85,
-                                height: 180,
-                                decoration: const BoxDecoration(
-                                  color: Color(0x47E2C647),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(100),
-                                    bottomLeft: Radius.circular(100),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            // Animated image
-                            Align(
-                              alignment: Alignment
-                                  .bottomCenter, // move image to bottom
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                child: Container(
-                                  width: 350, // adjust circle size
-
-                                  child: Image.asset(
-                                    pagesData[index].image,
-                                    fit: BoxFit.cover, // fill circle properly
-                                    alignment: Alignment.bottomCenter,
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              child: Image.asset(
-                                pagesData[index].image,
-                                key: ValueKey(index),
-                                width: 362,
-                                height: 4,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ],
+                    height: 56,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFB87C5C),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        _autoScrollTimer
+                            ?.cancel(); // Cancel timer before navigating
+                        goToDemo(context);
+                      },
+                      child: const Text(
+                        'Get Started',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-                ),
-                // Fixed content area with text and navigation
-                Expanded(
-                  flex: 40,
-                  child: Container(
-                    width: double.infinity,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 20.0,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Animated text content
-                          Expanded(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              child: Container(
-                                key: ValueKey(index),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    // Title
-                                    Text(
-                                      pagesData[index].title,
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                            color: darkGray,
-                                            fontSize: 28,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    // Description
-                                    Text(
-                                      pagesData[index].subtitle,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 15,
-                                        height: 1.0,
-                                        letterSpacing: 0.0,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Fixed navigation elements
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Skip button (left side)
-                              SizedBox(
-                                height: 32,
-                                width: 100,
-                                child: TextButton(
-                                  onPressed: () => goToAuth(context),
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: const Size(83, 32),
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  child: const Text(
-                                    'Skip',
-                                    style: TextStyle(
-                                      color: Color(0xFF2C2C2C),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
 
-                              // Dot indicator
-                              OnboardingDots(
-                                count: pagesData.length,
-                                activeIndex: index,
-                                activeColor: darkGray,
-                                inactiveColor: darkGray.withOpacity(0.3),
-                              ),
+                  const SizedBox(height: 16),
 
-                              // Next button (right side)
-                              SizedBox(
-                                height: 32,
-                                width: 100,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(48),
-                                    ),
-                                    elevation: 0,
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: const Size(83, 32),
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  onPressed: () {
-                                    if (index < pagesData.length - 1) {
-                                      controller.nextPage();
-                                    } else {
-                                      goToAuth(context);
-                                    }
-                                  },
-                                  child: Text(
-                                    index < pagesData.length - 1
-                                        ? 'Next'
-                                        : 'Get Started',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                  // Log In link
+                  TextButton(
+                    onPressed: () {
+                      _autoScrollTimer
+                          ?.cancel(); // Cancel timer before navigating
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => AccountPage(
+                            onSignIn: () {},
+                            onCreateAccount: () {},
                           ),
-                        ],
+                        ),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                    child: const Text(
+                      'Log In',
+                      style: TextStyle(
+                        color: Color(0xFF2C2C2C),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
-}
-
-// CircleClipper class moved here since we're no longer using OnboardingPageContent
-class TopWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-
-    // Start at left, 60% height
-    path.moveTo(0, size.height * 0.8);
-
-    // Circular arc OUTWARD (convex), ending at 80%
-    path.arcToPoint(
-      Offset(size.width, size.height * 0.99), // end point
-      radius: Radius.circular(
-        size.width * 1.5,
-      ), // big enough radius for circular feel
-      clockwise: false, // flip to make arc outside
-    );
-
-    // Go up to top-right
-    path.lineTo(size.width, 0);
-
-    // Back to top-left
-    path.lineTo(0, 0);
-
-    // Close the path
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
