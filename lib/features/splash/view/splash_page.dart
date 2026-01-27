@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../onboarding/view/onboarding_page.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
-import '../../auth/view/body_picture_upload_page.dart';
 import '../../home/view/home_page.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -24,6 +23,13 @@ class _SplashPageState extends ConsumerState<SplashPage>
   @override
   void initState() {
     super.initState();
+
+    // Force auth provider initialization immediately
+    // This ensures _checkInitialAuthStatus runs right away
+    Future.microtask(() {
+      ref.read(authViewModelProvider);
+      print('🚀 Auth provider initialized');
+    });
 
     // Initialize smoke animation controller
     _smokeController = AnimationController(
@@ -74,6 +80,12 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
     // Phase 4: Wait 800ms delay, then navigate
     await Future.delayed(const Duration(milliseconds: 800));
+
+    // Wait for auth check to complete
+    print('⏳ Waiting for auth check to complete...');
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    print('✅ Auth check should be complete, checking state...');
     _checkAuthAndNavigate();
   }
 
@@ -81,20 +93,18 @@ class _SplashPageState extends ConsumerState<SplashPage>
     if (mounted) {
       final authState = ref.read(authViewModelProvider);
 
-      // Check if user is logged in
-      if (authState.isLoggedIn && authState.currentUserModel != null) {
-        // User is logged in, check if body picture is uploaded
-        if (!authState.currentUserModel!.hasUploadedBodyPic) {
-          // Navigate to body picture upload page
-          Navigator.of(
-            context,
-          ).pushReplacementNamed(BodyPictureUploadPage.route);
-        } else {
-          // Navigate to home
-          Navigator.of(context).pushReplacementNamed(HomePage.route);
-        }
+      print(
+        '🔍 SplashPage checking auth: isLoggedIn=${authState.isLoggedIn}, hasUserModel=${authState.currentUserModel != null}',
+      );
+
+      // Simplified flow:
+      // - If logged in → Home
+      // - If not logged in → Onboarding
+      if (authState.isLoggedIn) {
+        print('✅ User is logged in, navigating to home page');
+        Navigator.of(context).pushReplacementNamed(HomePage.route);
       } else {
-        // User is not logged in, navigate to onboarding
+        print('❌ User is not logged in, navigating to onboarding');
         Navigator.of(context).pushReplacementNamed(OnboardingPage.route);
       }
     }

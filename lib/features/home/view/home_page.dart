@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
+import 'package:bonique/features/auth/view/body_picture_upload_page.dart';
 import '../viewmodel/discovery_viewmodel.dart';
 import 'wardrobe_page.dart';
 import 'discovery_page.dart';
@@ -29,6 +30,41 @@ class _HomePageState extends ConsumerState<HomePage> {
     ResultsPage(), // Add ResultsPage at index 4
     AddItemPage(), // Add AddItemPage at index 5
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Check body picture status after frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkBodyPictureStatus();
+    });
+  }
+
+  void _checkBodyPictureStatus() {
+    final authState = ref.read(authViewModelProvider);
+    final currentUser = authState.currentUserModel;
+
+    print('🔍 Checking body picture status on home page...');
+    print('   isLoggedIn: ${authState.isLoggedIn}');
+    print('   hasUserModel: ${currentUser != null}');
+
+    if (authState.isLoggedIn && currentUser != null) {
+      print('   hasUploadedBodyPic: ${currentUser.hasUploadedBodyPic}');
+
+      if (!currentUser.hasUploadedBodyPic) {
+        print('⚠️ User has NO body picture, navigating to upload page');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const BodyPictureUploadPage(),
+          ),
+        );
+      } else {
+        print('✅ User has body picture, staying on home page');
+      }
+    } else {
+      print('⚠️ User not properly authenticated or user model missing');
+    }
+  }
 
   void _navigateToAddItem() {
     // Navigate to AddItemPage using bottom navigation index
