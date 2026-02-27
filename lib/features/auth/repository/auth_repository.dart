@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/config/env_config.dart';
+import '../../../core/services/user_profile_cache_service.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../data/models/user_model.dart';
 
@@ -224,25 +225,42 @@ class AuthRepository {
     }
   }
 
-  // Sign out
+  // Sign out. When offline, server sign-out may fail; we still clear local cache and session.
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    await _client.auth.signOut();
+    final userId = currentUser?.id;
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {}
+    try {
+      await _client.auth.signOut();
+    } catch (e) {
+      // When offline, signOut() throws; clear local state anyway
+      print('⚠️ signOut (network) failed, clearing local cache: $e');
+    }
+    if (userId != null) {
+      await UserProfileCacheService.clear(userId);
+    }
   }
 
   // Get current user
   User? get currentUser => _client.auth.currentUser;
 
-  // Get current user model from our users table
+  // Get current user model from our users table.
+  // Saves to UserProfileCacheService on success so we can use cache when offline.
+  // Rethrows on network error so caller can fall back to cache.
   Future<UserModel?> getCurrentUserModel() async {
     final user = currentUser;
     if (user == null) return null;
 
     try {
-      return await _userRepository.getUserById(user.id);
+      final userModel = await _userRepository.getUserById(user.id);
+      if (userModel != null) {
+        await UserProfileCacheService.save(userModel);
+      }
+      return userModel;
     } catch (e) {
       print('Error getting current user model: $e');
-      return null;
+      rethrow;
     }
   }
 

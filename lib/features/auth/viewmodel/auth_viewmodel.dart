@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../repository/auth_repository.dart';
 import '../../../data/models/user_model.dart';
 import '../../../core/utils/connectivity_utils.dart';
+import '../../../core/services/user_profile_cache_service.dart';
 
 // Provider for AuthRepository
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -112,8 +114,24 @@ class AuthViewModel extends StateNotifier<AuthState> {
         }
       } catch (e) {
         print('Error getting current user model: $e');
-        // Sign out on error to ensure clean state
-        await _repository.signOut();
+        // When offline/network error: use cached user or build from local session
+        final user = _repository.currentUser;
+        if (user != null && _isNetworkError(e)) {
+          final cached = UserProfileCacheService.load(user.id);
+          if (cached != null) {
+            print('📦 Using cached user profile (offline)');
+            state = state.copyWith(isLoggedIn: true, currentUserModel: cached);
+            return;
+          }
+          // No cache (e.g. fresh install): use Supabase session so we stay logged in
+          final fallback = UserModel.fromSupabaseUser(user);
+          print('📦 Using session fallback (offline, no cache)');
+          state = state.copyWith(isLoggedIn: true, currentUserModel: fallback);
+          return;
+        }
+        try {
+          await _repository.signOut();
+        } catch (_) {}
         state = AuthState();
         return;
       }
@@ -125,6 +143,19 @@ class AuthViewModel extends StateNotifier<AuthState> {
           userModel != null, // Only logged in if user exists in DB
       currentUserModel: userModel,
     );
+  }
+
+  static bool _isNetworkError(Object e) {
+    if (e is SocketException) return true;
+    if (e is OSError && e.message.contains('hostname')) return true;
+    final msg = e.toString().toLowerCase();
+    return msg.contains('socketexception') ||
+        msg.contains('failed host lookup') ||
+        msg.contains('no address associated with hostname') ||
+        msg.contains('errno = 7') ||
+        msg.contains('host lookup') ||
+        msg.contains('authretryablefetchexception') ||
+        (msg.contains('connection') && msg.contains('refused'));
   }
 
   // Form validation methods

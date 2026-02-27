@@ -15,6 +15,9 @@ import 'core/services/session_manager.dart';
 import 'core/services/version_checker.dart';
 import 'core/utils/connectivity_utils.dart';
 import 'core/config/env_config.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'core/services/wardrobe_cache_service.dart';
+import 'core/services/user_profile_cache_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +54,13 @@ void main() async {
     if (versionChanged) {
       print('🔄 App version changed - user logged out for security');
     }
+
+    // Initialize Hive for offline cache (wardrobe + user profile)
+    await Hive.initFlutter();
+    await WardrobeCacheService.init();
+    await UserProfileCacheService.init();
+    print('✅ Wardrobe cache (Hive) initialized');
+    print('✅ User profile cache (Hive) initialized');
   } catch (e) {
     print('❌ Initialization failed: $e');
     // You might want to show an error screen or handle this gracefully

@@ -1,6 +1,6 @@
 import 'package:bonique/features/home/viewmodel/home_viewmodel.dart';
 import 'package:bonique/features/auth/viewmodel/auth_viewmodel.dart';
-import 'package:bonique/data/repositories/wardrobe_repository.dart';
+import 'package:bonique/core/services/wardrobe_data_source.dart';
 import 'package:bonique/data/models/wardrobe_model.dart';
 import 'package:bonique/core/widgets/loading_animation.dart';
 import 'package:bonique/core/utils/clothing_category_mapper.dart';
@@ -8,12 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // State management for wardrobe filtering
 final wardrobeFilterProvider = StateProvider<String>((ref) => 'All');
 
-// Real wardrobe data provider that fetches from Supabase and preloads images
-final wardrobeDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
+// Real wardrobe data provider (offline-first: API then Hive cache)
+final wardrobeDataProvider = FutureProvider<WardrobeDataResult>((ref) async {
   print('🔄 WARDROBE DATA PROVIDER CALLED');
   final authState = ref.watch(authViewModelProvider);
 
@@ -23,19 +24,21 @@ final wardrobeDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
 
   if (!authState.isLoggedIn || authState.currentUserModel == null) {
     print('❌ USER NOT LOGGED IN OR NO USER MODEL - RETURNING EMPTY LIST');
-    return [];
+    return const WardrobeDataResult(items: [], fromCache: false);
   }
 
   try {
-    print('📡 FETCHING WARDROBE ITEMS FROM SUPABASE...');
-    final wardrobeItems = await WardrobeRepository.getWardrobeItems(
+    print('📡 FETCHING WARDROBE (offline-first: API or Hive)...');
+    final result = await WardrobeDataSource.getWardrobeItems(
       authState.currentUserModel!.id,
     );
-    print('📦 WARDROBE DATA LOADED: ${wardrobeItems.length} items');
+    print(
+      '📦 WARDROBE DATA LOADED: ${result.items.length} items (fromCache: ${result.fromCache})',
+    );
 
-    if (wardrobeItems.isNotEmpty) {
+    if (result.items.isNotEmpty) {
       print('📋 WARDROBE ITEMS DETAILS:');
-      for (var item in wardrobeItems) {
+      for (var item in result.items) {
         print(
           '   - ID: ${item.id}, Category: ${item.category}, Image: ${item.imagePath}',
         );
@@ -44,11 +47,11 @@ final wardrobeDataProvider = FutureProvider<List<WardrobeModel>>((ref) async {
       print('⚠️ NO WARDROBE ITEMS RETURNED FROM REPOSITORY');
     }
 
-    return wardrobeItems;
+    return result;
   } catch (e) {
     print('❌ ERROR FETCHING WARDROBE DATA: $e');
     print('❌ STACK TRACE: ${StackTrace.current}');
-    return [];
+    return const WardrobeDataResult(items: [], fromCache: false);
   }
 });
 
@@ -86,7 +89,10 @@ class _WardrobePageState extends ConsumerState<WardrobePage> {
 
         await Future.wait(
           wardrobeItems.map(
-            (item) => precacheImage(NetworkImage(item.imagePath), context),
+            (item) => precacheImage(
+              CachedNetworkImageProvider(item.imagePath),
+              context,
+            ),
           ),
         );
         print('✅ ALL IMAGES PRELOADED');
@@ -168,9 +174,10 @@ class _WardrobePageState extends ConsumerState<WardrobePage> {
             // Wardrobe grid - handle all states here
             Expanded(
               child: wardrobeAsyncValue.when(
-                data: (wardrobeItems) {
+                data: (result) {
+                  final wardrobeItems = result.items;
                   print(
-                    '📦 WARDROBE DATA RECEIVED: ${wardrobeItems.length} items',
+                    '📦 WARDROBE DATA RECEIVED: ${wardrobeItems.length} items (fromCache: ${result.fromCache})',
                   );
 
                   // Check if we have new data or need to start preloading
@@ -239,59 +246,115 @@ class _WardrobePageState extends ConsumerState<WardrobePage> {
                     );
                   }
 
-                  // Show content after preloading
+                  // Show content after preloading (with offline banner when using cache)
                   return AnimatedOpacity(
                     opacity: _imagesPreloaded ? 1.0 : 0.0,
                     duration: const Duration(milliseconds: 300),
-                    child: filteredItems.isEmpty
-                        ? const Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.checkroom_outlined,
-                                  size: 64,
-                                  color: Colors.grey,
-                                ),
-                                SizedBox(height: 16),
-                                Text(
-                                  'No items found',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Add some items to your wardrobe!',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : GridView.builder(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (result.fromCache)
+                          Container(
+                            width: double.infinity,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 8,
                             ),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  mainAxisSpacing: 12,
-                                  crossAxisSpacing: 12,
-                                  childAspectRatio:
-                                      121.3831787109375 /
-                                      170.4719696044922, // Exact ratio from dimensions
+                            color: Colors.amber.shade100,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.cloud_off_outlined,
+                                  size: 20,
+                                  color: Colors.amber.shade900,
                                 ),
-                            itemCount: filteredItems.length,
-                            itemBuilder: (context, index) {
-                              return _WardrobeTile(item: filteredItems[index]);
-                            },
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Showing cached data (offline)',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.amber.shade900,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              ref.invalidate(wardrobeDataProvider);
+                              await ref.read(wardrobeDataProvider.future);
+                            },
+                            child: filteredItems.isEmpty
+                                ? SingleChildScrollView(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    child: SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.5,
+                                      child: const Center(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.checkroom_outlined,
+                                              size: 64,
+                                              color: Colors.grey,
+                                            ),
+                                            SizedBox(height: 16),
+                                            Text(
+                                              'No items found',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.grey,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            SizedBox(height: 8),
+                                            Text(
+                                              'Add some items to your wardrobe!',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : GridView.builder(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 3,
+                                          mainAxisSpacing: 12,
+                                          crossAxisSpacing: 12,
+                                          childAspectRatio:
+                                              121.3831787109375 /
+                                              170.4719696044922, // Exact ratio from dimensions
+                                        ),
+                                    itemCount: filteredItems.length,
+                                    itemBuilder: (context, index) {
+                                      return _WardrobeTile(
+                                        item: filteredItems[index],
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
                 loading: () => const Center(
@@ -356,7 +419,9 @@ class _WardrobePageState extends ConsumerState<WardrobePage> {
               onPressed: () {
                 // Get the full wardrobe items data
                 final wardrobeAsyncValue = ref.read(wardrobeDataProvider);
-                wardrobeAsyncValue.whenData((wardrobeItems) {
+                wardrobeAsyncValue.whenData((result) {
+                  final wardrobeItems = result.items;
+                  if (wardrobeItems.isEmpty) return;
                   // Find the selected item
                   final selectedItem = wardrobeItems.firstWhere(
                     (item) => item.id == selectedItemId,
@@ -533,22 +598,26 @@ class _WardrobeTile extends ConsumerWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8.93),
-              child: Image.network(
-                item.imagePath,
+              child: CachedNetworkImage(
+                imageUrl: item.imagePath,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD9D9D9),
-                      borderRadius: BorderRadius.circular(8.93),
-                    ),
-                    child: const Center(
-                      child: Icon(Icons.image, color: Colors.grey, size: 40),
-                    ),
-                  );
-                },
+                placeholder: (context, url) => Container(
+                  color: const Color(0xFFD9D9D9),
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD9D9D9),
+                    borderRadius: BorderRadius.circular(8.93),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.image, color: Colors.grey, size: 40),
+                  ),
+                ),
               ),
             ),
             // Zoom icon hint
@@ -599,7 +668,7 @@ class _WardrobeImageViewer extends StatelessWidget {
         ],
       ),
       body: PhotoView(
-        imageProvider: NetworkImage(item.imagePath),
+        imageProvider: CachedNetworkImageProvider(item.imagePath),
         minScale: PhotoViewComputedScale.contained,
         maxScale: PhotoViewComputedScale.covered * 3,
         initialScale: PhotoViewComputedScale.contained,
