@@ -24,6 +24,13 @@ class _SplashPageState extends ConsumerState<SplashPage>
   void initState() {
     super.initState();
 
+    // Force auth provider initialization immediately
+    // This ensures _checkInitialAuthStatus runs right away
+    Future.microtask(() {
+      ref.read(authViewModelProvider);
+      print('🚀 Auth provider initialized');
+    });
+
     // Initialize smoke animation controller
     _smokeController = AnimationController(
       duration: const Duration(milliseconds: 0), // Instant transition
@@ -73,19 +80,31 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
     // Phase 4: Wait 800ms delay, then navigate
     await Future.delayed(const Duration(milliseconds: 800));
+
+    // Wait for auth check to complete
+    print('⏳ Waiting for auth check to complete...');
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    print('✅ Auth check should be complete, checking state...');
     _checkAuthAndNavigate();
   }
 
   void _checkAuthAndNavigate() {
     if (mounted) {
-      final authViewModel = ref.read(authViewModelProvider.notifier);
+      final authState = ref.read(authViewModelProvider);
 
-      // Check if user is logged in
-      if (authViewModel.isUserLoggedIn) {
-        // User is logged in, navigate to home
+      print(
+        '🔍 SplashPage checking auth: isLoggedIn=${authState.isLoggedIn}, hasUserModel=${authState.currentUserModel != null}',
+      );
+
+      // Simplified flow:
+      // - If logged in → Home
+      // - If not logged in → Onboarding
+      if (authState.isLoggedIn) {
+        print('✅ User is logged in, navigating to home page');
         Navigator.of(context).pushReplacementNamed(HomePage.route);
       } else {
-        // User is not logged in, navigate to onboarding
+        print('❌ User is not logged in, navigating to onboarding');
         Navigator.of(context).pushReplacementNamed(OnboardingPage.route);
       }
     }

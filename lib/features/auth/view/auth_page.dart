@@ -5,6 +5,7 @@ import 'account_page.dart';
 import 'signin_page.dart';
 import 'signup_page.dart';
 import 'reset_password_page.dart';
+import 'body_picture_upload_page.dart';
 
 enum AuthScreen { account, signIn, signUp, resetPassword }
 
@@ -65,9 +66,21 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   Widget build(BuildContext context) {
     // Listen for auth state changes
     ref.listen<AuthState>(authViewModelProvider, (previous, next) {
-      // ENFORCE: Only navigate to home if user is logged in AND exists in database
+      // ENFORCE: Only navigate if user is logged in AND exists in database
       if (next.isLoggedIn && next.currentUserModel != null) {
-        Navigator.pushReplacementNamed(context, '/home');
+        // Check if user has uploaded body picture
+        if (!next.currentUserModel!.hasUploadedBodyPic) {
+          // Navigate to body picture upload page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const BodyPictureUploadPage(),
+            ),
+          );
+        } else {
+          // Navigate to home
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     });
 

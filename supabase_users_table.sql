@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS public.users (
     email TEXT NOT NULL,
     full_name TEXT,
     avatar_url TEXT,
+    has_uploaded_body_pic BOOLEAN DEFAULT FALSE,
+    body_pic_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     metadata JSONB DEFAULT '{}'::jsonb
@@ -64,3 +66,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Migration: Add body picture fields to existing users table
+-- Run this if the table already exists
+ALTER TABLE public.users 
+ADD COLUMN IF NOT EXISTS has_uploaded_body_pic BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS body_pic_url TEXT;
