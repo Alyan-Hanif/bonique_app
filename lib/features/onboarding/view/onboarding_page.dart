@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/onboarding_viewmodel.dart';
 import '../widgets/onboarding_dot_indicator.dart';
 import '../../demo/view/demo_intro_page.dart';
-import '../../auth/view/account_page.dart';
+import '../../auth/view/auth_page.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
@@ -117,11 +117,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               ),
               child: Column(
                 children: [
-                  // Logo at the top
-                  Image.asset(
-                    'assets/images/onboarding_logoo.png',
-                    height: 60,
-                    fit: BoxFit.contain,
+                  // Logo at the top (cropped to show logo)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      width: 80,
+                      height: 80,
+                      child: Image.asset(
+                        'assets/images/bonique/logo.JPG',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 24),
@@ -240,14 +246,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     onPressed: () {
                       _autoScrollTimer
                           ?.cancel(); // Cancel timer before navigating
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => AccountPage(
-                            onSignIn: () {},
-                            onCreateAccount: () {},
-                          ),
-                        ),
-                      );
+                      Navigator.of(
+                        context,
+                      ).pushReplacementNamed(AuthPage.route);
                     },
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),

@@ -113,73 +113,73 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
 
   Widget _buildResetForm() {
     final authState = ref.watch(authViewModelProvider);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Back button and app logo
+          // Back button and app logo row
           Row(
             children: [
               IconButton(
                 onPressed: widget.onBack,
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: Theme.of(context).colorScheme.primary,
+                icon: Icon(Icons.arrow_back, color: primary),
+                padding: const EdgeInsets.all(8),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              ),
+              Expanded(
+                child: Center(
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/images/bonique/logo.JPG',
+                        fit: BoxFit.cover,
+                        width: 80,
+                        height: 80,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              const Spacer(),
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.shopping_bag_outlined,
-                  color: Colors.white,
-                  size: 39,
-                ),
-              ),
-              const Spacer(),
-              const SizedBox(width: 48), // Balance the back button
+              const SizedBox(width: 48),
             ],
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
 
           // Forgot password icon
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.lock_reset,
-              color: Theme.of(context).colorScheme.primary,
-              size: 40,
+          Center(
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.lock_reset, color: primary, size: 40),
             ),
           ),
 
           const SizedBox(height: 24),
 
-          // Title
           Text(
             'Forgot Password?',
             style: AuthTextStyles.h1,
             textAlign: TextAlign.center,
           ),
-
           const SizedBox(height: 8),
-
-          // Subtitle
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               'Enter your email address and we\'ll send you a link to reset your password.',
               style: AuthTextStyles.stat1,
@@ -187,14 +187,12 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
 
-          // Email field
           AuthInputField(
             controller: _emailController,
-            label: 'Enter your email address',
+            label: 'Email address',
             placeholder: 'example@gmail.com',
-            // placeholder: 'Enter your email address',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             errorText: authState.emailError,
@@ -203,10 +201,8 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
             },
           ),
 
-          const SizedBox(height: 32),
-
-          // Deep link error message (e.g., expired link)
-          if (_deepLinkError != null)
+          if (_deepLinkError != null) ...[
+            const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -231,25 +227,25 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 ],
               ),
             ),
+          ],
 
-          if (_deepLinkError != null) const SizedBox(height: 16),
-
-          // Auth error message
-          if (authState.error != null)
+          if (authState.error != null) ...[
+            const SizedBox(height: 16),
             AuthErrorMessage(message: authState.error!),
+          ],
 
-          if (authState.error != null) const SizedBox(height: 16),
+          const SizedBox(height: 28),
 
-          // Send Reset Link button
-          AuthPrimaryButton(
-            text: 'Send Reset Link',
-            onPressed: _handleResetPassword,
-            isLoading: _isLoading,
+          Center(
+            child: AuthPrimaryButton(
+              text: 'Send Reset Link',
+              onPressed: _handleResetPassword,
+              isLoading: _isLoading,
+            ),
           ),
 
           const SizedBox(height: 24),
 
-          // Back to Sign In link
           Center(
             child: GestureDetector(
               onTap: widget.onBack,
@@ -261,7 +257,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                     TextSpan(
                       text: 'Sign In',
                       style: AuthTextStyles.stat2.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: primary,
                         fontWeight: FontWeight.w600,
                         decoration: TextDecoration.underline,
                       ),
@@ -277,77 +273,67 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
   }
 
   Widget _buildSuccessView() {
+    final primary = Theme.of(context).colorScheme.primary;
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // Success icon
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.check_circle_outline,
-            color: Colors.green,
-            size: 60,
+        Center(
+          child: Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_circle_outline,
+              color: Colors.green,
+              size: 56,
+            ),
           ),
         ),
-
-        const SizedBox(height: 32),
-
-        // Success title
+        const SizedBox(height: 28),
         Text(
           'Email Sent!',
           style: AuthTextStyles.h1,
           textAlign: TextAlign.center,
         ),
-
-        const SizedBox(height: 16),
-
-        // Success message
+        const SizedBox(height: 12),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
             'We\'ve sent a password reset link to\n${_emailController.text.trim()}',
             style: AuthTextStyles.stat1,
             textAlign: TextAlign.center,
           ),
         ),
-
-        const SizedBox(height: 16),
-
+        const SizedBox(height: 12),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
             'Please check your email and follow the instructions to reset your password.',
             style: AuthTextStyles.stat2.copyWith(color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
         ),
-
-        const SizedBox(height: 40),
-
-        // Resend email button
-        TextButton.icon(
-          onPressed: () {
-            setState(() {
-              _emailSent = false;
-            });
-          },
-          icon: const Icon(Icons.refresh),
-          label: const Text('Send Again'),
-          style: TextButton.styleFrom(
-            foregroundColor: Theme.of(context).colorScheme.primary,
+        const SizedBox(height: 32),
+        Center(
+          child: TextButton.icon(
+            onPressed: () => setState(() => _emailSent = false),
+            icon: const Icon(Icons.refresh, size: 20),
+            label: const Text('Send Again'),
+            style: TextButton.styleFrom(foregroundColor: primary),
           ),
         ),
-
         const SizedBox(height: 16),
-
-        // Back to Sign In button
-        AuthPrimaryButton(text: 'Back to Sign In', onPressed: widget.onBack),
+        Center(
+          child: AuthPrimaryButton(
+            text: 'Back to Sign In',
+            onPressed: widget.onBack,
+          ),
+        ),
       ],
     );
   }

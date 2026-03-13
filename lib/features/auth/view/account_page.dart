@@ -9,10 +9,15 @@ class AccountPage extends ConsumerWidget {
   final VoidCallback onSignIn;
   final VoidCallback onCreateAccount;
 
+  /// When set, "Continue with Email" uses this to navigate (e.g. push SignIn).
+  /// Ensures navigation works even when parent setState doesn't rebuild.
+  final void Function(BuildContext context)? onContinueWithEmail;
+
   const AccountPage({
     super.key,
     required this.onSignIn,
     required this.onCreateAccount,
+    this.onContinueWithEmail,
   });
 
   void _handleGoogleSignIn(BuildContext context, WidgetRef ref) async {
@@ -71,19 +76,21 @@ class AccountPage extends ConsumerWidget {
                   children: [
                     const SizedBox(height: 30),
 
-                    // App Icon
+                    // App Logo
                     Container(
-                      width: 60,
-                      height: 60,
+                      width: 90,
+                      height: 90,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                      child: Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
                         child: Image.asset(
-                          'assets/images/bonique/account_logo.png',
-                          width: 60,
-                          height: 60,
+                          'assets/images/bonique/logo.JPG',
+                          fit: BoxFit.cover,
+                          width: 90,
+                          height: 90,
                         ),
                       ),
                     ),
@@ -202,45 +209,44 @@ class AccountPage extends ConsumerWidget {
                     const SizedBox(height: 16),
 
                     // Continue with Apple Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black87,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          elevation: 0,
-                        ),
-                        onPressed: () {
-                          // TODO: Implement Apple Sign-In
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Apple Sign-In coming soon'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.apple, size: 28, color: Colors.black87),
-                            SizedBox(width: 12),
-                            Text(
-                              'Continue with Apple',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
+                    // SizedBox(
+                    //   width: double.infinity,
+                    //   height: 48,
+                    //   child: ElevatedButton(
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: Colors.white,
+                    //       foregroundColor: Colors.black87,
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(28),
+                    //       ),
+                    //       elevation: 0,
+                    //     ),
+                    //     onPressed: () {
+                    //       // TODO: Implement Apple Sign-In
+                    //       ScaffoldMessenger.of(context).showSnackBar(
+                    //         const SnackBar(
+                    //           content: Text('Apple Sign-In coming soon'),
+                    //           duration: Duration(seconds: 2),
+                    //         ),
+                    //       );
+                    //     },
+                    //     child: const Row(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       children: [
+                    //         Icon(Icons.apple, size: 28, color: Colors.black87),
+                    //         SizedBox(width: 12),
+                    //         Text(
+                    //           'Continue with Apple',
+                    //           style: TextStyle(
+                    //             fontSize: 16,
+                    //             fontWeight: FontWeight.w600,
+                    //             color: Colors.black87,
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
                     const SizedBox(height: 16),
 
                     // Continue with Email Button
@@ -256,7 +262,13 @@ class AccountPage extends ConsumerWidget {
                           ),
                           elevation: 0,
                         ),
-                        onPressed: onCreateAccount,
+                        onPressed: () {
+                          if (onContinueWithEmail != null) {
+                            onContinueWithEmail!(context);
+                          } else {
+                            onCreateAccount();
+                          }
+                        },
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

@@ -20,12 +20,17 @@ class DemoIntroPage extends StatelessWidget {
             children: [
               const Spacer(flex: 1),
 
-              // Logo at the top
-              Image.asset(
-                'assets/images/onboarding_logoo.png',
-                width: 140,
-                height: 50,
-                fit: BoxFit.contain,
+              // Logo at the top (cropped to show logo)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: Image.asset(
+                    'assets/images/bonique/logo.JPG',
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
 
               const Spacer(flex: 1),

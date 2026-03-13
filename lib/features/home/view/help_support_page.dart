@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../auth/view/privacy_policy_page.dart';
 
 class HelpSupportPage extends ConsumerWidget {
   const HelpSupportPage({super.key});
@@ -74,52 +75,15 @@ class HelpSupportPage extends ConsumerWidget {
                   context: context,
                   icon: Icons.email_outlined,
                   title: 'Email Support',
-                  subtitle: 'Get help via email',
+                  subtitle: 'contact@bonique.com',
                   onTap: () => _launchEmail(),
-                ),
-                _buildContactTile(
-                  context: context,
-                  icon: Icons.chat_bubble_outline,
-                  title: 'Live Chat',
-                  subtitle: 'Chat with our support team',
-                  onTap: () => _showComingSoon(context, 'Live Chat'),
                 ),
                 _buildContactTile(
                   context: context,
                   icon: Icons.phone_outlined,
                   title: 'Phone Support',
-                  subtitle: '+1 (555) 123-4567',
+                  subtitle: '+1 (781) 579-9475',
                   onTap: () => _launchPhone(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Resources Section
-            _buildSection(
-              context: context,
-              title: 'Resources',
-              children: [
-                _buildContactTile(
-                  context: context,
-                  icon: Icons.book_outlined,
-                  title: 'User Guide',
-                  subtitle: 'Learn how to use all features',
-                  onTap: () => _showComingSoon(context, 'User Guide'),
-                ),
-                _buildContactTile(
-                  context: context,
-                  icon: Icons.video_library_outlined,
-                  title: 'Video Tutorials',
-                  subtitle: 'Watch step-by-step guides',
-                  onTap: () => _showComingSoon(context, 'Video Tutorials'),
-                ),
-                _buildContactTile(
-                  context: context,
-                  icon: Icons.bug_report_outlined,
-                  title: 'Report a Bug',
-                  subtitle: 'Help us improve the app',
-                  onTap: () => _showBugReportDialog(context),
                 ),
               ],
             ),
@@ -135,22 +99,19 @@ class HelpSupportPage extends ConsumerWidget {
                   title: 'Version',
                   value: '1.0.0',
                 ),
-                _buildInfoTile(
-                  context: context,
-                  title: 'Build',
-                  value: '2024.01.15',
-                ),
+                _buildInfoTile(context: context, title: 'Build', value: '1'),
                 _buildInfoTile(
                   context: context,
                   title: 'Privacy Policy',
                   value: 'View our privacy policy',
-                  onTap: () => _showComingSoon(context, 'Privacy Policy'),
-                ),
-                _buildInfoTile(
-                  context: context,
-                  title: 'Terms of Service',
-                  value: 'View our terms of service',
-                  onTap: () => _showComingSoon(context, 'Terms of Service'),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) =>
+                            const PrivacyPolicyPage(showAgreeSection: false),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -278,7 +239,7 @@ class HelpSupportPage extends ConsumerWidget {
   void _launchEmail() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'support@bonique.ai',
+      path: 'contact@bonique.com',
       query: 'subject=Support Request',
     );
 
@@ -291,7 +252,7 @@ class HelpSupportPage extends ConsumerWidget {
   }
 
   void _launchPhone() async {
-    final Uri phoneUri = Uri(scheme: 'tel', path: '+15551234567');
+    final Uri phoneUri = Uri(scheme: 'tel', path: '+17815799475');
 
     if (await canLaunchUrl(phoneUri)) {
       await launchUrl(phoneUri);

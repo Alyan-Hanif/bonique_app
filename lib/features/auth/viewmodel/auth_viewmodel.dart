@@ -341,6 +341,11 @@ class AuthViewModel extends StateNotifier<AuthState> {
     state = state.copyWith(agreeToTerms: !state.agreeToTerms);
   }
 
+  /// Set terms agreement (e.g. when user agrees on the privacy policy page).
+  void setAgreeToTerms(bool value) {
+    state = state.copyWith(agreeToTerms: value);
+  }
+
   //Authentication with Google
 
   // Authentication methods

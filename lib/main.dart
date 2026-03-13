@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
@@ -16,6 +17,7 @@ import 'core/services/session_manager.dart';
 import 'core/services/version_checker.dart';
 import 'core/utils/connectivity_utils.dart';
 import 'core/config/env_config.dart';
+import 'core/network/staging_http_overrides.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/services/wardrobe_cache_service.dart';
 import 'core/services/user_profile_cache_service.dart';
@@ -33,6 +35,19 @@ void main() async {
       throw Exception('Missing required environment variables');
     }
     print('✅ Environment variables validated');
+
+    // DEVELOPMENT ONLY: Allow expired/invalid SSL cert for staging API host
+    // Remove or disable once staging-api.bonique.co certificate is renewed
+    if (kDebugMode && EnvConfig.boniqueAiUrl.isNotEmpty) {
+      try {
+        final uri = Uri.parse(EnvConfig.boniqueAiUrl);
+        final stagingHost = uri.host;
+        setupStagingHttpOverrides(stagingHost);
+        print(
+          '⚠️ SSL cert verification relaxed for host: $stagingHost (debug only)',
+        );
+      } catch (_) {}
+    }
 
     // Initialize Supabase with environment variables
     await SupabaseService.init();

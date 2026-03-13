@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/auth_viewmodel.dart';
 import '../widgets/auth_widgets.dart';
+import 'privacy_policy_page.dart';
 import '../../../core/utils/snackbar_utils.dart';
 
 class SignUpPage extends ConsumerStatefulWidget {
@@ -133,18 +134,25 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // IconButton(
-                      //   onPressed: widget.onBack,
-                      //   icon: const Icon(Icons.arrow_back, color: kTextPrimary),
-                      // ),
-                      // const Spacer(),
                       Container(
-                        width: 60,
-                        height: 60,
-                        child: Image.asset(
-                          'assets/images/bonique/auth-logo.png',
-                          width: 60,
-                          height: 60,
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                          child: Image.asset(
+                            'assets/images/bonique/logo.JPG',
+                            fit: BoxFit.cover,
+                            width: 80,
+                            height: 80,
+                          ),
                         ),
                       ),
                     ],
@@ -249,8 +257,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   //   errorText: authState.confirmPasswordError,
                   //   onChanged: _onConfirmPasswordChanged,
                   // ),
-
-                  // const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Terms checkbox
                   TermsCheckbox(
@@ -259,6 +266,19 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       ref
                           .read(authViewModelProvider.notifier)
                           .toggleTermsAgreement();
+                    },
+                    onPrivacyPolicyTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (context) => PrivacyPolicyPage(
+                            onAgree: () {
+                              ref
+                                  .read(authViewModelProvider.notifier)
+                                  .setAgreeToTerms(true);
+                            },
+                          ),
+                        ),
+                      );
                     },
                   ),
 

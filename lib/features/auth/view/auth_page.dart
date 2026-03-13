@@ -39,8 +39,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   // }
 
   void _navigateToSignIn() {
-    setState(() {
-      _currentScreen = AuthScreen.signIn;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _currentScreen = AuthScreen.signIn;
+        });
+      }
     });
   }
 
@@ -84,7 +88,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       }
     });
 
-    return Scaffold(body: _buildCurrentScreen());
+    return Scaffold(
+      body: KeyedSubtree(
+        key: ValueKey(_currentScreen),
+        child: _buildCurrentScreen(),
+      ),
+    );
   }
 
   Widget _buildCurrentScreen() {
@@ -92,7 +101,37 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       case AuthScreen.account:
         return AccountPage(
           onSignIn: _navigateToSignIn,
-          onCreateAccount: _navigateToSignUp,
+          onCreateAccount: _navigateToSignIn,
+          onContinueWithEmail: (context) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (ctx) => SignInPage(
+                  onBack: () => Navigator.pop(ctx),
+                  onSignUp: () {
+                    Navigator.pop(ctx);
+                    Navigator.of(ctx).push(
+                      MaterialPageRoute<void>(
+                        builder: (signUpCtx) => SignUpPage(
+                          onBack: () => Navigator.pop(signUpCtx),
+                          onSignIn: () => Navigator.pop(signUpCtx),
+                        ),
+                      ),
+                    );
+                  },
+                  onForgotPassword: () {
+                    Navigator.pop(ctx);
+                    Navigator.of(ctx).push(
+                      MaterialPageRoute<void>(
+                        builder: (resetCtx) => ResetPasswordPage(
+                          onBack: () => Navigator.pop(resetCtx),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
         );
       case AuthScreen.signIn:
         return SignInPage(

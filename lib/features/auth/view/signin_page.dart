@@ -119,16 +119,24 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 60,
-                          height: 60,
+                          width: 80,
+                          height: 80,
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(12),
+                            ),
                           ),
-                          child: Image.asset(
-                            'assets/images/bonique/auth-logo.png',
-                            width: 60,
-                            height: 60,
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(12),
+                            ),
+                            child: Image.asset(
+                              'assets/images/bonique/logo.JPG',
+                              fit: BoxFit.cover,
+                              width: 80,
+                              height: 80,
+                            ),
                           ),
                         ),
                       ],
@@ -230,7 +238,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     //
                     // // Google Sign In button
                     // GoogleSignInButton(onPressed: _handleGoogleSignIn),
-
                     const SizedBox(height: 20),
 
                     // Sign Up link

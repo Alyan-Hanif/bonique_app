@@ -142,14 +142,14 @@ class _AccountSecurityPageState extends ConsumerState<AccountSecurityPage> {
                   icon: Icons.email_outlined,
                   title: 'Email Address',
                   subtitle: user?.email ?? 'Not available',
-                  trailing: const Icon(Icons.verified, color: Colors.green),
+                  trailing: null,
                 ),
                 const SizedBox(height: 12),
                 _buildInfoCard(
                   icon: Icons.person_outline,
                   title: 'Full Name',
                   subtitle: user?.userMetadata?['full_name'] ?? 'Not set',
-                  trailing: const Icon(Icons.edit_outlined, color: Colors.grey),
+                  trailing: null,
                 ),
                 const SizedBox(height: 12),
                 _buildInfoCard(
@@ -182,42 +182,41 @@ class _AccountSecurityPageState extends ConsumerState<AccountSecurityPage> {
                     );
                   },
                 ),
-                const SizedBox(height: 12),
-                _buildSecurityCard(
-                  icon: Icons.lock_reset,
-                  title: 'Reset Password',
-                  subtitle: 'Reset password via email (if forgotten)',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ResetPasswordPage(
-                          onBack: () => Navigator.pop(context),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                _buildSecurityCard(
-                  icon: Icons.security_outlined,
-                  title: 'Two-Factor Authentication',
-                  subtitle: 'Add an extra layer of security',
-                  trailing: Switch(
-                    value: false, // This would be connected to actual 2FA state
-                    onChanged: (value) {
-                      // Implement 2FA toggle
-                      _showComingSoonDialog('Two-Factor Authentication');
-                    },
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _buildSecurityCard(
-                  icon: Icons.devices_outlined,
-                  title: 'Active Sessions',
-                  subtitle: 'Manage your logged-in devices',
-                  onTap: () => _showComingSoonDialog('Active Sessions'),
-                ),
+                // const SizedBox(height: 12),
+                // _buildSecurityCard(
+                //   icon: Icons.lock_reset,
+                //   title: 'Reset Password'
+                //   subtitle: 'Reset password via email (if forgotten)',
+                //   onTap: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (context) => ResetPasswordPage(
+                //           onBack: () => Navigator.pop(context),
+                //         ),
+                //       ),
+                //     );
+                //   },
+                // ),
+                // const SizedBox(height: 12),
+                // _buildSecurityCard(
+                //   icon: Icons.security_outlined,
+                //   title: 'Two-Factor Authentication',
+                //   subtitle: 'Add an extra layer of security',
+                //   trailing: Switch(
+                //     value: false, // This would be connected to actual 2FA state
+                //     onChanged: (value) {
+                //       _showComingSoonDialog('Two-Factor Authentication');
+                //     },
+                //   ),
+                // ),
+                // const SizedBox(height: 12),
+                // _buildSecurityCard(
+                //   icon: Icons.devices_outlined,
+                //   title: 'Active Sessions',
+                //   subtitle: 'Manage your logged-in devices',
+                //   onTap: () => _showComingSoonDialog('Active Sessions'),
+                // ),
               ],
             ),
 
@@ -225,22 +224,22 @@ class _AccountSecurityPageState extends ConsumerState<AccountSecurityPage> {
 
             // Privacy Section
             _buildSection(
-              title: 'Privacy',
+              title: '',
               children: [
-                _buildSecurityCard(
-                  icon: Icons.privacy_tip_outlined,
-                  title: 'Privacy Settings',
-                  subtitle: 'Control your data and privacy',
-                  onTap: () => _showComingSoonDialog('Privacy Settings'),
-                ),
-                const SizedBox(height: 12),
-                _buildSecurityCard(
-                  icon: Icons.delete_outline,
-                  title: 'Delete Account',
-                  subtitle: 'Permanently delete your account',
-                  onTap: _showDeleteAccountDialog,
-                  isDestructive: true,
-                ),
+                // _buildSecurityCard(
+                //   icon: Icons.privacy_tip_outlined,
+                //   title: 'Privacy Settings',
+                //   subtitle: 'Control your data and privacy',
+                //   onTap: () => _showComingSoonDialog('Privacy Settings'),
+                // ),
+                // const SizedBox(height: 12),
+                // _buildSecurityCard(
+                //   icon: Icons.delete_outline,
+                //   title: 'Delete Account',
+                //   subtitle: 'Permanently delete your account',
+                //   onTap: _showDeleteAccountDialog,
+                //   isDestructive: true,
+                // ),
               ],
             ),
 

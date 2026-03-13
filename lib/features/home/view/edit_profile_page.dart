@@ -397,399 +397,305 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // Black background section
-          Container(
-            height: 200,
-            color: Colors.black,
-            child: SafeArea(
-              child: Column(
-                children: [
-                  // Custom title bar with white text
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                          ),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        const Expanded(
-                          child: Center(
-                            child: Text(
-                              'Edit Profile',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 48),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-            ),
-          ),
-
-          // White content section with proper layout
-          Expanded(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Avatar positioned to overlap both sections
-                Positioned(
-                  top: -50, // Half in black, half in white
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: InkWell(
-                      onTap: _pickImage,
-                      borderRadius: BorderRadius.circular(50),
-                      child: Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.grey.shade200,
-                            backgroundImage: _selectedImage != null
-                                ? FileImage(_selectedImage!)
-                                : (user?.avatarUrl != null
-                                      ? NetworkImage(user!.avatarUrl!)
-                                      : null),
-                            child:
-                                _selectedImage == null &&
-                                    user?.avatarUrl == null
-                                ? const Icon(
-                                    Icons.person,
-                                    size: 50,
-                                    color: Colors.grey,
-                                  )
-                                : null,
-                          ),
-                          // Camera icon overlay
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Colors.black,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                        ],
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        title: const Text(
+          'Edit Profile',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 8),
+              Center(
+                child: InkWell(
+                  onTap: _pickImage,
+                  borderRadius: BorderRadius.circular(50),
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey.shade200,
+                        backgroundImage: _selectedImage != null
+                            ? FileImage(_selectedImage!)
+                            : (user?.avatarUrl != null
+                                  ? NetworkImage(user!.avatarUrl!)
+                                  : null),
+                        child: _selectedImage == null && user?.avatarUrl == null
+                            ? const Icon(
+                                Icons.person,
+                                size: 50,
+                                color: Colors.grey,
+                              )
+                            : null,
                       ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: InkWell(
+                  onTap: _pickImage,
+                  child: Text(
+                    'Tap to change photo',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
-
-                // Content area
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
+              ),
+              const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: TextFormField(
+                  controller: _nameController,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    labelStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: TextFormField(
+                  initialValue: user?.email ?? '',
+                  enabled: false,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    labelStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        const SizedBox(height: 50), // Space for avatar
-                        // Tap to change photo text
-                        InkWell(
-                          onTap: _pickImage,
-                          child: const Text(
-                            'Tap to change photo',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
+                        Icon(
+                          Icons.person_outline,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 24,
                         ),
-
-                        const SizedBox(height: 30),
-
-                        // Name Field
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: TextFormField(
-                            controller: _nameController,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: 'Name',
-                              labelStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Email Field (read-only)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: TextFormField(
-                            initialValue: user?.email ?? '',
-                            enabled: false,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: const InputDecoration(
-                              labelText: 'Email',
-                              labelStyle: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 30),
-
-                        // Body Picture Section
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
+                        const SizedBox(width: 12),
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.person_outline,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    size: 24,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Body Picture for Try-On',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          user?.bodyPicUrl != null
-                                              ? 'Picture uploaded'
-                                              : 'No picture uploaded yet',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: user?.bodyPicUrl != null
-                                                ? Colors.green
-                                                : Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Preview or placeholder
-                              if (_selectedBodyImage != null ||
-                                  user?.bodyPicUrl != null)
-                                Center(
-                                  child: Container(
-                                    height: 150,
-                                    width: 100,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: _selectedBodyImage != null
-                                          ? Image.file(
-                                              _selectedBodyImage!,
-                                              fit: BoxFit.cover,
-                                            )
-                                          : (user?.bodyPicUrl != null
-                                                ? Image.network(
-                                                    user!.bodyPicUrl!,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder:
-                                                        (
-                                                          context,
-                                                          error,
-                                                          stackTrace,
-                                                        ) => Icon(
-                                                          Icons.broken_image,
-                                                          color: Colors.grey,
-                                                          size: 40,
-                                                        ),
-                                                  )
-                                                : null),
-                                    ),
-                                  ),
+                              Text(
+                                'Body Picture for Try-On',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
-
-                              const SizedBox(height: 16),
-
-                              // Update button
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: _isUploadingBodyPic
-                                      ? null
-                                      : _pickBodyImage,
-                                  icon: _isUploadingBodyPic
-                                      ? const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  Colors.white,
-                                                ),
-                                          ),
-                                        )
-                                      : Icon(
-                                          user?.bodyPicUrl != null
-                                              ? Icons.edit
-                                              : Icons.add_photo_alternate,
-                                          size: 20,
-                                        ),
-                                  label: Text(
-                                    _isUploadingBodyPic
-                                        ? 'Uploading...'
-                                        : (user?.bodyPicUrl != null
-                                              ? 'Update Body Picture'
-                                              : 'Add Body Picture'),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                user?.bodyPicUrl != null
+                                    ? 'Picture uploaded'
+                                    : 'No picture uploaded yet',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: user?.bodyPicUrl != null
+                                      ? Colors.green
+                                      : Colors.grey,
                                 ),
                               ),
                             ],
                           ),
                         ),
-
-                        const SizedBox(height: 40),
                       ],
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Update Profile Button at bottom
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _updateProfile,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                    const SizedBox(height: 16),
+                    if (_selectedBodyImage != null || user?.bodyPicUrl != null)
+                      Center(
+                        child: Container(
+                          height: 150,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.primary,
+                              width: 2,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: _selectedBodyImage != null
+                                ? Image.file(
+                                    _selectedBodyImage!,
+                                    fit: BoxFit.cover,
+                                  )
+                                : (user?.bodyPicUrl != null
+                                      ? Image.network(
+                                          user!.bodyPicUrl!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Icon(
+                                                    Icons.broken_image,
+                                                    color: Colors.grey,
+                                                    size: 40,
+                                                  ),
+                                        )
+                                      : null),
                           ),
                         ),
-                      )
-                    : const Text(
-                        'Update Profile',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                      ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _isUploadingBodyPic ? null : _pickBodyImage,
+                        icon: _isUploadingBodyPic
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                user?.bodyPicUrl != null
+                                    ? Icons.edit
+                                    : Icons.add_photo_alternate,
+                                size: 20,
+                              ),
+                        label: Text(
+                          _isUploadingBodyPic
+                              ? 'Uploading...'
+                              : (user?.bodyPicUrl != null
+                                    ? 'Update Body Picture'
+                                    : 'Add Body Picture'),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _updateProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          'Update Profile',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

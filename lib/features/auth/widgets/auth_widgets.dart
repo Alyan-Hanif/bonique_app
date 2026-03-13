@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // Colors - use theme colors instead of hardcoded values
@@ -319,21 +320,31 @@ class AuthDivider extends StatelessWidget {
 class TermsCheckbox extends StatelessWidget {
   final bool value;
   final ValueChanged<bool?> onChanged;
+  final VoidCallback? onPrivacyPolicyTap;
+  final VoidCallback? onTermsTap;
 
   const TermsCheckbox({
     super.key,
     required this.value,
     required this.onChanged,
+    this.onPrivacyPolicyTap,
+    this.onTermsTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final linkStyle = AuthTextStyles.stat3.copyWith(
+      color: primary,
+      decoration: TextDecoration.underline,
+    );
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Checkbox(
           value: value,
           onChanged: onChanged,
-          activeColor: Theme.of(context).colorScheme.primary,
+          activeColor: primary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
         Expanded(
@@ -344,18 +355,18 @@ class TermsCheckbox extends StatelessWidget {
                 const TextSpan(text: 'I agree to the '),
                 TextSpan(
                   text: 'Terms of Services',
-                  style: AuthTextStyles.stat3.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline,
-                  ),
+                  style: linkStyle,
+                  recognizer: onTermsTap != null
+                      ? (TapGestureRecognizer()..onTap = onTermsTap)
+                      : null,
                 ),
                 const TextSpan(text: ' & '),
                 TextSpan(
                   text: 'Privacy Policy',
-                  style: AuthTextStyles.stat3.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline,
-                  ),
+                  style: linkStyle,
+                  recognizer: onPrivacyPolicyTap != null
+                      ? (TapGestureRecognizer()..onTap = onPrivacyPolicyTap)
+                      : null,
                 ),
               ],
             ),
